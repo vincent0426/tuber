@@ -130,3 +130,13 @@ run-local:
 # make query-local | jq
 query-local:
 	@curl 'http://localhost:3000/users?page=1&rows=2&orderBy=name'
+
+# make dashboard-up
+.PHONY: dashboard-up
+dashboard-up:
+	docker compose -f zarf/docker/docker-compose.yml up -d
+
+# make dashboard-down
+.PHONY: dashboard-down
+dashboard-down:
+	docker compose -f zarf/docker/docker-compose.yml down
