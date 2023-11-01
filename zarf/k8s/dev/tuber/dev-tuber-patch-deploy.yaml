@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tuber
+  namespace: tuber-system
+spec:
+  selector:
+    matchLabels:
+      app: tuber
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: tuber
+    spec:
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      containers:
+        - name:
+            tuber-api
+            # APP ENV
+          env:
+            - name: API_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: tuber-config
+                  key: API_HOST
+          # resources:
+          #   requests:
+          #     cpu: "1500m"
+          #     memory: 500Mi
+          #   limits:
+          #     cpu: "1500m"
+          #     memory: 500Mi

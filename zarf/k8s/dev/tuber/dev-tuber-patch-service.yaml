@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tuber-api
+  namespace: tuber-system
+spec:
+  selector:
+    app: tuber
+  type: ClusterIP
+  ports:
+    - name: tuber-api
+      port: 3000
+      targetPort: tuber-api
+    - name: tuber-api-debug
+      port: 4000
+      targetPort: tuber-api-debug
