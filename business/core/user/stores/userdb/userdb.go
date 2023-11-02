@@ -2,7 +2,6 @@
 package userdb
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"database/sql/driver"
@@ -10,6 +9,7 @@ import (
 	"fmt"
 	"net/mail"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/data/order"
 	"github.com/TSMC-Uber/server/business/sys/database/dbarray"
@@ -37,16 +37,22 @@ func NewStore(log *zap.SugaredLogger, db *sqlx.DB) *Store {
 
 // Create inserts a new user into the database.
 func (s *Store) Create(ctx context.Context, usr user.User) error {
-	const q = `
-	INSERT INTO users
-		(user_id, name, email, password_hash, roles, enabled, department, date_created, date_updated)
-	VALUES
-		(:user_id, :name, :email, :password_hash, :roles, :enabled, :department, :date_created, :date_updated)`
+	dbUser := toDBUser(usr)
+	sql, args, err := sq.
+		Insert("users").
+		Columns("user_id", "name", "email", "bio", "language", "accept_notification").
+		Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.Bio, dbUser.Lang, dbUser.AcceptNotification).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("to sql: %w", err)
+	}
 
-	if err := database.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
+	if err := database.NamedExecContext(ctx, s.log, s.db, sql, args); err != nil {
 		if errors.Is(err, database.ErrDBDuplicatedEntry) {
-			return fmt.Errorf("namedexeccontext: %w", user.ErrUniqueEmail)
+			fmt.Println("userdb: ", user.ErrUniqueEmail)
+			return user.ErrUniqueEmail
 		}
+		fmt.Println("userdb: ", err)
 		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
@@ -106,25 +112,25 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 		"rows_per_page": rowsPerPage,
 	}
 
-	const q = `
-	SELECT
-		*
-	FROM
-		users`
+	builder := sq.Select("*").From("users")
 
-	buf := bytes.NewBufferString(q)
-	s.applyFilter(filter, data, buf)
+	builder = s.applyFilter(builder, filter)
 
 	orderByClause, err := orderByClause(orderBy)
 	if err != nil {
 		return nil, err
 	}
+	builder = builder.OrderBy(orderByClause)
 
-	buf.WriteString(orderByClause)
-	buf.WriteString(" OFFSET :offset ROWS FETCH NEXT :rows_per_page ROWS ONLY")
+	// Convert the builder to SQL and args
+	sql, _, err := builder.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("tosql: %w", err)
+	}
 
 	var dbUsrs []dbUser
-	if err := database.NamedQuerySlice(ctx, s.log, s.db, buf.String(), data, &dbUsrs); err != nil {
+	if err := database.NamedQuerySlice(ctx, s.log, s.db, sql, data, &dbUsrs); err != nil {
+		fmt.Println("userdb: ", err)
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -135,19 +141,20 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
 	data := map[string]interface{}{}
 
-	const q = `
-	SELECT
-		count(1)
-	FROM
-		users`
+	builder := sq.Select("COUNT(*) AS count").From("users")
 
-	buf := bytes.NewBufferString(q)
-	s.applyFilter(filter, data, buf)
+	builder = s.applyFilter(builder, filter)
+
+	// Convert the builder to SQL and args
+	sql, _, err := builder.ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("tosql: %w", err)
+	}
 
 	var count struct {
 		Count int `db:"count"`
 	}
-	if err := database.NamedQueryStruct(ctx, s.log, s.db, buf.String(), data, &count); err != nil {
+	if err := database.NamedQueryStruct(ctx, s.log, s.db, sql, data, &count); err != nil {
 		return 0, fmt.Errorf("namedquerystruct: %w", err)
 	}
 
