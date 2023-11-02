@@ -8,6 +8,7 @@ import (
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -16,8 +17,8 @@ import (
 // Unexpected errors (status >= 500) are logged.
 func Errors(log *zap.SugaredLogger) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
-		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-			if err := handler(ctx, w, r); err != nil {
+		h := func(ctx context.Context, c *gin.Context) error {
+			if err := handler(ctx, c); err != nil {
 				log.Errorw("ERROR", "trace_id", web.GetTraceID(ctx), "message", err)
 
 				var er response.ErrorDocument
@@ -52,7 +53,7 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 					status = http.StatusInternalServerError
 				}
 
-				if err := web.Respond(ctx, w, er, status); err != nil {
+				if err := web.Respond(ctx, c.Writer, er, status); err != nil {
 					return err
 				}
 

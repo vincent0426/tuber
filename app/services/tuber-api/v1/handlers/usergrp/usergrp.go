@@ -11,6 +11,8 @@ import (
 	"github.com/TSMC-Uber/server/business/web/v1/paging"
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Handlers manages the set of user endpoints.
@@ -26,10 +28,11 @@ func New(user *user.Core) *Handlers {
 }
 
 // Create adds a new user to the system.
-func (h *Handlers) Create(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	var app AppNewUser
-	if err := web.Decode(r, &app); err != nil {
-		return err
+	// Validate the request.
+	if err := web.Decode(c, &app); err != nil {
+		return response.NewError(err, http.StatusBadRequest)
 	}
 
 	nc, err := toCoreNewUser(app)
@@ -45,75 +48,78 @@ func (h *Handlers) Create(ctx context.Context, w http.ResponseWriter, r *http.Re
 		return fmt.Errorf("create: usr[%+v]: %w", usr, err)
 	}
 
-	return web.Respond(ctx, w, toAppUser(usr), http.StatusCreated)
+	return web.Respond(ctx, c.Writer, toAppUser(usr), http.StatusCreated)
 }
 
 // Update updates a user in the system.
-// func (h *Handlers) Update(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-// 	var app AppUpdateUser
-// 	if err := web.Decode(r, &app); err != nil {
-// 		return err
-// 	}
+func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
+	var app AppUpdateUser
+	if err := web.Decode(c, &app); err != nil {
+		return err
+	}
 
-// 	userID := auth.GetUserID(ctx)
+	// userID := auth.GetUserID(ctx)
+	// temp get from url "/users/:id" -> uuid
+	userID := uuid.Must(uuid.Parse(c.Param("id")))
 
-// 	usr, err := h.user.QueryByID(ctx, userID)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, user.ErrNotFound):
-// 			return v1.NewRequestError(err, http.StatusNotFound)
-// 		default:
-// 			return fmt.Errorf("querybyid: userID[%s]: %w", userID, err)
-// 		}
-// 	}
+	usr, err := h.user.QueryByID(ctx, userID)
+	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querybyid: userID[%s]: %w", userID, err)
+		}
+	}
 
-// 	uu, err := toCoreUpdateUser(app)
-// 	if err != nil {
-// 		return v1.NewRequestError(err, http.StatusBadRequest)
-// 	}
+	uu, err := toCoreUpdateUser(app)
+	if err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
 
-// 	usr, err = h.user.Update(ctx, usr, uu)
-// 	if err != nil {
-// 		return fmt.Errorf("update: userID[%s] uu[%+v]: %w", userID, uu, err)
-// 	}
+	usr, err = h.user.Update(ctx, usr, uu)
+	if err != nil {
+		return fmt.Errorf("update: userID[%s] uu[%+v]: %w", userID, uu, err)
+	}
 
-// 	return web.Respond(ctx, w, toAppUser(usr), http.StatusOK)
-// }
+	return web.Respond(ctx, c.Writer, toAppUser(usr), http.StatusOK)
+}
 
 // Delete removes a user from the system.
-// func (h *Handlers) Delete(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-// 	userID := auth.GetUserID(ctx)
+func (h *Handlers) Delete(ctx context.Context, c *gin.Context) error {
+	// userID := auth.GetUserID(ctx)
+	userID := uuid.Must(uuid.Parse(c.Param("id")))
 
-// 	usr, err := h.user.QueryByID(ctx, userID)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, user.ErrNotFound):
-// 			return web.Respond(ctx, w, nil, http.StatusNoContent)
-// 		default:
-// 			return fmt.Errorf("querybyid: userID[%s]: %w", userID, err)
-// 		}
-// 	}
+	usr, err := h.user.QueryByID(ctx, userID)
+	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return web.Respond(ctx, c.Writer, nil, http.StatusNoContent)
+		default:
+			return fmt.Errorf("querybyid: userID[%s]: %w", userID, err)
+		}
+	}
 
-// 	if err := h.user.Delete(ctx, usr); err != nil {
-// 		return fmt.Errorf("delete: userID[%s]: %w", userID, err)
-// 	}
+	if err := h.user.Delete(ctx, usr); err != nil {
+		return fmt.Errorf("delete: userID[%s]: %w", userID, err)
+	}
 
-// 	return web.Respond(ctx, w, nil, http.StatusNoContent)
-// }
+	return web.Respond(ctx, c.Writer, nil, http.StatusNoContent)
+}
 
 // Query returns a list of users with paging.
-func (h *Handlers) Query(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-	page, err := paging.ParseRequest(r)
+func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
+	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
 		return err
 	}
 
-	filter, err := parseFilter(r)
+	filter, err := parseFilter(c.Request)
 	if err != nil {
 		return err
 	}
 
-	orderBy, err := parseOrder(r)
+	orderBy, err := parseOrder(c.Request)
 	if err != nil {
 		return err
 	}
@@ -133,7 +139,7 @@ func (h *Handlers) Query(ctx context.Context, w http.ResponseWriter, r *http.Req
 		return fmt.Errorf("count: %w", err)
 	}
 
-	return web.Respond(ctx, w, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
+	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
 // QueryByID returns a user by its ID.

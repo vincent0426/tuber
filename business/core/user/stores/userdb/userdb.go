@@ -38,22 +38,24 @@ func NewStore(log *zap.SugaredLogger, db *sqlx.DB) *Store {
 // Create inserts a new user into the database.
 func (s *Store) Create(ctx context.Context, usr user.User) error {
 	dbUser := toDBUser(usr)
+
 	sql, args, err := sq.
 		Insert("users").
-		Columns("user_id", "name", "email", "bio", "language", "accept_notification").
+		Columns("id", "name", "email", "bio", "language", "accept_notification").
 		Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.Bio, dbUser.Lang, dbUser.AcceptNotification).
+		PlaceholderFormat(sq.Dollar).
 		ToSql()
+
 	if err != nil {
-		return fmt.Errorf("to sql: %w", err)
+		return fmt.Errorf("tosql: %w", err)
 	}
 
-	if err := database.NamedExecContext(ctx, s.log, s.db, sql, args); err != nil {
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
 		if errors.Is(err, database.ErrDBDuplicatedEntry) {
-			fmt.Println("userdb: ", user.ErrUniqueEmail)
 			return user.ErrUniqueEmail
 		}
-		fmt.Println("userdb: ", err)
-		return fmt.Errorf("namedexeccontext: %w", err)
+		return fmt.Errorf("execcontext: %w", err)
 	}
 
 	return nil
@@ -61,24 +63,29 @@ func (s *Store) Create(ctx context.Context, usr user.User) error {
 
 // Update replaces a user document in the database.
 func (s *Store) Update(ctx context.Context, usr user.User) error {
-	const q = `
-	UPDATE
-		users
-	SET 
-		"name" = :name,
-		"email" = :email,
-		"roles" = :roles,
-		"password_hash" = :password_hash,
-		"department" = :department,
-		"date_updated" = :date_updated
-	WHERE
-		user_id = :user_id`
+	dbUser := toDBUser(usr)
 
-	if err := database.NamedExecContext(ctx, s.log, s.db, q, toDBUser(usr)); err != nil {
+	sql, args, err := sq.
+		Update("users").
+		Set("name", dbUser.Name).
+		Set("email", dbUser.Email).
+		Set("bio", dbUser.Bio).
+		Set("language", dbUser.Lang).
+		Set("accept_notification", dbUser.AcceptNotification).
+		Where(sq.Eq{"id": dbUser.ID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("tosql: %w", err)
+	}
+
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
 		if errors.Is(err, database.ErrDBDuplicatedEntry) {
 			return user.ErrUniqueEmail
 		}
-		return fmt.Errorf("namedexeccontext: %w", err)
+		return fmt.Errorf("execcontext: %w", err)
 	}
 
 	return nil
@@ -86,20 +93,19 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 
 // Delete removes a user from the database.
 func (s *Store) Delete(ctx context.Context, usr user.User) error {
-	data := struct {
-		UserID string `db:"user_id"`
-	}{
-		UserID: usr.ID.String(),
+	sql, args, err := sq.
+		Delete("users").
+		Where(sq.Eq{"id": usr.ID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("tosql: %w", err)
 	}
 
-	const q = `
-	DELETE FROM
-		users
-	WHERE
-		user_id = :user_id`
-
-	if err := database.NamedExecContext(ctx, s.log, s.db, q, data); err != nil {
-		return fmt.Errorf("namedexeccontext: %w", err)
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
+		return fmt.Errorf("execcontext: %w", err)
 	}
 
 	return nil
@@ -130,7 +136,6 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 
 	var dbUsrs []dbUser
 	if err := database.NamedQuerySlice(ctx, s.log, s.db, sql, data, &dbUsrs); err != nil {
-		fmt.Println("userdb: ", err)
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -163,22 +168,19 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 
 // QueryByID gets the specified user from the database.
 func (s *Store) QueryByID(ctx context.Context, userID uuid.UUID) (user.User, error) {
-	data := struct {
-		ID string `db:"user_id"`
-	}{
-		ID: userID.String(),
+	sql, args, err := sq.
+		Select("*").
+		From("users").
+		Where(sq.Eq{"id": userID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return user.User{}, fmt.Errorf("tosql: %w", err)
 	}
 
-	const q = `
-	SELECT
-		*
-	FROM
-		users
-	WHERE 
-		user_id = :user_id`
-
 	var dbUsr dbUser
-	if err := database.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
+	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbUsr); err != nil {
 		if errors.Is(err, database.ErrDBNotFound) {
 			return user.User{}, fmt.Errorf("namedquerystruct: %w", user.ErrNotFound)
 		}

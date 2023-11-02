@@ -22,7 +22,6 @@ type dbUser struct {
 }
 
 func toDBUser(usr user.User) dbUser {
-
 	return dbUser{
 		ID:                 usr.ID,
 		Name:               usr.Name,

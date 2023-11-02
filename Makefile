@@ -127,6 +127,36 @@ db/seed/down:
 run-local:
 	go run app/services/tuber-api/main.go
 	
-# make query-local | jq
+create-local:
+	@NAME=$$(awk 'BEGIN { srand(); print "Name_" int(rand()*10000) }'); \
+	EMAIL=$$(awk 'BEGIN { srand(); print "user" int(rand()*10000) "@example.com" }'); \
+	curl -iX POST 'http://localhost:3000/v1/users' \
+	-H 'Content-Type: application/json' \
+	--data-raw '{ \
+	  "name": "'$$NAME'", \
+	  "email": "'$$EMAIL'", \
+	  "bio": "Experienced software developer with a passion for AI.", \
+	  "language": "en", \
+	  "acceptNotification": true \
+	}'
+
+# how to use: make update-local id=1
+update-local:
+	@NAME=$$(awk 'BEGIN { srand(); print "Name_" int(rand()*10000) }'); \
+	EMAIL=$$(awk 'BEGIN { srand(); print "user" int(rand()*10000) "@example.com" }'); \
+	curl -iX PUT 'http://localhost:3000/v1/users/$(id)' \
+	-H 'Content-Type: application/json' \
+	--data-raw '{ \
+	  "name": "'$$NAME'", \
+	  "email": "'$$EMAIL'", \
+	  "bio": "Experienced software developer with a passion for AI.", \
+	  "language": "en", \
+	  "acceptNotification": true \
+	}'
+
+# how to use: make delete-local id=1
+delete-local:
+	@curl -iX DELETE 'http://localhost:3000/v1/users/$(id)'
+# how to use: make query-local | jq
 query-local:
 	@curl 'http://localhost:3000/v1/users?page=1&rows=2&orderBy=name'

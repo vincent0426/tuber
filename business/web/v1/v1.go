@@ -3,6 +3,7 @@ package v1
 import (
 	"os"
 
+	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -26,8 +27,11 @@ type RouteAdder interface {
 func APIMux(cfg APIMuxConfig, routeAddr RouteAdder) *web.App {
 	app := web.NewApp(
 		cfg.Shutdown,
+		mid.Logger(cfg.Log),
+		mid.Errors(cfg.Log),
+		mid.Metrics(),
+		mid.Panics(),
 	)
-
 	routeAddr.Add(app, cfg)
 
 	return app

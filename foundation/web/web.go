@@ -4,7 +4,6 @@ package web
 import (
 	"context"
 	"errors"
-	"net/http"
 	"os"
 	"syscall"
 	"time"
@@ -15,7 +14,7 @@ import (
 
 // A Handler is a type that handles a http request within our own little mini
 // framework.
-type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
+type Handler func(ctx context.Context, c *gin.Context) error
 
 // App is the entrypoint into our application and what configures our context
 // object for each of our http handlers. Feel free to add any configuration
@@ -48,16 +47,13 @@ func (a *App) Handle(method string, group string, path string, handler Handler, 
 	handler = wrapMiddleware(a.mw, handler)
 
 	ginHandler := func(c *gin.Context) {
-		w := c.Writer
-		r := c.Request
-
 		v := Values{
 			TraceID: uuid.New().String(),
 			Now:     time.Now().UTC(),
 		}
-		ctx := context.WithValue(r.Context(), key, &v)
+		ctx := context.WithValue(c.Request.Context(), key, &v)
 
-		if err := handler(ctx, w, r); err != nil {
+		if err := handler(ctx, c); err != nil {
 			if validateShutdown(err) {
 				a.SignalShutdown()
 				return

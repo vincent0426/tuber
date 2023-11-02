@@ -28,4 +28,7 @@ func Routes(app *web.App, cfg Config) {
 
 	hdl := New(usrCore)
 	app.Handle(http.MethodGet, version, "/users", hdl.Query)
+	app.Handle(http.MethodPost, version, "/users", hdl.Create)
+	app.Handle(http.MethodPut, version, "/users/:id", hdl.Update)
+	app.Handle(http.MethodDelete, version, "/users/:id", hdl.Delete)
 }

@@ -142,33 +142,25 @@ func WithinTran(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, fn fun
 	return nil
 }
 
-// ExecContext is a helper function to execute a CUD operation with
-// logging and tracing.
-func ExecContext(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtContext, query string) error {
-	return NamedExecContext(ctx, log, db, query, struct{}{})
-}
-
-// NamedExecContext is a helper function to execute a CUD operation with
-// logging and tracing where field replacement is necessary.
-func NamedExecContext(ctx context.Context, log *zap.SugaredLogger, db sqlx.ExtContext, query string, data any) error {
-	q := queryString(query, data)
-
-	if _, ok := data.(struct{}); ok {
-		log.WithOptions(zap.AddCallerSkip(3)).Infow("database.NamedExecContext", "trace_id", web.GetTraceID(ctx), "query", q)
-	} else {
-		log.WithOptions(zap.AddCallerSkip(2)).Infow("database.NamedExecContext", "trace_id", web.GetTraceID(ctx), "query", q)
+func ExecContext(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, query string, data []interface{}) error {
+	_, err := db.ExecContext(ctx, query, data...)
+	if err != nil {
+		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == uniqueViolation {
+			return ErrDBDuplicatedEntry
+		}
+		return fmt.Errorf("namedexeccontext: %w", err)
 	}
 
-	if _, err := sqlx.NamedExecContext(ctx, db, query, data); err != nil {
-		if pqerr, ok := err.(*pgconn.PgError); ok {
-			switch pqerr.Code {
-			case undefinedTable:
-				return ErrUndefinedTable
-			case uniqueViolation:
-				return ErrDBDuplicatedEntry
-			}
+	return nil
+}
+
+func GetContext(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, query string, data []interface{}, dest interface{}) error {
+	err := db.GetContext(ctx, dest, query, data...)
+	if err != nil {
+		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == undefinedTable {
+			return ErrUndefinedTable
 		}
-		return err
+		return fmt.Errorf("namedgetcontext: %w", err)
 	}
 
 	return nil

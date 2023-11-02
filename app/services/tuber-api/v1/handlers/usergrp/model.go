@@ -39,11 +39,11 @@ func toAppUser(usr user.User) AppUser {
 
 // AppNewUser contains information needed to create a new user.
 type AppNewUser struct {
-	Name                string        `json:"name" validate:"required"`
-	Email               string        `json:"email" validate:"required,email"`
-	Bio                 string        `json:"bio"`
-	Lang                user.Language `json:"language"`
-	Accept_Notification bool          `json:"acceptNotification"`
+	Name               string `json:"name" binding:"required"`
+	Email              string `json:"email" binding:"required,email"`
+	Bio                string `json:"bio"`
+	Lang               string `json:"language"`
+	AcceptNotification bool   `json:"acceptNotification"`
 }
 
 func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
@@ -56,8 +56,8 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 		Name:               app.Name,
 		Email:              *addr,
 		Bio:                app.Bio,
-		Lang:               app.Lang,
-		AcceptNotification: app.Accept_Notification,
+		Lang:               user.Language{Name: app.Lang},
+		AcceptNotification: app.AcceptNotification,
 	}
 
 	return usr, nil
@@ -75,11 +75,11 @@ func (app AppNewUser) Validate() error {
 
 // AppUpdateUser contains information needed to update a user.
 type AppUpdateUser struct {
-	Name               *string        `json:"name"`
-	Email              *string        `json:"email" validate:"omitempty,email"`
-	Bio                *string        `json:"bio"`
-	Lang               *user.Language `json:"language"`
-	AcceptNotification *bool          `json:"acceptNotification"`
+	Name               *string `json:"name"`
+	Email              *string `json:"email" validate:"omitempty,email"`
+	Bio                *string `json:"bio"`
+	Lang               *string `json:"language"`
+	AcceptNotification *bool   `json:"acceptNotification"`
 }
 
 func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
@@ -96,7 +96,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 		Name:               app.Name,
 		Email:              addr,
 		Bio:                app.Bio,
-		Lang:               app.Lang,
+		Lang:               &user.Language{Name: *app.Lang},
 		AcceptNotification: app.AcceptNotification,
 	}
 
