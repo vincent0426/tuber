@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/core/user"
-	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/business/web/v1/paging"
+	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
 )
 
@@ -34,13 +34,13 @@ func (h *Handlers) Create(ctx context.Context, w http.ResponseWriter, r *http.Re
 
 	nc, err := toCoreNewUser(app)
 	if err != nil {
-		return v1.NewRequestError(err, http.StatusBadRequest)
+		return response.NewError(err, http.StatusBadRequest)
 	}
 
 	usr, err := h.user.Create(ctx, nc)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
-			return v1.NewRequestError(err, http.StatusConflict)
+			return response.NewError(err, http.StatusConflict)
 		}
 		return fmt.Errorf("create: usr[%+v]: %w", usr, err)
 	}

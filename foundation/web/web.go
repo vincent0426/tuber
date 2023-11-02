@@ -43,7 +43,7 @@ func (a *App) SignalShutdown() {
 
 // Handle sets a handler function for a given HTTP method and path pair
 // to the application server mux.
-func (a *App) Handle(method string, path string, handler Handler, mw ...Middleware) {
+func (a *App) Handle(method string, group string, path string, handler Handler, mw ...Middleware) {
 	handler = wrapMiddleware(mw, handler)
 	handler = wrapMiddleware(a.mw, handler)
 
@@ -67,7 +67,7 @@ func (a *App) Handle(method string, path string, handler Handler, mw ...Middlewa
 		// ANY CODE I WANT
 	}
 
-	a.Engine.Handle(method, path, ginHandler)
+	a.Engine.Handle(method, group+path, ginHandler)
 }
 
 // validateShutdown validates the error for special conditions that do not

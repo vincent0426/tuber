@@ -1,9 +1,13 @@
 ## Dependencies
 - docker
-- kind
+- kind 
 - kubectl
 - kustomize
 
+## Git Commit Message
+https://www.conventionalcommits.org/en/v1.0.0/
+
+# Not Complete
 ## Setup
 1. Pull docker images
 ```sh

@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/sys/validate"
-	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
+	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"go.uber.org/zap"
 )
@@ -20,33 +20,33 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 			if err := handler(ctx, w, r); err != nil {
 				log.Errorw("ERROR", "trace_id", web.GetTraceID(ctx), "message", err)
 
-				var er v1.ErrorResponse
+				var er response.ErrorDocument
 				var status int
 
 				switch {
 				case validate.IsFieldErrors(err):
 					fieldErrors := validate.GetFieldErrors(err)
-					er = v1.ErrorResponse{
+					er = response.ErrorDocument{
 						Error:  "data validation error",
 						Fields: fieldErrors.Fields(),
 					}
 					status = http.StatusBadRequest
 
-				case v1.IsRequestError(err):
-					reqErr := v1.GetRequestError(err)
-					er = v1.ErrorResponse{
+				case response.IsError(err):
+					reqErr := response.GetError(err)
+					er = response.ErrorDocument{
 						Error: reqErr.Error(),
 					}
 					status = reqErr.Status
 
 				case auth.IsAuthError(err):
-					er = v1.ErrorResponse{
+					er = response.ErrorDocument{
 						Error: http.StatusText(http.StatusUnauthorized),
 					}
 					status = http.StatusUnauthorized
 
 				default:
-					er = v1.ErrorResponse{
+					er = response.ErrorDocument{
 						Error: http.StatusText(http.StatusInternalServerError),
 					}
 					status = http.StatusInternalServerError

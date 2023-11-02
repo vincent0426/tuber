@@ -129,4 +129,4 @@ run-local:
 	
 # make query-local | jq
 query-local:
-	@curl 'http://localhost:3000/users?page=1&rows=2&orderBy=name'
+	@curl 'http://localhost:3000/v1/users?page=1&rows=2&orderBy=name'

@@ -1,46 +1,34 @@
-// Package v1 represents types used by the web application for v1.
 package v1
 
 import (
-	"errors"
+	"os"
+
+	"github.com/TSMC-Uber/server/foundation/web"
+	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 )
 
-// ErrorResponse is the form used for API responses from failures in the API.
-type ErrorResponse struct {
-	Error  string            `json:"error"`
-	Fields map[string]string `json:"fields,omitempty"`
+// APIMuxConfig contains all the mandatory systems required by handlers.
+type APIMuxConfig struct {
+	Shutdown chan os.Signal
+	Log      *zap.SugaredLogger
+	// Auth     *auth.Auth
+	DB *sqlx.DB
 }
 
-// RequestError is used to pass an error during the request through the
-// application with web specific context.
-type RequestError struct {
-	Err    error
-	Status int
+// RouteAdder defines behavior that sets the routes to bind for an instance
+// of the service.
+type RouteAdder interface {
+	Add(app *web.App, cfg APIMuxConfig)
 }
 
-// NewRequestError wraps a provided error with an HTTP status code. This
-// function should be used when handlers encounter expected errors.
-func NewRequestError(err error, status int) error {
-	return &RequestError{err, status}
-}
+// APIMux constructs a http.Handler with all application routes defined.
+func APIMux(cfg APIMuxConfig, routeAddr RouteAdder) *web.App {
+	app := web.NewApp(
+		cfg.Shutdown,
+	)
 
-// Error implements the error interface. It uses the default message of the
-// wrapped error. This is what will be shown in the services' logs.
-func (re *RequestError) Error() string {
-	return re.Err.Error()
-}
+	routeAddr.Add(app, cfg)
 
-// IsRequestError checks if an error of type RequestError exists.
-func IsRequestError(err error) bool {
-	var re *RequestError
-	return errors.As(err, &re)
-}
-
-// GetRequestError returns a copy of the RequestError pointer.
-func GetRequestError(err error) *RequestError {
-	var re *RequestError
-	if !errors.As(err, &re) {
-		return nil
-	}
-	return re
+	return app
 }

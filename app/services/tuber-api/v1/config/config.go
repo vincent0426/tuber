@@ -27,7 +27,7 @@ type config struct {
 	}
 }
 
-func Init() (config, error) {
+func New() (config, error) {
 	vConfig := viper.New()
 
 	// Set Web defaults.
