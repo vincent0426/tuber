@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
-
+import store from '@/store';
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
@@ -153,7 +153,6 @@ const router = createRouter({
             name: 'notfound',
             component: () => import('@/views/pages/NotFound.vue')
         },
-
         {
             path: '/auth/login',
             name: 'login',
@@ -170,6 +169,23 @@ const router = createRouter({
             component: () => import('@/views/pages/auth/Error.vue')
         }
     ]
+});
+
+
+// Navigation guard to check authentication before each navigation
+router.beforeEach(async (to, from, next) => {
+    if (to.name !== 'login' && !store.getters.login) {
+        try {
+            console.log('check login');
+            await store.dispatch("checkLogin");
+            next();
+        } catch {
+            next({ name: "login" });
+        }
+    } else {
+    console.log('have login');
+      next(); // Continue with the navigation
+    }
 });
 
 export default router;

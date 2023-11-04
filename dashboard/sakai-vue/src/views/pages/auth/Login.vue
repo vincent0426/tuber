@@ -2,15 +2,33 @@
 import { useLayout } from '@/layout/composables/layout';
 import { ref, computed } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
+import store from '@/store';
+import router from '@/router';
 
 const { layoutConfig } = useLayout();
-const email = ref('');
+const loading = ref(false);
+const username = ref('');
 const password = ref('');
 const checked = ref(false);
 
 const logoUrl = computed(() => {
     return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
 });
+
+const submit = async () => {
+    loading.value = true;
+    try {
+        await store.dispatch('login', { username: username.value, password: password.value });
+        router.push({ name: 'dashboard' });
+    } catch (error) {
+        // Handle login error
+        console.error('Login failed:', error);
+        alert('Login failed. Please check your username and password and try again.');
+    } finally {
+        loading.value = false;
+    }
+};
+
 </script>
 
 <template>
@@ -26,8 +44,8 @@ const logoUrl = computed(() => {
                     </div>
 
                     <div>
-                        <label for="email1" class="block text-900 text-xl font-medium mb-2">Email</label>
-                        <InputText id="email1" type="text" placeholder="Email address" class="w-full md:w-30rem mb-5" style="padding: 1rem" v-model="email" />
+                        <label for="username1" class="block text-900 text-xl font-medium mb-2">Username</label>
+                        <InputText id="username1" type="text" placeholder="Email address" class="w-full md:w-30rem mb-5" style="padding: 1rem" v-model="username" />
 
                         <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
                         <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }"></Password>
@@ -39,7 +57,7 @@ const logoUrl = computed(() => {
                             </div>
                             <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
                         </div>
-                        <Button label="Sign In" class="w-full p-3 text-xl"></Button>
+                        <Button label="Sign In" class="w-full p-3 text-xl" @click="submit"></Button>
                     </div>
                 </div>
             </div>
