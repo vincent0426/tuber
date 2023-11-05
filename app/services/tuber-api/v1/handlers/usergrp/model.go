@@ -7,6 +7,7 @@ import (
 
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/sys/validate"
+	"github.com/TSMC-Uber/server/business/web/v1/mid"
 )
 
 // AppUser represents information about an individual user.
@@ -49,7 +50,7 @@ type AppNewUser struct {
 func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 	addr, err := mail.ParseAddress(app.Email)
 	if err != nil {
-		return user.NewUser{}, fmt.Errorf("parsing email: %w", err)
+		return user.NewUser{}, mid.WrapError(fmt.Errorf("parsing email: %w", err))
 	}
 
 	usr := user.NewUser{
@@ -88,7 +89,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 		var err error
 		addr, err = mail.ParseAddress(*app.Email)
 		if err != nil {
-			return user.UpdateUser{}, fmt.Errorf("parsing email: %w", err)
+			return user.UpdateUser{}, mid.WrapError(fmt.Errorf("parsing email: %w", err))
 		}
 	}
 

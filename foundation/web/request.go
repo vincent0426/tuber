@@ -28,7 +28,7 @@ func Param(r *http.Request, key string) string {
 func Decode(c *gin.Context, val any) error {
 	if err := c.ShouldBindJSON(val); err != nil {
 		// This will catch all the validation issues with the JSON provided.
-		return err
+		return wrapError(err)
 	}
 	return nil
 }

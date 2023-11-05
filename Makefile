@@ -143,7 +143,7 @@ create-local:
 # how to use: make update-local id=1
 update-local:
 	@NAME=$$(awk 'BEGIN { srand(); print "Name_" int(rand()*10000) }'); \
-	EMAIL=$$(awk 'BEGIN { srand(); print "user" int(rand()*10000) "@example.com" }'); \
+	EMAIL=$$(awk 'BEGIN { srand(); print "user" int(rand()*10000) "example.com" }'); \
 	curl -iX PUT 'http://localhost:3000/v1/users/$(id)' \
 	-H 'Content-Type: application/json' \
 	--data-raw '{ \

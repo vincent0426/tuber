@@ -2,7 +2,10 @@ package mid
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
+	"runtime"
 
 	"github.com/TSMC-Uber/server/business/sys/validate"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
@@ -71,4 +74,17 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 	}
 
 	return m
+}
+
+// WrapError wraps the provided error with file and line number information.
+func WrapError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	_, file, line, ok := runtime.Caller(1)
+	if !ok {
+		return errors.New("error occurred, but caller info could not be retrieved")
+	}
+	return fmt.Errorf("%w at %s:%d", err, file, line)
 }

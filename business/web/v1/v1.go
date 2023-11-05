@@ -15,6 +15,7 @@ type APIMuxConfig struct {
 	Log      *zap.SugaredLogger
 	// Auth     *auth.Auth
 	DB *sqlx.DB
+	// Tracer trace.Tracer
 }
 
 // RouteAdder defines behavior that sets the routes to bind for an instance
@@ -27,6 +28,7 @@ type RouteAdder interface {
 func APIMux(cfg APIMuxConfig, routeAddr RouteAdder) *web.App {
 	app := web.NewApp(
 		cfg.Shutdown,
+		// cfg.Tracer,
 		mid.Logger(cfg.Log),
 		mid.Errors(cfg.Log),
 		mid.Metrics(),

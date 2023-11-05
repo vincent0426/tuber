@@ -12,6 +12,7 @@ require (
 	github.com/google/uuid v1.1.2
 	github.com/jackc/pgx/v5 v5.4.3
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.17.0
 	go.uber.org/zap v1.26.0
 )
