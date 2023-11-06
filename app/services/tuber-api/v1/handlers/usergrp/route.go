@@ -6,6 +6,7 @@ import (
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/core/user/stores/userdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
+	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
@@ -26,8 +27,11 @@ func Routes(app *web.App, cfg Config) {
 	// usrCore := user.NewCore(cfg.Log, envCore, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB)))
 	usrCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
 
+	authen := mid.Authenticate(cfg.Auth, usrCore)
+
 	hdl := New(usrCore)
 	app.Handle(http.MethodGet, version, "/users", hdl.Query)
+	app.Handle(http.MethodGet, version, "/users/:id", hdl.QueryByID, authen)
 	app.Handle(http.MethodPost, version, "/users", hdl.Create)
 	app.Handle(http.MethodPut, version, "/users/:id", hdl.Update)
 	app.Handle(http.MethodDelete, version, "/users/:id", hdl.Delete)

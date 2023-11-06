@@ -5,6 +5,7 @@ package user
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"net/mail"
@@ -32,6 +33,7 @@ type Storer interface {
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
 	QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]User, error)
 	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
+	ValidateToken(ctx context.Context, tokenHash [32]byte) (User, error)
 }
 
 // Core manages the set of APIs for user access.
@@ -147,4 +149,20 @@ func (c *Core) QueryByEmail(ctx context.Context, email mail.Address) (User, erro
 	}
 
 	return user, nil
+}
+
+func (c *Core) ValidateToken(ctx context.Context, tokenPlaintext string) bool {
+	// Calculate the SHA-256 hash of the plaintext token provided by the client. // Remember that this returns a byte *array* with length 32, not a slice. tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+	// Set up the SQL query.
+	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
+	user, err := c.storer.ValidateToken(ctx, tokenHash)
+	if err != nil {
+		return false
+	}
+
+	if user.ID != uuid.Nil {
+		return true
+	}
+
+	return false
 }

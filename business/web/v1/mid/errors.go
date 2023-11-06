@@ -24,6 +24,10 @@ func Errors(log *zap.SugaredLogger) web.Middleware {
 			if err := handler(ctx, c); err != nil {
 				log.Errorw("ERROR", "trace_id", web.GetTraceID(ctx), "message", err)
 
+				ctx, span := web.AddSpan(ctx, "business.web.request.mid.error")
+				span.RecordError(err)
+				span.End()
+
 				var er response.ErrorDocument
 				var status int
 

@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap"
 )
 
@@ -143,6 +144,9 @@ func WithinTran(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, fn fun
 }
 
 func ExecContext(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, query string, data []interface{}) error {
+	ctx, span := web.AddSpan(ctx, "business.sys.database.ExecContext", attribute.String("query", query))
+	defer span.End()
+
 	_, err := db.ExecContext(ctx, query, data...)
 	if err != nil {
 		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == uniqueViolation {
@@ -155,6 +159,9 @@ func ExecContext(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, query
 }
 
 func GetContext(ctx context.Context, log *zap.SugaredLogger, db *sqlx.DB, query string, data []interface{}, dest interface{}) error {
+	ctx, span := web.AddSpan(ctx, "business.sys.database.GetContext", attribute.String("query", query))
+	defer span.End()
+
 	err := db.GetContext(ctx, dest, query, data...)
 	if err != nil {
 		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == undefinedTable {
@@ -190,6 +197,9 @@ func namedQuerySlice[T any](ctx context.Context, log *zap.SugaredLogger, db sqlx
 	q := queryString(query, data)
 
 	log.WithOptions(zap.AddCallerSkip(3)).Infow("database.NamedQuerySlice", "trace_id", web.GetTraceID(ctx), "query", q)
+
+	ctx, span := web.AddSpan(ctx, "business.sys.database.queryslice", attribute.String("query", q))
+	defer span.End()
 
 	var rows *sqlx.Rows
 	var err error

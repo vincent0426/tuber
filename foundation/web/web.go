@@ -4,12 +4,16 @@ package web
 import (
 	"context"
 	"errors"
+	"net/http"
 	"os"
 	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // A Handler is a type that handles a http request within our own little mini
@@ -23,14 +27,16 @@ type App struct {
 	*gin.Engine
 	shutdown chan os.Signal
 	mw       []Middleware
+	tracer   trace.Tracer
 }
 
 // NewApp creates an App value that handle a set of routes for the application.
-func NewApp(shutdown chan os.Signal, mw ...Middleware) *App {
+func NewApp(shutdown chan os.Signal, tracer trace.Tracer, mw ...Middleware) *App {
 	return &App{
 		Engine:   gin.New(),
 		shutdown: shutdown,
 		mw:       mw,
+		tracer:   tracer,
 	}
 }
 
@@ -46,12 +52,20 @@ func (a *App) Handle(method string, group string, path string, handler Handler, 
 	handler = wrapMiddleware(mw, handler)
 	handler = wrapMiddleware(a.mw, handler)
 
-	ginHandler := func(c *gin.Context) {
+	a.handle(method, group, path, handler)
+}
+
+func (a *App) handle(method string, group string, path string, handler Handler) {
+	h := func(c *gin.Context) {
+		ctx, span := a.startSpan(c.Writer, c.Request)
+		defer span.End()
+
 		v := Values{
-			TraceID: uuid.New().String(),
+			TraceID: span.SpanContext().TraceID().String(),
+			Tracer:  a.tracer,
 			Now:     time.Now().UTC(),
 		}
-		ctx := context.WithValue(c.Request.Context(), key, &v)
+		ctx = SetValues(ctx, &v)
 
 		if err := handler(ctx, c); err != nil {
 			if validateShutdown(err) {
@@ -59,11 +73,35 @@ func (a *App) Handle(method string, group string, path string, handler Handler, 
 				return
 			}
 		}
-
-		// ANY CODE I WANT
+	}
+	finalPath := path
+	if group != "" {
+		finalPath = "/" + group + path
 	}
 
-	a.Engine.Handle(method, group+path, ginHandler)
+	a.Engine.Handle(method, finalPath, h)
+}
+
+// startSpan initializes the request by adding a span and writing otel
+// related information into the response writer for the response.
+func (a *App) startSpan(w http.ResponseWriter, r *http.Request) (context.Context, trace.Span) {
+	ctx := r.Context()
+
+	// There are times when the handler is called without a tracer, such
+	// as with tests. We need a span for the trace id.
+	span := trace.SpanFromContext(ctx)
+
+	// If a tracer exists, then replace the span for the one currently
+	// found in the context. This may have come from over the wire.
+	if a.tracer != nil {
+		ctx, span = a.tracer.Start(ctx, "pkg.web.handle")
+		span.SetAttributes(attribute.String("endpoint", r.RequestURI))
+	}
+
+	// Inject the trace information into the response.
+	otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(w.Header()))
+
+	return ctx, span
 }
 
 // validateShutdown validates the error for special conditions that do not

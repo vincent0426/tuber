@@ -2,22 +2,36 @@ package mid
 
 import (
 	"context"
+	"net/http"
 
+	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
+	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Authenticate validates a JWT from the `Authorization` header.
-func Authenticate(a *auth.Auth) web.Middleware {
+func Authenticate(a *auth.Auth, usrCore *user.Core) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, c *gin.Context) error {
-			claims, err := a.Authenticate(ctx, c.Request.Header.Get("authorization"))
+			err := a.Authenticate(ctx, c.Request.Header.Get("authorization"), usrCore)
 			if err != nil {
 				return auth.NewAuthError("authenticate: failed: %s", err)
 			}
 
-			ctx = auth.SetClaims(ctx, claims)
+			// use an zero valued user id if it doesn't exsit.
+			var userID uuid.UUID
+			id := web.Param(c.Request, "id")
+			if id != "" {
+				var err error
+				userID, err = uuid.Parse(id)
+				if err != nil {
+					return response.NewError(err, http.StatusBadRequest)
+				}
+				ctx = auth.SetUserID(ctx, userID)
+			}
 
 			return handler(ctx, c)
 		}
@@ -30,23 +44,23 @@ func Authenticate(a *auth.Auth) web.Middleware {
 
 // Authorize validates that an authenticated user has at least one role from a
 // specified list. This method constructs the actual function that is used.
-func Authorize(a *auth.Auth, rule string) web.Middleware {
-	m := func(handler web.Handler) web.Handler {
-		h := func(ctx context.Context, c *gin.Context) error {
-			claims := auth.GetClaims(ctx)
-			if claims.Subject == "" {
-				return auth.NewAuthError("authorize: you are not authorized for that action, no claims")
-			}
+// func Authorize(a *auth.Auth, rule string) web.Middleware {
+// 	m := func(handler web.Handler) web.Handler {
+// 		h := func(ctx context.Context, c *gin.Context) error {
+// 			claims := auth.GetClaims(ctx)
+// 			if claims.Subject == "" {
+// 				return auth.NewAuthError("authorize: you are not authorized for that action, no claims")
+// 			}
 
-			if err := a.Authorize(ctx, claims, rule); err != nil {
-				return auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", nil, rule, err)
-			}
+// 			if err := a.Authorize(ctx, claims, rule); err != nil {
+// 				return auth.NewAuthError("authorize: you are not authorized for that action, claims[%v] rule[%v]: %s", nil, rule, err)
+// 			}
 
-			return handler(ctx, c)
-		}
+// 			return handler(ctx, c)
+// 		}
 
-		return h
-	}
+// 		return h
+// 	}
 
-	return m
-}
+// 	return m
+// }

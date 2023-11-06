@@ -7,7 +7,8 @@ APP							:= tuber
 BASE_IMAGE_NAME := tuber/service
 KIND            := kindest/node:v1.27.3
 KIND_CLUSTER    := tuber
-POSTGRES        := postgres:15.4
+# POSTGRES        := postgres:15.4
+POSTGRES        := vincent0426/tuber/postgres
 # VERSION         := dev
 VERSION         := 0.0.1
 SERVICE_NAME    := tuber-api
@@ -52,8 +53,23 @@ dev-load:
 	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
 
 dev-apply:
+	kustomize build zarf/k8s/dev/database | kubectl apply -f -
+	kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=120s sts/database
+
+	kustomize build zarf/k8s/dev/grafana | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=grafana --timeout=120s --for=condition=Ready
+
+	kustomize build zarf/k8s/dev/tempo | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=120s --for=condition=Ready
+
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
+	
+dev-services-delete:
+	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
+	kustomize build zarf/k8s/dev/tempo | kubectl delete -f -
+	kustomize build zarf/k8s/dev/database | kubectl delete -f -
+	kustomize build zarf/k8s/dev/tuber | kubectl delete -f -
 
 dev-apply-with-database:
 	kustomize build zarf/k8s/dev/database | kubectl apply -f -

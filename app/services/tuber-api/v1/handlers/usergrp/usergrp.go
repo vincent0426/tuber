@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/core/user"
+	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/paging"
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
@@ -143,18 +144,18 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 }
 
 // QueryByID returns a user by its ID.
-// func (h *Handlers) QueryByID(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-// 	id := auth.GetUserID(ctx)
+func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
+	id := auth.GetUserID(ctx)
 
-// 	usr, err := h.user.QueryByID(ctx, id)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, user.ErrNotFound):
-// 			return v1.NewRequestError(err, http.StatusNotFound)
-// 		default:
-// 			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
-// 		}
-// 	}
+	usr, err := h.user.QueryByID(ctx, id)
+	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
+		}
+	}
 
-// 	return web.Respond(ctx, w, toAppUser(usr), http.StatusOK)
-// }
+	return web.Respond(ctx, c.Writer, toAppUser(usr), http.StatusOK)
+}

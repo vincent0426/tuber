@@ -25,6 +25,11 @@ type config struct {
 		MaxOpenConns int
 		DisableTLS   bool
 	}
+	Tempo struct {
+		ReporterURI string
+		ServiceName string
+		Probability float64
+	}
 }
 
 func New() (config, error) {
@@ -48,6 +53,10 @@ func New() (config, error) {
 	vConfig.SetDefault("DB.MaxOpenConns", 10)
 	vConfig.SetDefault("DB.DisableTLS", true)
 
+	// Set Tempo defaults.
+	vConfig.SetDefault("Tempo.ReporterURI", "tempo.tuber-system.svc.cluster.local:4317")
+	vConfig.SetDefault("Tempo.ServiceName", "tuber-api")
+	vConfig.SetDefault("Tempo.Probability", 1)
 	// Enable environment variable overriding for all.
 	vConfig.AutomaticEnv()
 	conf := &config{}
