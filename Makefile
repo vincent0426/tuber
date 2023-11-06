@@ -97,6 +97,9 @@ dev-docker-pull:
 	docker pull $(KIND)
 	docker pull $(POSTGRES)
 
+dev-down:
+	kind delete cluster --name $(KIND_CLUSTER)
+
 tidy:
 	go mod tidy
 	go mod vendor
@@ -104,39 +107,33 @@ tidy:
 pgcli:
 	pgcli postgresql://postgres:postgres@localhost
 
-## db/migrations/new name=$1: create a new database migration
-.PHONY: db/migrations/new 
-db/migrations/new:
+# db/migrations/new name=$1: create a new database migration
+db-migrations-new:
 	@echo 'Creating migration files for ${name}...'
 	migrate create -seq -ext=.sql -dir=./db/migrations ${name}
 	
-## db/migrations/up: apply all up database migrations
-.PHONY: db/migrations/up 
-db/migrations/up:
+# db/migrations/up: apply all up database migrations
+db-migrations-up:
 	@echo 'Running up migrations...'
 	migrate -path ./db/migrations -database ${DB_DSN} up
 	
-## db/migrations/down: apply all down database migrations
-.PHONY: db/migrations/down
-db/migrations/down:
+# db/migrations/down: apply all down database migrations
+db-migrations-down:
 	@echo 'Running down migrations...'
 	migrate -path ./db/migrations -database ${DB_DSN} down
 
-## receive version from command line
-.PHONY: db/migrations/force
-db/migrations/force:
+# receive version from command line
+db-migrations-force:
 	@echo 'Running force migrations...'
 	migrate -path ./db/migrations -database ${DB_DSN} force $(version)
 
-## db/seed/up: apply all up database seeds
-.PHONY: db/seed/up
-db/seed/up:
+# db/seed/up: apply all up database seeds
+db-seed/up:
 	@echo 'Running up seeds...'
 	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/seed/up.sql
 
-## db/seed/down: apply all down database seeds
-.PHONY: db/seed/down
-db/seed/down:
+# db/seed/down: apply all down database seeds
+db-seed/down:
 	@echo 'Running down seeds...'
 	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/seed/down.sql
 	
