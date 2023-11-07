@@ -13,6 +13,7 @@ import (
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/config"
 	"github.com/TSMC-Uber/server/business/sys/database"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
+	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/debug"
 
 	"github.com/TSMC-Uber/server/foundation/logger"
@@ -95,6 +96,18 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		log.Infow("shutdown", "status", "stopping database support", "host", cfg.DB.Host)
 		db.Close()
 	}()
+	fmt.Println("audience", cfg.Auth.Audience)
+	authCfg := auth.Config{
+		Log:      log,
+		DB:       db,
+		Audience: cfg.Auth.Audience,
+		// KeyLookup: vault,
+	}
+
+	auth, err := auth.New(authCfg)
+	if err != nil {
+		return fmt.Errorf("constructing auth: %w", err)
+	}
 
 	// -------------------------------------------------------------------------
 	// Start Tracing Support
@@ -124,9 +137,9 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 	cfgMux := v1.APIMuxConfig{
 		Shutdown: shutdown,
 		Log:      log,
-		// Auth:     auth,
-		DB:     db,
-		Tracer: tracer,
+		Auth:     auth,
+		DB:       db,
+		Tracer:   tracer,
 	}
 
 	apiMux := v1.APIMux(cfgMux, routeAdder)

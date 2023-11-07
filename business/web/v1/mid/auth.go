@@ -2,9 +2,10 @@ package mid
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
-	"github.com/TSMC-Uber/server/business/core/user"
+	aauth "github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
@@ -13,11 +14,12 @@ import (
 )
 
 // Authenticate validates a JWT from the `Authorization` header.
-func Authenticate(a *auth.Auth, usrCore *user.Core) web.Middleware {
+func Authenticate(a *auth.Auth, authCore *aauth.Core) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, c *gin.Context) error {
-			err := a.Authenticate(ctx, c.Request.Header.Get("authorization"), usrCore)
+			err := a.Authenticate(ctx, c.Request.Header.Get("authorization"), authCore)
 			if err != nil {
+				fmt.Printf("authenticate: failed: %s", err)
 				return auth.NewAuthError("authenticate: failed: %s", err)
 			}
 

@@ -3,6 +3,8 @@ package usergrp
 import (
 	"net/http"
 
+	aauth "github.com/TSMC-Uber/server/business/core/auth"
+	"github.com/TSMC-Uber/server/business/core/auth/stores/authdb"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/core/user/stores/userdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
@@ -25,9 +27,10 @@ func Routes(app *web.App, cfg Config) {
 
 	// envCore := event.NewCore(cfg.Log)
 	// usrCore := user.NewCore(cfg.Log, envCore, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB)))
+	authCore := aauth.NewCore(authdb.NewStore(cfg.Log, cfg.DB))
 	usrCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
 
-	authen := mid.Authenticate(cfg.Auth, usrCore)
+	authen := mid.Authenticate(cfg.Auth, authCore)
 
 	hdl := New(usrCore)
 	app.Handle(http.MethodGet, version, "/users", hdl.Query)

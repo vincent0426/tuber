@@ -2,7 +2,6 @@ package web
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -61,16 +60,12 @@ func GetTime(ctx context.Context) time.Time {
 func AddSpan(ctx context.Context, spanName string, keyValues ...attribute.KeyValue) (context.Context, trace.Span) {
 	v, ok := ctx.Value(key).(*Values)
 	if !ok || v.Tracer == nil {
-		fmt.Println("--- foundation/web/context.go --- AddSpan() !ok || v.Tracer == nil ---")
-		fmt.Println("ok: ", ok, "v.Tracer: ", v.Tracer)
 		return ctx, trace.SpanFromContext(ctx)
 	}
 
 	ctx, span := v.Tracer.Start(ctx, spanName)
 	for _, kv := range keyValues {
-		fmt.Println("--- foundation/web/context.go --- AddSpan() ---")
 		span.SetAttributes(kv)
-		fmt.Println("kv: ", kv)
 	}
 
 	return ctx, span

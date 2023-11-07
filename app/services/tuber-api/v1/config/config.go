@@ -30,6 +30,9 @@ type config struct {
 		ServiceName string
 		Probability float64
 	}
+	Auth struct {
+		Audience string
+	}
 }
 
 func New() (config, error) {
@@ -57,6 +60,9 @@ func New() (config, error) {
 	vConfig.SetDefault("Tempo.ReporterURI", "tempo.tuber-system.svc.cluster.local:4317")
 	vConfig.SetDefault("Tempo.ServiceName", "tuber-api")
 	vConfig.SetDefault("Tempo.Probability", 1)
+
+	// Set Auth defaults.
+	vConfig.SetDefault("Auth.Audience", "855836946959-bp1cr7uthl0e0pni33b6dmbfbac7m5ak.apps.googleusercontent.com")
 	// Enable environment variable overriding for all.
 	vConfig.AutomaticEnv()
 	conf := &config{}

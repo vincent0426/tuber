@@ -2,6 +2,7 @@
 package all
 
 import (
+	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/authgrp"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/usergrp"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/foundation/web"
@@ -17,6 +18,11 @@ type add struct{}
 
 // Add implements the RouterAdder interface.
 func (add) Add(app *web.App, cfg v1.APIMuxConfig) {
+	authgrp.Routes(app, authgrp.Config{
+		Log:  cfg.Log,
+		Auth: cfg.Auth,
+		DB:   cfg.DB,
+	})
 	usergrp.Routes(app, usergrp.Config{
 		Log:  cfg.Log,
 		Auth: cfg.Auth,

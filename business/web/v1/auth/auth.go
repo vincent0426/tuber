@@ -13,9 +13,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/TSMC-Uber/server/business/core/user"
+	"google.golang.org/api/idtoken"
+
+	aauth "github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
@@ -38,6 +41,8 @@ type KeyLookup interface {
 // Config represents information required to initialize auth.
 type Config struct {
 	Log       *zap.SugaredLogger
+	DB        *sqlx.DB
+	Audience  string
 	KeyLookup KeyLookup
 	Issuer    string
 }
@@ -48,6 +53,7 @@ type Auth struct {
 	log       *zap.SugaredLogger
 	keyLookup KeyLookup
 	method    jwt.SigningMethod
+	audience  string
 	// parser    *jwt.Parser
 	issuer string
 	mu     sync.RWMutex
@@ -61,12 +67,35 @@ type Token struct {
 	Expiry    time.Time
 }
 
+type IDTokenInfo struct {
+	Iss string `json:"iss"`
+	// userId
+	Sub string `json:"sub"`
+	Azp string `json:"azp"`
+	// clientId
+	Aud string `json:"aud"`
+	Iat int64  `json:"iat"`
+	// expired time
+	Exp int64 `json:"exp"`
+
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	AtHash        string `json:"at_hash"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Picture       string `json:"picture"`
+	Local         string `json:"locale"`
+	jwt.StandardClaims
+}
+
 // New creates an Auth to support authentication/authorization.
 func New(cfg Config) (*Auth, error) {
 	a := Auth{
 		log:       cfg.Log,
 		keyLookup: cfg.KeyLookup,
 		method:    jwt.GetSigningMethod(jwt.SigningMethodRS256.Name),
+		audience:  cfg.Audience,
 		// parser:    jwt.NewParser(jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Name})),
 		issuer: cfg.Issuer,
 		cache:  make(map[string]string),
@@ -107,7 +136,7 @@ func GenerateToken(userID uuid.UUID, ttl time.Duration) (*Token, error) {
 }
 
 // Authenticate processes the token to validate the sender's token is valid.
-func (a *Auth) Authenticate(ctx context.Context, bearerToken string, usrCore *user.Core) error {
+func (a *Auth) Authenticate(ctx context.Context, bearerToken string, authCore *aauth.Core) error {
 	parts := strings.Split(bearerToken, " ")
 	if len(parts) != 2 || parts[0] != "Bearer" {
 		return errors.New("expected authorization header format: Bearer <token>")
@@ -119,44 +148,29 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string, usrCore *us
 		return errors.New("invalid plaintext token")
 	}
 
-	if ok := usrCore.ValidateToken(ctx, token); !ok {
+	if ok := authCore.ValidateToken(ctx, token); !ok {
 		return errors.New("invalid token")
 	}
-	// token, _, err := a.parser.ParseUnverified(parts[1], &claims)
-	// if err != nil {
-	// 	return Claims{}, fmt.Errorf("error parsing token: %w", err)
-	// }
-
-	// Perform an extra level of authentication verification with OPA.
-
-	// kidRaw, exists := token.Header["kid"]
-	// if !exists {
-	// 	return Claims{}, fmt.Errorf("kid missing from header: %w", err)
-	// }
-
-	// kid, ok := kidRaw.(string)
-	// if !ok {
-	// 	return Claims{}, fmt.Errorf("kid malformed: %w", err)
-	// }
-
-	// pem, err := a.publicKeyLookup(kid)
-	// if err != nil {
-	// 	return Claims{}, fmt.Errorf("failed to fetch public key: %w", err)
-	// }
-
-	// input := map[string]any{
-	// 	"Key":   pem,
-	// 	"Token": parts[1],
-	// 	"ISS":   a.issuer,
-	// }
-
-	// if err := a.opaPolicyEvaluation(ctx, opaAuthentication, RuleAuthenticate, input); err != nil {
-	// 	return Claims{}, fmt.Errorf("authentication failed : %w", err)
-	// }
-
-	// Check the database for this user to verify they are still enabled.
 
 	return nil
+}
+
+// Authenticate processes the token to validate the sender's token is valid.
+func (a *Auth) AuthGoogle(ctx context.Context, idToken string) error {
+	_, err := idtoken.Validate(context.Background(), idToken, a.audience)
+	if err != nil {
+		return fmt.Errorf("idtoken validate: %w", err)
+	}
+	token, _, err := new(jwt.Parser).ParseUnverified(idToken, &IDTokenInfo{})
+	if err != nil {
+		return fmt.Errorf("parse unverified: %w", err)
+	}
+	if tokenInfo, ok := token.Claims.(*IDTokenInfo); ok {
+		fmt.Println("tokenInfo: ", tokenInfo)
+		return nil
+	} else {
+		return errors.New("invalid token")
+	}
 }
 
 // Authorize attempts to authorize the user with the provided input roles, if
