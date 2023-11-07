@@ -13,6 +13,15 @@ POSTGRES        := vincent0426/tuber/postgres
 VERSION         := 0.0.1
 SERVICE_NAME    := tuber-api
 SERVICE_IMAGE   := $(BASE_IMAGE_NAME)/$(SERVICE_NAME):$(VERSION)
+
+dev-brew:
+	brew update
+	brew list kind || brew install kind
+	brew list kubectl || brew install kubectl
+	brew list kustomize || brew install kustomize
+	brew list helmfile || brew install helmfile
+	brew list pgcli || brew install pgcli
+
 # ==============================================================================
 # Building containers
 all: service
@@ -62,9 +71,13 @@ dev-apply:
 	kustomize build zarf/k8s/dev/tempo | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=120s --for=condition=Ready
 
+# helmfile is used to deploy helm charts.
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/dev-prometheus.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=300s
+	
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
-	
+
 dev-services-delete:
 	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
 	kustomize build zarf/k8s/dev/tempo | kubectl delete -f -
