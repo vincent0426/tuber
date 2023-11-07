@@ -1,0 +1,12 @@
+repositories:
+  - name: grafana
+    url: https://grafana.github.io/helm-charts
+
+# Add the Loki release
+releases:
+  - name: loki
+    namespace: tuber-system
+    chart: grafana/loki-stack
+    # version:
+    values:
+      - loki-values.yaml

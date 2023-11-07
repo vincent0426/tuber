@@ -9,16 +9,3 @@ releases:
     version: 52.1.0
     values:
       - kube-prometheus-stack-values.yaml
-    hooks:
-      - events: ["postsync"]
-        showlogs: true
-        command: "kubectl"
-        args:
-          [
-            "wait",
-            "--for=condition=available",
-            "--timeout=600s",
-            "deployment/kube-prometheus-stack-operator",
-            "-n",
-            "{{`{{ .Release.Namespace }}`}}",
-          ]

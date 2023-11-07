@@ -9,6 +9,9 @@ KIND            := kindest/node:v1.27.3
 KIND_CLUSTER    := tuber
 # POSTGRES        := postgres:15.4
 POSTGRES        := vincent0426/tuber/postgres
+TEMPO           := grafana/tempo:2.2.0
+LOKI            := grafana/loki:3.3.1
+
 # VERSION         := dev
 VERSION         := 0.0.1
 SERVICE_NAME    := tuber-api
@@ -73,14 +76,19 @@ dev-apply:
 
 # helmfile is used to deploy helm charts.
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/dev-prometheus.yaml sync
-	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=300s
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=120s
+	
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=120s
 	
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
 
 dev-services-delete:
-	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/dev-prometheus.yaml destroy
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml destroy
 	kustomize build zarf/k8s/dev/tempo | kubectl delete -f -
+	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
 	kustomize build zarf/k8s/dev/database | kubectl delete -f -
 	kustomize build zarf/k8s/dev/tuber | kubectl delete -f -
 
