@@ -70,23 +70,20 @@ dev-apply:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml sync
 	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=120s
 	
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/dev-redis.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=redis --namespace $(NAMESPACE) --timeout=120s
+	
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
 
 dev-services-delete:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/dev-prometheus.yaml destroy
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml destroy
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/dev-redis.yaml destroy
 	kustomize build zarf/k8s/dev/tempo | kubectl delete -f -
 	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
 	kustomize build zarf/k8s/dev/database | kubectl delete -f -
 	kustomize build zarf/k8s/dev/tuber | kubectl delete -f -
-
-dev-apply-with-database:
-	kustomize build zarf/k8s/dev/database | kubectl apply -f -
-	kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=120s sts/database
-
-	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
-	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
 
 dev-logs:
 	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP) --all-containers=true -f --tail=100
