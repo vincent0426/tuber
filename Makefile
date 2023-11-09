@@ -8,7 +8,7 @@ BASE_IMAGE_NAME := tuber/service
 KIND            := kindest/node:v1.27.3
 KIND_CLUSTER    := tuber
 # POSTGRES        := postgres:15.4
-POSTGRES        := vincent0426/tuber/postgres
+POSTGRES        := vincent0426/tuber-postgres
 TEMPO           := grafana/tempo:2.2.0
 LOKI            := grafana/loki:3.3.1
 
@@ -37,17 +37,6 @@ service:
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	.
 
-dev-db-up:
-	docker build \
-	-f zarf/docker/dockerfile.dbservice \
-	-t $(APP)/postgres \
-	.
-
-	docker run -d \
-	--name postgres \
-	-p 5432:5432 \
-	$(APP)/postgres
-	
 # ==============================================================================
 # Running from within k8s/kind
 dev-up:
@@ -149,18 +138,21 @@ db-migrations-force:
 	migrate -path ./db/migrations -database ${DB_DSN} force $(version)
 
 # db/seed/up: apply all up database seeds
-db-seed/up:
+db-seed-up:
 	@echo 'Running up seeds...'
 	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/seed/up.sql
 
 # db/seed/down: apply all down database seeds
-db-seed/down:
+db-seed-down:
 	@echo 'Running down seeds...'
 	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/seed/down.sql
 	
 run-local:
 	go run app/services/tuber-api/main.go
 	
+run-local-db:
+	docker run -p 5432:5432 --name postgres -d vincent0426/tuber-postgres	
+
 create-local:
 	@NAME=$$(awk 'BEGIN { srand(); print "Name_" int(rand()*10000) }'); \
 	EMAIL=$$(awk 'BEGIN { srand(); print "user" int(rand()*10000) "@example.com" }'); \

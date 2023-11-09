@@ -40,7 +40,7 @@ spec:
             claimName: database-data
       containers:
         - name: postgres
-          image: docker.io/vincent0426/tuber/postgres:latest
+          image: docker.io/vincent0426/tuber-postgres:latest
           imagePullPolicy: IfNotPresent # Look for the image locally first.
           volumeMounts:
             - name: data
