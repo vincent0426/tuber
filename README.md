@@ -9,44 +9,44 @@ https://www.conventionalcommits.org/en/v1.0.0/
 
 # Not Complete
 ## Setup
-1. Pull docker images
-```sh
-make dev-docker-pull
-```
-2. run k8s cluster
+1. run k8s cluster
 ```sh
 make dev-up
 ```
-3. 
+2. 
 ```sh
 make service
 ```
-4. 
+3. 
 ```sh
 make dev-load
 ```
-5. 
+4. 
 ```sh
 make dev-apply
 ```
+
+if update code only
+```sh
+make dev-update
+```
+if update config and code
+```sh
+make dev-update-apply
+```
+
 ## Database
-1. Since we use extension postgis, we need to build our own image, or pull from vincent0426/tuber/postgres
-```sh
-make dev-db-build
 
-docker start postgres
+### Migrations
+```sh
+make db-migrations-up
+
+make db-migrations-down
 ```
 
-2. run migration
+### Seed
 ```sh
-make db/migrations/up
+make db-seed-up
 
-make db/migrations/down
-```
-
-3. (optional) run seed
-```sh
-make db/seed/up
-
-make db/seed/down
+make db-seed-down
 ```
