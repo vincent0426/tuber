@@ -251,3 +251,27 @@ func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User
 
 	return toCoreUser(dbUsr), nil
 }
+
+// QueryByGoogleID gets the specified user from the database by googleID.
+func (s *Store) QueryByGoogleID(ctx context.Context, googleID string) (user.User, error) {
+	sql, args, err := sq.
+		Select("*").
+		From("users").
+		Where(sq.Eq{"google_id": googleID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return user.User{}, fmt.Errorf("tosql: %w", err)
+	}
+
+	var dbUsr dbUser
+	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbUsr); err != nil {
+		if errors.Is(err, database.ErrDBNotFound) {
+			return user.User{}, fmt.Errorf("namedquerystruct: %w", user.ErrNotFound)
+		}
+		return user.User{}, fmt.Errorf("namedquerystruct: %w", err)
+	}
+
+	return toCoreUser(dbUsr), nil
+}

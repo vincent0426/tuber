@@ -4,12 +4,28 @@ import (
 	"net/mail"
 	"time"
 
+	"github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/google/uuid"
 )
 
-// dbUser represent the structure we need for moving data
-// between the app and the database.
+type dbSessionToken struct {
+	Hash   []byte    `db:"hash"`
+	UserID uuid.UUID `db:"user_id"`
+	Expiry time.Time `db:"expiry"`
+	Scope  string    `db:"scope"`
+}
+
+func toDBSessionToken(app auth.SessionToken) dbSessionToken {
+	return dbSessionToken{
+		Hash:   app.Hash,
+		UserID: app.UserID,
+		Expiry: app.Expiry,
+		Scope:  app.Scope,
+	}
+}
+
+// should not be like this
 type dbUser struct {
 	ID                 uuid.UUID `db:"id"`
 	Name               string    `db:"name"`

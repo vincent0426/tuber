@@ -62,7 +62,7 @@ func New() (config, error) {
 	vConfig.SetDefault("Tempo.Probability", 1)
 
 	// Set Auth defaults.
-	vConfig.SetDefault("Auth.Audience", "855836946959-bp1cr7uthl0e0pni33b6dmbfbac7m5ak.apps.googleusercontent.com")
+	vConfig.SetDefault("Auth.Audience", "808161745758-73upckm7gpah36uejvar457fhn6qtsd4.apps.googleusercontent.com")
 	// Enable environment variable overriding for all.
 	vConfig.AutomaticEnv()
 	conf := &config{}

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/sys/database"
 	"github.com/jmoiron/sqlx"
@@ -36,7 +37,7 @@ func (s *Store) Logout(ctx context.Context, sessionToken string) error {
 	return nil
 }
 
-func (s *Store) ValidateToken(ctx context.Context, tokenHash [32]byte) (user.User, error) {
+func (s *Store) ValidateTokenForUser(ctx context.Context, tokenHash [32]byte) (user.User, error) {
 	// user joins tokens
 	sql, args, err := sq.
 		Select("users.*").
@@ -60,4 +61,8 @@ func (s *Store) ValidateToken(ctx context.Context, tokenHash [32]byte) (user.Use
 	}
 
 	return toCoreUser(dbUsr), nil
+}
+
+func (s *Store) UpsertSessionToken(ctx context.Context, sessionToken auth.SessionToken) error {
+	return nil
 }

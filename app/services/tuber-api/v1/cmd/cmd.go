@@ -96,11 +96,10 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		log.Infow("shutdown", "status", "stopping database support", "host", cfg.DB.Host)
 		db.Close()
 	}()
-	fmt.Println("audience", cfg.Auth.Audience)
+
 	authCfg := auth.Config{
-		Log:      log,
-		DB:       db,
-		Audience: cfg.Auth.Audience,
+		Log: log,
+		DB:  db,
 		// KeyLookup: vault,
 	}
 

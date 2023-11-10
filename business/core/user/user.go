@@ -32,6 +32,7 @@ type Storer interface {
 	QueryByID(ctx context.Context, userID uuid.UUID) (User, error)
 	QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]User, error)
 	QueryByEmail(ctx context.Context, email mail.Address) (User, error)
+	QueryByGoogleID(ctx context.Context, googleID string) (User, error)
 }
 
 // Core manages the set of APIs for user access.
@@ -147,4 +148,22 @@ func (c *Core) QueryByEmail(ctx context.Context, email mail.Address) (User, erro
 	}
 
 	return user, nil
+}
+
+// UpsertByGoogleID gets the specified user from the database by email.
+func (c *Core) UpsertByGoogleID(ctx context.Context, googleID string, nu NewUser) (User, error) {
+	usr, err := c.storer.QueryByGoogleID(ctx, googleID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrNotFound):
+			usr, err = c.Create(ctx, nu)
+			if err != nil {
+				return User{}, fmt.Errorf("create: %w", err)
+			}
+		default:
+			return User{}, fmt.Errorf("query: googleID[%s]: %w", googleID, err)
+		}
+	}
+
+	return usr, nil
 }
