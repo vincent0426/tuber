@@ -15,8 +15,8 @@ type dbUser struct {
 	Name               string    `db:"name"`
 	Email              string    `db:"email"`
 	Bio                string    `db:"bio"`
-	Lang               string    `db:"language"`
 	AcceptNotification bool      `db:"accept_notification"`
+	Sub                string    `db:"sub"`
 	CreatedAt          time.Time `db:"created_at"`
 	UpdatedAt          time.Time `db:"updated_at"`
 }
@@ -27,8 +27,8 @@ func toDBUser(usr user.User) dbUser {
 		Name:               usr.Name,
 		Email:              usr.Email.Address,
 		Bio:                usr.Bio,
-		Lang:               usr.Lang.Name,
 		AcceptNotification: usr.AcceptNotification,
+		Sub:                usr.Sub,
 		CreatedAt:          usr.CreatedAt.UTC(),
 		UpdatedAt:          usr.UpdatedAt.UTC(),
 	}
@@ -44,7 +44,6 @@ func toCoreUser(dbUsr dbUser) user.User {
 		Name:               dbUsr.Name,
 		Email:              addr,
 		Bio:                dbUsr.Bio,
-		Lang:               user.Language{Name: dbUsr.Lang},
 		AcceptNotification: dbUsr.AcceptNotification,
 		CreatedAt:          dbUsr.CreatedAt.In(time.Local),
 		UpdatedAt:          dbUsr.UpdatedAt.In(time.Local),

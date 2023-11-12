@@ -5,20 +5,26 @@ import (
 
 	aauth "github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/core/auth/stores/authdb"
+	"github.com/TSMC-Uber/server/business/core/auth/stores/authredisdb"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/core/user/stores/userdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 )
 
 // Config contains all the mandatory systems required by handlers.
 type Config struct {
-	Log  *zap.SugaredLogger
-	Auth *auth.Auth
-	DB   *sqlx.DB
+	Log     *zap.SugaredLogger
+	Auth    *auth.Auth
+	DB      *sqlx.DB
+	RedisDB struct {
+		Master  *redis.Client
+		Replica *redis.Client
+	}
 }
 
 // Routes adds specific routes for this group.
@@ -26,7 +32,8 @@ func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
 	userCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
-	authCore := aauth.NewCore(authdb.NewStore(cfg.Log, cfg.DB))
+
+	authCore := aauth.NewCore(authdb.NewStore(cfg.Log, cfg.DB), authredisdb.NewStore(cfg.Log, cfg.RedisDB))
 
 	authenGoogle := mid.AuthGoogle(cfg.Auth, authCore)
 

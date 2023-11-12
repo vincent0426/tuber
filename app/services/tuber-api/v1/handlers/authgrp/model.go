@@ -18,6 +18,7 @@ func toCoreNewUser(tokenInfo *auth.IDTokenInfo) (user.NewUser, error) {
 	usr := user.NewUser{
 		Name:  tokenInfo.Name,
 		Email: *addr,
+		Sub:   tokenInfo.Sub,
 	}
 
 	return usr, nil

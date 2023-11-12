@@ -9,7 +9,7 @@ import (
 
 type SessionToken struct {
 	Plaintext string
-	Hash      []byte
+	Hash      string
 	UserID    uuid.UUID
 	Expiry    time.Time
 	Scope     string

@@ -1,2 +1,2 @@
 -- truncate all tables
-TRUNCATE TABLE Account CASCADE;
+TRUNCATE TABLE Users CASCADE;

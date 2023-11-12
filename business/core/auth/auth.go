@@ -8,10 +8,10 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
+	"encoding/hex"
 	"fmt"
 	"time"
 
-	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/google/uuid"
@@ -25,67 +25,24 @@ var ()
 type Storer interface {
 	Login(ctx context.Context, idToken string) (string, error)
 	Logout(ctx context.Context, sessionToken string) error
-	ValidateTokenForUser(ctx context.Context, tokenHash [32]byte) (user.User, error)
-	UpsertSessionToken(ctx context.Context, sessionToken SessionToken) error
+}
+
+type RedisStorer interface {
+	Get(ctx context.Context, key string) (string, error)
+	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error
 }
 
 // Core manages the set of APIs for user access.
 type Core struct {
-	storer Storer
+	storer      Storer
+	redisStorer RedisStorer
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer) *Core {
+func NewCore(storer Storer, redisStorer RedisStorer) *Core {
 	return &Core{
-		storer: storer,
-	}
-}
-
-// Create inserts a new user into the database.
-// func (c *Core) Login(ctx context.Context, idToken string) (sessionToken string, err error) {
-// 	now := time.Now()
-
-// 	token := Token{
-// 		Hash: sha256.Sum256([]byte(idToken)),
-// 	}
-
-// 	if err := c.storer.Create(ctx, usr); err != nil {
-// 		return User{}, fmt.Errorf("create: %w", err)
-// 	}
-
-// 	return usr, nil
-// }
-
-func (c *Core) ValidateTokenForUser(ctx context.Context, tokenPlaintext string) (uuid.UUID, error) {
-	// Calculate the SHA-256 hash of the plaintext token provided by the client. // Remember that this returns a byte *array* with length 32, not a slice. tokenHash := sha256.Sum256([]byte(tokenPlaintext))
-	// Set up the SQL query.
-	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
-	user, err := c.storer.ValidateTokenForUser(ctx, tokenHash)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	if user.ID != uuid.Nil {
-		return user.ID, nil
-	}
-
-	return uuid.Nil, nil
-}
-
-func (c *Core) UpsertSessionToken(ctx context.Context, sessionToken SessionToken) error {
-	return c.storer.UpsertSessionToken(ctx, sessionToken)
-}
-
-func (c *Core) GetTokenInfo(idToken string) (*IDTokenInfo, error) {
-	token, _, err := new(jwt.Parser).ParseUnverified(idToken, &IDTokenInfo{})
-	if err != nil {
-		return nil, fmt.Errorf("parse unverified: %w", err)
-	}
-	if tokenInfo, ok := token.Claims.(*IDTokenInfo); ok {
-		fmt.Println("tokenInfo: ", tokenInfo)
-		return tokenInfo, nil
-	} else {
-		return nil, fmt.Errorf("token claims: %w", err)
+		storer:      storer,
+		redisStorer: redisStorer,
 	}
 }
 
@@ -117,6 +74,26 @@ func (c *Core) GenerateSessionToken(userID uuid.UUID, ttl time.Duration) (*Sessi
 	// that we store in the `hash` field of our database table. Note that the
 	// sha256.Sum256() function returns an *array* of length 32, so to make it easier to // work with we convert it to a slice using the [:] operator before storing it.
 	hash := sha256.Sum256([]byte(token.Plaintext))
-	token.Hash = hash[:]
+	token.Hash = hex.EncodeToString(hash[:])
 	return token, nil
+}
+
+func (c *Core) SetSessionToken(ctx context.Context, sessionToken SessionToken) error {
+	if err := c.redisStorer.Set(ctx, sessionToken.Hash, sessionToken.UserID, time.Until(sessionToken.Expiry)); err != nil {
+		return fmt.Errorf("set session token: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Core) ParseIDToken(idToken string) (*IDTokenInfo, error) {
+	token, _, err := new(jwt.Parser).ParseUnverified(idToken, &IDTokenInfo{})
+	if err != nil {
+		return nil, fmt.Errorf("parse unverified: %w", err)
+	}
+	if tokenInfo, ok := token.Claims.(*IDTokenInfo); ok {
+		return tokenInfo, nil
+	} else {
+		return nil, fmt.Errorf("token claims: %w", err)
+	}
 }

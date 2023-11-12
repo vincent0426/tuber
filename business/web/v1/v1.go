@@ -7,6 +7,7 @@ import (
 	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 )
@@ -17,7 +18,11 @@ type APIMuxConfig struct {
 	Log      *zap.SugaredLogger
 	Auth     *auth.Auth
 	DB       *sqlx.DB
-	Tracer   trace.Tracer
+	RedisDB  struct {
+		Master  *redis.Client
+		Replica *redis.Client
+	}
+	Tracer trace.Tracer
 }
 
 // RouteAdder defines behavior that sets the routes to bind for an instance

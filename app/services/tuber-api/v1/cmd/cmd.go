@@ -12,9 +12,11 @@ import (
 
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/config"
 	"github.com/TSMC-Uber/server/business/sys/database"
+	"github.com/TSMC-Uber/server/business/sys/redisdb"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/debug"
+	"github.com/redis/go-redis/v9"
 
 	"github.com/TSMC-Uber/server/foundation/logger"
 	"go.opentelemetry.io/otel"
@@ -97,6 +99,33 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		db.Close()
 	}()
 
+	rdbm, err := redisdb.Open(redisdb.Config{
+		Host:     cfg.Redis.Host.Master,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+	if err != nil {
+		return fmt.Errorf("connecting to master redis: %w", err)
+	}
+	defer func() {
+		log.Infow("shutdown", "status", "stopping redis support", "host", cfg.Redis.Host)
+		rdbm.Close()
+	}()
+
+	rdbr, err := redisdb.Open(redisdb.Config{
+		Host:     cfg.Redis.Host.Replica,
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+
+	if err != nil {
+		return fmt.Errorf("connecting to slave redis: %w", err)
+	}
+	defer func() {
+		log.Infow("shutdown", "status", "stopping redis support", "host", cfg.Redis.Host)
+		rdbr.Close()
+	}()
+
 	authCfg := auth.Config{
 		Log: log,
 		DB:  db,
@@ -138,7 +167,14 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		Log:      log,
 		Auth:     auth,
 		DB:       db,
-		Tracer:   tracer,
+		RedisDB: struct {
+			Master  *redis.Client
+			Replica *redis.Client
+		}{
+			Master:  rdbm,
+			Replica: rdbr,
+		},
+		Tracer: tracer,
 	}
 
 	apiMux := v1.APIMux(cfgMux, routeAdder)

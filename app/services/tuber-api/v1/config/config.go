@@ -25,6 +25,14 @@ type config struct {
 		MaxOpenConns int
 		DisableTLS   bool
 	}
+	Redis struct {
+		Host struct {
+			Master  string
+			Replica string
+		}
+		Password string
+		DB       int
+	}
 	Tempo struct {
 		ReporterURI string
 		ServiceName string
@@ -56,6 +64,12 @@ func New() (config, error) {
 	vConfig.SetDefault("DB.MaxOpenConns", 10)
 	vConfig.SetDefault("DB.DisableTLS", true)
 
+	// Set Redis defaults.
+	vConfig.SetDefault("Redis.Host.Master", "redis-master.tuber-system.svc.cluster.local:6379")
+	vConfig.SetDefault("Redis.Host.Replica", "redis-replicas.tuber-system.svc.cluster.local:6379")
+	vConfig.SetDefault("Redis.Password", "redis")
+	vConfig.SetDefault("Redis.DB", 0)
+
 	// Set Tempo defaults.
 	vConfig.SetDefault("Tempo.ReporterURI", "tempo.tuber-system.svc.cluster.local:4317")
 	vConfig.SetDefault("Tempo.ServiceName", "tuber-api")
@@ -63,6 +77,7 @@ func New() (config, error) {
 
 	// Set Auth defaults.
 	vConfig.SetDefault("Auth.Audience", "808161745758-73upckm7gpah36uejvar457fhn6qtsd4.apps.googleusercontent.com")
+
 	// Enable environment variable overriding for all.
 	vConfig.AutomaticEnv()
 	conf := &config{}

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/TSMC-Uber/server/business/data/order"
+	"github.com/TSMC-Uber/server/business/sys/database"
 	"github.com/google/uuid"
 )
 
@@ -56,8 +57,8 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		Name:               nu.Name,
 		Email:              nu.Email,
 		Bio:                nu.Bio,
-		Lang:               nu.Lang,
 		AcceptNotification: nu.AcceptNotification,
+		Sub:                nu.Sub,
 		CreatedAt:          now,
 		UpdatedAt:          now,
 	}
@@ -79,9 +80,6 @@ func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error
 	}
 	if uu.Bio != nil {
 		usr.Bio = *uu.Bio
-	}
-	if uu.Lang != nil {
-		usr.Lang = *uu.Lang
 	}
 	if uu.AcceptNotification != nil {
 		usr.AcceptNotification = *uu.AcceptNotification
@@ -155,7 +153,7 @@ func (c *Core) UpsertByGoogleID(ctx context.Context, googleID string, nu NewUser
 	usr, err := c.storer.QueryByGoogleID(ctx, googleID)
 	if err != nil {
 		switch {
-		case errors.Is(err, ErrNotFound):
+		case errors.Is(err, database.ErrDBNotFound):
 			usr, err = c.Create(ctx, nu)
 			if err != nil {
 				return User{}, fmt.Errorf("create: %w", err)

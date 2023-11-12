@@ -41,8 +41,8 @@ func (s *Store) Create(ctx context.Context, usr user.User) error {
 
 	sql, args, err := sq.
 		Insert("users").
-		Columns("id", "name", "email", "bio", "language", "accept_notification").
-		Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.Bio, dbUser.Lang, dbUser.AcceptNotification).
+		Columns("id", "name", "email", "bio", "accept_notification", "sub").
+		Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.Bio, dbUser.AcceptNotification, dbUser.Sub).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -70,7 +70,6 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 		Set("name", dbUser.Name).
 		Set("email", dbUser.Email).
 		Set("bio", dbUser.Bio).
-		Set("language", dbUser.Lang).
 		Set("accept_notification", dbUser.AcceptNotification).
 		Where(sq.Eq{"id": dbUser.ID}).
 		PlaceholderFormat(sq.Dollar).
@@ -257,7 +256,7 @@ func (s *Store) QueryByGoogleID(ctx context.Context, googleID string) (user.User
 	sql, args, err := sq.
 		Select("*").
 		From("users").
-		Where(sq.Eq{"google_id": googleID}).
+		Where(sq.Eq{"sub": googleID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -268,7 +267,7 @@ func (s *Store) QueryByGoogleID(ctx context.Context, googleID string) (user.User
 	var dbUsr dbUser
 	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbUsr); err != nil {
 		if errors.Is(err, database.ErrDBNotFound) {
-			return user.User{}, fmt.Errorf("namedquerystruct: %w", user.ErrNotFound)
+			return user.User{}, fmt.Errorf("namedquerystruct: %w", database.ErrDBNotFound)
 		}
 		return user.User{}, fmt.Errorf("namedquerystruct: %w", err)
 	}

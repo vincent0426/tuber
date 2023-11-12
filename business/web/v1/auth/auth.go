@@ -90,9 +90,11 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string, authCore *a
 }
 
 func (a *Auth) ValidateIDToken(idToken string) error {
-	if err := a.validateIDToken(idToken); err != nil {
-		return fmt.Errorf("validate: %w", err)
+	_, err := idtoken.Validate(context.Background(), idToken, a.audience)
+	if err != nil {
+		return fmt.Errorf("validate idtoken: %w", err)
 	}
+
 	return nil
 }
 
@@ -180,15 +182,6 @@ func (a *Auth) validateTokenPlaintext(tokenPlaintext string) error {
 
 	if len(tokenPlaintext) != 26 {
 		return fmt.Errorf("token must be 26 bytes long")
-	}
-
-	return nil
-}
-
-func (a *Auth) validateIDToken(idToken string) error {
-	_, err := idtoken.Validate(context.Background(), idToken, a.audience)
-	if err != nil {
-		return fmt.Errorf("idtoken validate: %w", err)
 	}
 
 	return nil

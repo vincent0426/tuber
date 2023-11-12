@@ -64,22 +64,25 @@ dev-apply:
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=120s --for=condition=Ready
 
 # helmfile is used to deploy helm charts.
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/dev-prometheus.yaml sync
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml sync
 	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=120s
 	
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml sync
 	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=120s
 	
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/dev-redis.yaml sync
+# create redis secret
+	kustomize build zarf/k8s/dev/redis | kubectl apply -f -
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml sync
 	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=redis --namespace $(NAMESPACE) --timeout=120s
 	
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
 
-dev-services-delete:
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/dev-prometheus.yaml destroy
+dev-delete:
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml destroy
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml destroy
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/dev-redis.yaml destroy
+	kustomize build zarf/k8s/dev/redis | kubectl delete -f -
 	kustomize build zarf/k8s/dev/tempo | kubectl delete -f -
 	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
 	kustomize build zarf/k8s/dev/database | kubectl delete -f -
@@ -114,17 +117,17 @@ tidy:
 pgcli:
 	pgcli postgresql://postgres:postgres@localhost
 
-# db/migrations/new name=$1: create a new database migration
+# db-migrations-new name=$1: create a new database migration
 db-migrations-new:
 	@echo 'Creating migration files for ${name}...'
 	migrate create -seq -ext=.sql -dir=./db/migrations ${name}
 	
-# db/migrations/up: apply all up database migrations
+# db-migrations-up: apply all up database migrations
 db-migrations-up:
 	@echo 'Running up migrations...'
 	migrate -path ./db/migrations -database ${DB_DSN} up
 	
-# db/migrations/down: apply all down database migrations
+# db-migrations-down: apply all down database migrations
 db-migrations-down:
 	@echo 'Running down migrations...'
 	migrate -path ./db/migrations -database ${DB_DSN} down
@@ -134,15 +137,20 @@ db-migrations-force:
 	@echo 'Running force migrations...'
 	migrate -path ./db/migrations -database ${DB_DSN} force $(version)
 
-# db/seed/up: apply all up database seeds
+# db-seed-up: apply all up database seeds
 db-seed-up:
 	@echo 'Running up seeds...'
 	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/seed/up.sql
 
-# db/seed/down: apply all down database seeds
+# db-seed-down: apply all down database seeds
 db-seed-down:
 	@echo 'Running down seeds...'
 	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/seed/down.sql
+	
+# db-drop-all: drop all tables
+db-drop-all:
+	@echo 'Dropping all tables...'
+	psql -h localhost -p 5432 -U postgres -d postgres -a -f db/drop-all.sql
 	
 run-local:
 	go run app/services/tuber-api/main.go
@@ -159,7 +167,6 @@ create-local:
 	  "name": "'$$NAME'", \
 	  "email": "'$$EMAIL'", \
 	  "bio": "Experienced software developer with a passion for AI.", \
-	  "language": "en", \
 	  "acceptNotification": true \
 	}'
 
@@ -173,7 +180,6 @@ update-local:
 	  "name": "'$$NAME'", \
 	  "email": "'$$EMAIL'", \
 	  "bio": "Experienced software developer with a passion for AI.", \
-	  "language": "en", \
 	  "acceptNotification": true \
 	}'
 

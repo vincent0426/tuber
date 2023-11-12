@@ -37,6 +37,7 @@ func AuthGoogle(a *auth.Auth, authCore *aauth.Core) web.Middleware {
 			if err != nil {
 				return auth.NewAuthError("google authenticate: failed: %s", err)
 			}
+			ctx = auth.SetIDToken(ctx, idToken)
 
 			return handler(ctx, c)
 		}

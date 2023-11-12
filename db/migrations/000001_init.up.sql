@@ -5,8 +5,8 @@ CREATE TABLE users (
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   bio TEXT,
-  language TEXT CHECK (language IN ('en', 'zh')) DEFAULT 'en',
   accept_notification BOOLEAN NOT NULL DEFAULT TRUE,
+  sub TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -105,3 +105,9 @@ CREATE TABLE favorite_driver (
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (driver_id) REFERENCES driver(user_id)
 );
+-- ------------------ view ------------------
+-- CREATE VIEW user_tokens_view AS
+-- SELECT users.*
+-- FROM users
+--   JOIN tokens ON users.id = tokens.user_id
+-- WHERE tokens.expiry > NOW();

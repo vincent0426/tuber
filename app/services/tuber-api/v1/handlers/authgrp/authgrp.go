@@ -8,6 +8,8 @@ import (
 
 	"github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/core/user"
+	webauth "github.com/TSMC-Uber/server/business/web/v1/auth"
+	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
@@ -27,13 +29,13 @@ func New(auth *auth.Core, user *user.Core) *Handlers {
 	}
 }
 
-// Login adds a new user to the system.
+// Login will add a user if they do not exist or update them if they do.
 func (h *Handlers) Login(ctx context.Context, c *gin.Context) error {
-	idToken := c.Request.Header.Get("id_token")
+	idToken := webauth.GetIDToken(ctx)
 
-	tokenInfo, err := h.auth.GetTokenInfo(idToken)
+	tokenInfo, err := h.auth.ParseIDToken(idToken)
 	if err != nil {
-		return fmt.Errorf("get token info: %w", err)
+		return mid.WrapError(fmt.Errorf("parse id token: %w", err))
 	}
 
 	nc, err := toCoreNewUser(tokenInfo)
@@ -41,28 +43,24 @@ func (h *Handlers) Login(ctx context.Context, c *gin.Context) error {
 		return response.NewError(err, http.StatusBadRequest)
 	}
 
-	fmt.Println(nc)
+	usr, err := h.user.UpsertByGoogleID(ctx, tokenInfo.Sub, nc)
+	if err != nil {
+		return mid.WrapError(fmt.Errorf("upsert user: %w", err))
+	}
 
-	// usr, err := h.user.UpsertByGoogleID(ctx, tokenInfo.Id, nc)
-	// if err != nil {
-	// 	return fmt.Errorf("upsert user: %w", err)
-	// }
+	// generate token
+	sessionToken, err := h.auth.GenerateSessionToken(usr.ID, 3600)
+	if err != nil {
+		return mid.WrapError(fmt.Errorf("generate session token: %w", err))
+	}
 
-	// // generate token
-	// sessionToken, err := webauth.GenerateSessionToken(usr.ID, 3600)
-	// if err != nil {
-	// 	return fmt.Errorf("generate token: %w", err)
-	// }
-
-	// // insert token to db
-	// coreSessionToken := toCoreSessionToken(sessionToken)
-	// err = h.auth.UpsertSessionToken(ctx, coreSessionToken)
-	// if err != nil {
-	// 	return fmt.Errorf("upsert token: %w", err)
-	// }
-
+	// store session token to redis
+	err = h.auth.SetSessionToken(ctx, *sessionToken)
+	if err != nil {
+		return mid.WrapError(fmt.Errorf("set session token: %w", err))
+	}
 	// set cookie
-	// c.SetCookie("token", sessionToken.Plaintext, 3600, "/", "localhost", false, true)
+	c.SetCookie("token", sessionToken.Plaintext, 3600, "/", "localhost", false, true)
 	return web.Respond(ctx, c.Writer, "login success", http.StatusOK)
 }
 

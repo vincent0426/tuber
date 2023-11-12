@@ -30,3 +30,6 @@ nodes:
       # Tempo (tracing)
       - containerPort: 9411
         hostPort: 9411
+      # Redis
+      - containerPort: 6379
+        hostPort: 6379

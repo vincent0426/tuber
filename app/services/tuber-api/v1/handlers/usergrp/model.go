@@ -16,7 +16,6 @@ type AppUser struct {
 	Name               string `json:"name"`
 	Email              string `json:"email"`
 	Bio                string `json:"bio"`
-	Lang               string `json:"language"`
 	AcceptNotification bool   `json:"acceptNotification"`
 	CreatedAt          string `json:"createdAt"`
 	UpdatedAt          string `json:"updatedAt"`
@@ -29,7 +28,6 @@ func toAppUser(usr user.User) AppUser {
 		Name:               usr.Name,
 		Email:              usr.Email.Address,
 		Bio:                usr.Bio,
-		Lang:               usr.Lang.Name,
 		AcceptNotification: usr.AcceptNotification,
 		CreatedAt:          usr.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:          usr.UpdatedAt.Format(time.RFC3339),
@@ -43,7 +41,6 @@ type AppNewUser struct {
 	Name               string `json:"name" binding:"required"`
 	Email              string `json:"email" binding:"required,email"`
 	Bio                string `json:"bio"`
-	Lang               string `json:"language"`
 	AcceptNotification bool   `json:"acceptNotification"`
 }
 
@@ -57,7 +54,6 @@ func toCoreNewUser(app AppNewUser) (user.NewUser, error) {
 		Name:               app.Name,
 		Email:              *addr,
 		Bio:                app.Bio,
-		Lang:               user.Language{Name: app.Lang},
 		AcceptNotification: app.AcceptNotification,
 	}
 
@@ -79,7 +75,6 @@ type AppUpdateUser struct {
 	Name               *string `json:"name"`
 	Email              *string `json:"email" validate:"omitempty,email"`
 	Bio                *string `json:"bio"`
-	Lang               *string `json:"language"`
 	AcceptNotification *bool   `json:"acceptNotification"`
 }
 
@@ -97,7 +92,6 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 		Name:               app.Name,
 		Email:              addr,
 		Bio:                app.Bio,
-		Lang:               &user.Language{Name: *app.Lang},
 		AcceptNotification: app.AcceptNotification,
 	}
 

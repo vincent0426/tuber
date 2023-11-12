@@ -1,12 +1,9 @@
-repositories:
-  - name: redis
-    url: https://charts.bitnami.com/bitnami
-
-# Add the Loki release
-releases:
-  - name: redis
-    namespace: tuber-system
-    chart: bitnami/redis
-    # version:
-    values:
-      - redis-values.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: redis-secret
+  namespace: tuber-system
+type: Opaque
+# echo -n "<password>" | base64
+data:
+  password: cmVkaXM=
