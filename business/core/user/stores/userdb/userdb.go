@@ -71,6 +71,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 		Set("email", dbUser.Email).
 		Set("bio", dbUser.Bio).
 		Set("accept_notification", dbUser.AcceptNotification).
+		Set("updated_at", dbUser.UpdatedAt).
 		Where(sq.Eq{"id": dbUser.ID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()

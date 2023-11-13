@@ -82,11 +82,9 @@ func (a *Auth) Authenticate(ctx context.Context, bearerToken string, authCore *a
 		return uuid.Nil, errors.New("invalid plaintext token")
 	}
 
-	if userID, err := authCore.ValidateTokenForUser(ctx, token); err != nil {
-		return uuid.Nil, fmt.Errorf("validate token: %w", err)
-	} else {
-		return userID, nil
-	}
+	// TODO: get userID from redis
+
+	return uuid.Nil, nil
 }
 
 func (a *Auth) ValidateIDToken(idToken string) error {
