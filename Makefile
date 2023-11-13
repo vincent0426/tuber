@@ -45,7 +45,7 @@ dev-up:
 		--name $(KIND_CLUSTER) \
 		--config zarf/k8s/dev/kind-config.yaml
 	
-	kubectl wait --timeout=120s --namespace=local-path-storage --for=condition=Available deployment/local-path-provisioner
+	kubectl wait --timeout=300s --namespace=local-path-storage --for=condition=Available deployment/local-path-provisioner
 	
 	kind load docker-image $(POSTGRES) --name $(KIND_CLUSTER)
 
@@ -55,28 +55,28 @@ dev-load:
 
 dev-apply:
 	kustomize build zarf/k8s/dev/database | kubectl apply -f -
-	kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=120s sts/database
+	kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=300s sts/database
 
 	kustomize build zarf/k8s/dev/grafana | kubectl apply -f -
-	kubectl wait pods --namespace=$(NAMESPACE) --selector app=grafana --timeout=120s --for=condition=Ready
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=grafana --timeout=300s --for=condition=Ready
 
 	kustomize build zarf/k8s/dev/tempo | kubectl apply -f -
-	kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=120s --for=condition=Ready
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=300s --for=condition=Ready
 
 # helmfile is used to deploy helm charts.
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml sync
-	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=120s
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=300s
 	
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml sync
-	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=120s
+	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=300s
 	
 # create redis secret
 	kustomize build zarf/k8s/dev/redis | kubectl apply -f -
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml sync
-	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=redis --namespace $(NAMESPACE) --timeout=120s
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=redis --namespace $(NAMESPACE) --timeout=300s
 	
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
-	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=120s --for=condition=Ready
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=300s --for=condition=Ready
 
 dev-delete:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
