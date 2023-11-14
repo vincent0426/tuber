@@ -1,90 +1,47 @@
--- Seeding users Table
+-- Insert data into 'users' table
 INSERT INTO users (name, email, bio)
 VALUES (
     'John Doe',
-    'johndoe@example.com',
-    'Loves long drives'
+    'john.doe@example.com',
+    'Loves traveling.'
   ),
   (
     'Jane Smith',
-    'janesmith@example.com',
-    'Enthusiast of eco-friendly travel'
-  ),
-  (
-    'Alice Johnson',
-    'alicejohnson@example.com',
-    'Frequent traveler for business'
-  ),
-  (
-    'Bob Brown',
-    'bobbrown@example.com',
-    'Enjoy exploring new places'
+    'jane.smith@example.com',
+    'Enjoys long drives.'
   );
--- Seeding car Table (assuming John Doe is a driver)
-INSERT INTO car (driver_id, license)
+-- Insert data into 'driver' table
+INSERT INTO driver (
+    user_id,
+    brand,
+    model,
+    color,
+    plate,
+    license,
+    verified
+  )
+SELECT id,
+  'Toyota',
+  'Camry',
+  'White',
+  'ABC123',
+  'DL123456',
+  TRUE
+FROM users
+WHERE email = 'john.doe@example.com';
+-- Insert data into 'locations' table
+INSERT INTO locations (name, address, coordinates)
 VALUES (
-    (
-      SELECT id
-      FROM users
-      WHERE name = 'John Doe'
-    ),
-    'ABC123'
+    'Location 1',
+    '1234 Main St, Anytown, USA',
+    ST_GeomFromText('POINT(-71.060316 48.432044)', 4326)
   ),
   (
-    (
-      SELECT id
-      FROM users
-      WHERE name = 'Jane Smith'
-    ),
-    'XYZ789'
+    'Location 2',
+    '5678 Elm St, Anothertown, USA',
+    ST_GeomFromText('POINT(-69.445469 43.769196)', 4326)
   );
--- Seeding driver Table (assuming John Doe is a driver)
-INSERT INTO driver (user_id, car_id)
-VALUES (
-    (
-      SELECT id
-      FROM users
-      WHERE name = 'John Doe'
-    ),
-    (
-      SELECT id
-      FROM car
-      WHERE driver_id = (
-          SELECT id
-          FROM users
-          WHERE name = 'John Doe'
-        )
-    )
-  ),
-  (
-    (
-      SELECT id
-      FROM users
-      WHERE name = 'Jane Smith'
-    ),
-    (
-      SELECT id
-      FROM car
-      WHERE driver_id = (
-          SELECT id
-          FROM users
-          WHERE name = 'Jane Smith'
-        )
-    )
-  );
--- Seeding location Table
-INSERT INTO location (name, address, coordinates)
-VALUES (
-    'Central Park',
-    '5th Ave, New York, NY',
-    ST_GeomFromText('POINT(-73.965355 40.782865)', 4326)
-  ),
-  (
-    'Golden Gate Bridge',
-    'San Francisco, CA',
-    ST_GeomFromText('POINT(-122.478255 37.819929)', 4326)
-  );
--- Seeding trip Table (assuming John Doe started a trip)
+-- Insert a trip (assuming John Doe is the driver)
 INSERT INTO trip (
     driver_id,
     passenger_limit,
@@ -92,143 +49,119 @@ INSERT INTO trip (
     destination_id,
     start_time
   )
-VALUES (
-    (
-      SELECT user_id
-      FROM driver
-      WHERE user_id = (
-          SELECT id
-          FROM users
-          WHERE name = 'John Doe'
-        )
-    ),
-    3,
-    (
-      SELECT id
-      FROM location
-      WHERE name = 'Central Park'
-    ),
-    (
-      SELECT id
-      FROM location
-      WHERE name = 'Golden Gate Bridge'
-    ),
-    '2023-11-15 08:00:00'
-  );
--- Seeding chat_history Table (sample chat between John and Jane)
+SELECT (
+    SELECT user_id
+    FROM driver
+    WHERE license = 'DL123456'
+  ),
+  3,
+  (
+    SELECT id
+    FROM locations
+    WHERE name = 'Location 1'
+  ),
+  (
+    SELECT id
+    FROM locations
+    WHERE name = 'Location 2'
+  ),
+  '2023-01-01 08:00:00';
+-- Insert data into 'chat_history'
 INSERT INTO chat_history (trip_id, sender_id, msg_content)
-VALUES (
-    (
-      SELECT id
-      FROM trip
-      LIMIT 1
-    ), (
-      SELECT id
-      FROM users
-      WHERE name = 'Alice Johnson'
-    ),
-    'Is there space for one more?'
-  );
--- Seeding rating Table (Jane rates John's trip)
+SELECT (
+    SELECT id
+    FROM trip
+    LIMIT 1
+  ), (
+    SELECT id
+    FROM users
+    WHERE email = 'john.doe@example.com'
+  ),
+  'Hello, I am your driver.';
+-- Insert data into 'rating'
 INSERT INTO rating (trip_id, commenter_id, comment)
-VALUES (
-    (
-      SELECT id
-      FROM trip
-      LIMIT 1
-    ), (
-      SELECT id
-      FROM users
-      WHERE name = 'Alice Johnson'
-    ),
-    'Great trip, comfortable car!'
-  );
--- Seeding trip_Station Table (One station for John's trip)
+SELECT (
+    SELECT id
+    FROM trip
+    LIMIT 1
+  ), (
+    SELECT id
+    FROM users
+    WHERE email = 'jane.smith@example.com'
+  ),
+  'Great trip, very comfortable.';
+-- Insert data into 'trip_station' table
 INSERT INTO trip_station (trip_id, name)
-VALUES (
-    (
-      SELECT id
-      FROM trip
-      LIMIT 1
-    ), 'Midway Point'
-  );
--- Seeding trip_passenger Table (Jane joins John's trip)
+SELECT (
+    SELECT id
+    FROM trip
+    LIMIT 1
+  ), 'Intermediate Stop';
+-- Insert data into 'trip_passenger' table
 INSERT INTO trip_passenger (
     trip_id,
     passenger_id,
     station_source_id,
     station_destination_id
   )
-VALUES (
-    (
-      SELECT id
-      FROM trip
-      LIMIT 1
-    ), (
-      SELECT id
-      FROM users
-      WHERE name = 'Alice Johnson'
-    ),
-    (
-      SELECT id
-      FROM location
-      WHERE name = 'Central Park'
-    ),
-    (
-      SELECT id
-      FROM location
-      WHERE name = 'Golden Gate Bridge'
-    )
+SELECT (
+    SELECT id
+    FROM trip
+    LIMIT 1
+  ), (
+    SELECT id
+    FROM users
+    WHERE email = 'jane.smith@example.com'
+  ),
+  (
+    SELECT id
+    FROM locations
+    WHERE name = 'Location 1'
+  ),
+  (
+    SELECT id
+    FROM locations
+    WHERE name = 'Location 2'
   );
--- Seeding alert Table (Jane alerts about something in John's trip)
+-- Insert data into 'alert' table
 INSERT INTO alert (trip_id, passenger_id, comment)
-VALUES (
-    (
-      SELECT id
-      FROM trip
-      LIMIT 1
-    ), (
-      SELECT id
-      FROM users
-      WHERE name = 'Alice Johnson'
-    ),
-    'Left my bag in the car'
-  );
--- Seeding report Table (Jane reports John during a trip)
+SELECT (
+    SELECT id
+    FROM trip
+    LIMIT 1
+  ), (
+    SELECT id
+    FROM users
+    WHERE email = 'jane.smith@example.com'
+  ),
+  'Left a bag in the car.';
+-- Insert data into 'report' table
 INSERT INTO report (trip_id, complainant, defendant, comment)
-VALUES (
-    (
-      SELECT id
-      FROM trip
-      LIMIT 1
-    ), (
-      SELECT id
-      FROM users
-      WHERE name = 'Alice Johnson'
-    ),
-    (
-      SELECT id
-      FROM users
-      WHERE name = 'John Doe'
-    ),
-    'Driver was very courteous'
-  );
--- Seeding Favorite_driver Table (Jane adds John to her favorite drivers)
+SELECT (
+    SELECT id
+    FROM trip
+    LIMIT 1
+  ), (
+    SELECT id
+    FROM users
+    WHERE email = 'jane.smith@example.com'
+  ),
+  (
+    SELECT id
+    FROM users
+    WHERE email = 'john.doe@example.com'
+  ),
+  'Driver was late.';
+-- Insert data into 'favorite_driver' table
 INSERT INTO favorite_driver (user_id, driver_id, note)
-VALUES (
-    (
-      SELECT id
-      FROM users
-      WHERE name = 'Alice Johnson'
-    ),
-    (
-      SELECT user_id
-      FROM driver
-      WHERE user_id = (
-          SELECT id
-          FROM users
-          WHERE name = 'John Doe'
-        )
-    ),
-    'Always on time!'
-  );
+SELECT (
+    SELECT id
+    FROM users
+    WHERE email = 'jane.smith@example.com'
+  ),
+  (
+    SELECT user_id
+    FROM driver
+    WHERE license = 'DL123456'
+  ),
+  'Favorite driver, always on time.';

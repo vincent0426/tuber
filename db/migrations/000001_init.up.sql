@@ -3,28 +3,25 @@ CREATE EXTENSION IF NOT EXISTS "postgis";
 CREATE TABLE users (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
   bio TEXT,
   accept_notification BOOLEAN NOT NULL DEFAULT TRUE,
   sub TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE car (
-  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  driver_id UUID NOT NULL,
-  license TEXT NOT NULL,
-  verified BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (driver_id) REFERENCES users(id)
-);
 CREATE TABLE driver (
   user_id UUID PRIMARY KEY,
-  car_id UUID,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (car_id) REFERENCES car(id)
+  license TEXT NOT NULL,
+  verified BOOLEAN NOT NULL DEFAULT FALSE,
+  brand TEXT NOT NULL,
+  model TEXT NOT NULL,
+  color TEXT NOT NULL,
+  plate TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
-CREATE TABLE location (
+CREATE TABLE locations (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
   address TEXT,
@@ -40,8 +37,8 @@ CREATE TABLE trip (
   start_time TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (driver_id) REFERENCES driver(user_id),
-  FOREIGN KEY (source_id) REFERENCES location(id),
-  FOREIGN KEY (destination_id) REFERENCES location(id)
+  FOREIGN KEY (source_id) REFERENCES locations(id),
+  FOREIGN KEY (destination_id) REFERENCES locations(id)
 );
 CREATE TABLE chat_history (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -77,8 +74,8 @@ CREATE TABLE trip_passenger (
   PRIMARY KEY (trip_id, passenger_id),
   FOREIGN KEY (trip_id) REFERENCES trip(id),
   FOREIGN KEY (passenger_id) REFERENCES users(id),
-  FOREIGN KEY (station_source_id) REFERENCES location(id),
-  FOREIGN KEY (station_destination_id) REFERENCES location(id)
+  FOREIGN KEY (station_source_id) REFERENCES locations(id),
+  FOREIGN KEY (station_destination_id) REFERENCES locations(id)
 );
 CREATE TABLE alert (
   trip_id UUID PRIMARY KEY,
@@ -106,8 +103,40 @@ CREATE TABLE favorite_driver (
   FOREIGN KEY (driver_id) REFERENCES driver(user_id)
 );
 -- ------------------ view ------------------
--- CREATE VIEW user_tokens_view AS
--- SELECT users.*
--- FROM users
---   JOIN tokens ON users.id = tokens.user_id
--- WHERE tokens.expiry > NOW();
+-- trip_view: trip + driverinfo + tripinfo + station_source + station_destination
+CREATE VIEW trip_view AS
+SELECT trip.*,
+  driver.license,
+  location_source.name AS source_name,
+  location_source.address AS source_address,
+  location_source.coordinates AS source_coordinates,
+  location_destination.name AS destination_name,
+  location_destination.address AS destination_address,
+  location_destination.coordinates AS destination_coordinates
+FROM trip
+  JOIN driver ON trip.driver_id = driver.user_id
+  JOIN locations AS location_source ON trip.source_id = location_source.id
+  JOIN locations AS location_destination ON trip.destination_id = location_destination.id;
+-- trip_passenger_view
+CREATE VIEW trip_passenger_view AS
+SELECT trip_passenger.*,
+  trip.start_time AS trip_start_time,
+  trip.status AS trip_status,
+  location_source.name AS station_source_name,
+  location_source.address AS station_source_address,
+  location_source.coordinates AS station_source_coordinates,
+  location_destination.name AS station_destination_name,
+  location_destination.address AS station_destination_address,
+  location_destination.coordinates AS station_destination_coordinates,
+  passenger_location_source.name AS passenger_location_source_name,
+  passenger_location_source.address AS passenger_location_source_address,
+  passenger_location_source.coordinates AS passenger_location_source_coordinates,
+  passenger_location_destination.name AS passenger_location_destination_name,
+  passenger_location_destination.address AS passenger_location_destination_address,
+  passenger_location_destination.coordinates AS passenger_location_destination_coordinates
+FROM trip_passenger
+  JOIN trip ON trip_passenger.trip_id = trip.id
+  JOIN locations AS location_source ON trip.source_id = location_source.id
+  JOIN locations AS location_destination ON trip.destination_id = location_destination.id
+  JOIN locations AS passenger_location_source ON trip_passenger.station_source_id = passenger_location_source.id
+  JOIN locations AS passenger_location_destination ON trip_passenger.station_destination_id = passenger_location_destination.id;
