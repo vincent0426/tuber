@@ -3,6 +3,7 @@ package tripdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
@@ -123,7 +124,7 @@ func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy o
 	}
 
 	var dbTrips []dbTrip
-	if err := database.SelectContext(ctx, s.log, s.db, sql, nil, &dbTrips); err != nil {
+	if err := database.QueryContext(ctx, s.log, s.db, sql, nil, &dbTrips); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -158,7 +159,7 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID, filter trip
 	}
 
 	var dbTrips []dbUserTrip
-	if err := database.Select(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
+	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
@@ -189,29 +190,28 @@ func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error)
 	return 0, nil
 }
 
-// // QueryByID gets the specified trip from the database.
-func (s *Store) QueryByID(ctx context.Context, tripID uuid.UUID) (trip.Trip, error) {
-	// sql, args, err := sq.
-	// 	Select("*").
-	// 	From("users").
-	// 	Where(sq.Eq{"id": userID}).
-	// 	PlaceholderFormat(sq.Dollar).
-	// 	ToSql()
+// QueryByID gets the specified trip from the database.
+func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.Trip, error) {
+	sql, args, err := sq.
+		Select("*").
+		From("trip").
+		Where(sq.Eq{"id": tripID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
 
-	// if err != nil {
-	// 	return user.User{}, fmt.Errorf("tosql: %w", err)
-	// }
+	if err != nil {
+		return trip.Trip{}, fmt.Errorf("tosql: %w", err)
+	}
 
-	// var dbUsr dbUser
-	// if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbUsr); err != nil {
-	// 	if errors.Is(err, database.ErrDBNotFound) {
-	// 		return user.User{}, fmt.Errorf("namedquerystruct: %w", user.ErrNotFound)
-	// 	}
-	// 	return user.User{}, fmt.Errorf("namedquerystruct: %w", err)
-	// }
+	var dbTrip dbTrip
+	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbTrip); err != nil {
+		if errors.Is(err, database.ErrDBNotFound) {
+			return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", trip.ErrNotFound)
+		}
+		return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", err)
+	}
 
-	// return toCoreUser(dbUsr), nil
-	return trip.Trip{}, nil
+	return toCoreTrip(dbTrip), nil
 }
 
 // // QueryByIDs gets the specified users from the database.

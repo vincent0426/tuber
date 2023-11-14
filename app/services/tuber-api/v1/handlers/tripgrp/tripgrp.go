@@ -116,9 +116,9 @@ func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(trip, len(trip), page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// QueryByID returns a user by its ID.
+// QueryByID returns a trip by its ID.
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
-	id := auth.GetUserID(ctx)
+	id := c.Param("id")
 
 	usr, err := h.trip.QueryByID(ctx, id)
 	if err != nil {

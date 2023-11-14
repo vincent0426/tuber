@@ -25,7 +25,7 @@ type Storer interface {
 	// Delete(ctx context.Context, trip Trip) error
 	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error)
 	QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
-	QueryByID(ctx context.Context, tripID uuid.UUID) (Trip, error)
+	QueryByID(ctx context.Context, tripID string) (Trip, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	// QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]Trip, error)
 	// QueryByEmail(ctx context.Context, email mail.Address) (Trip, error)
@@ -125,10 +125,10 @@ func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter Query
 }
 
 // QueryByID gets the specified user from the database.
-func (c *Core) QueryByID(ctx context.Context, userID uuid.UUID) (Trip, error) {
-	user, err := c.storer.QueryByID(ctx, userID)
+func (c *Core) QueryByID(ctx context.Context, tripID string) (Trip, error) {
+	user, err := c.storer.QueryByID(ctx, tripID)
 	if err != nil {
-		return Trip{}, fmt.Errorf("query: tripID[%s]: %w", userID, err)
+		return Trip{}, fmt.Errorf("query: tripID[%s]: %w", tripID, err)
 	}
 
 	return user, nil

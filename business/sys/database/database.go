@@ -106,11 +106,17 @@ func StatusCheck(ctx context.Context, db *sqlx.DB) error {
 	return db.QueryRowContext(ctx, q).Scan(&tmp)
 }
 
-func ExecContext(ctx context.Context, log *logger.Logger, db *sqlx.DB, query string, data []interface{}) error {
+func ExecContext(ctx context.Context, log *logger.Logger, db *sqlx.DB, query string, data []interface{}) (err error) {
 	ctx, span := web.AddSpan(ctx, "business.sys.database.ExecContext", attribute.String("query", query))
 	defer span.End()
 
-	_, err := db.Exec(query, data...)
+	defer func() {
+		if err != nil {
+			log.Infoc(ctx, 6, "database.ExecContext", "query", query, "ERROR", err)
+		}
+	}()
+
+	_, err = db.Exec(query, data...)
 	if err != nil {
 		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == uniqueViolation {
 			return ErrDBDuplicatedEntry
@@ -121,6 +127,7 @@ func ExecContext(ctx context.Context, log *logger.Logger, db *sqlx.DB, query str
 	return nil
 }
 
+// use to fetch single row
 func GetContext(ctx context.Context, log *logger.Logger, db *sqlx.DB, query string, data []interface{}, dest interface{}) error {
 	ctx, span := web.AddSpan(ctx, "business.sys.database.GetContext", attribute.String("query", query))
 	defer span.End()
@@ -136,53 +143,8 @@ func GetContext(ctx context.Context, log *logger.Logger, db *sqlx.DB, query stri
 	return nil
 }
 
-func SelectContext[T any](ctx context.Context, log *logger.Logger, db *sqlx.DB, query string, data []interface{}, dest *[]T) (err error) {
-	ctx, span := web.AddSpan(ctx, "business.sys.database.SelectContext", attribute.String("query", query))
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			log.Infoc(ctx, 6, "database.SelectContext", "query", query, "ERROR", err)
-		}
-	}()
-
-	var rows *sqlx.Rows
-	// check if data is empty, if yes then execute query without data
-	switch data {
-	case nil:
-		fmt.Println("data is nil")
-		err = db.SelectContext(ctx, dest, query)
-		if err != nil {
-			if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == undefinedTable {
-				return ErrUndefinedTable
-			}
-			return fmt.Errorf("namedselectcontext: %w", err)
-		}
-		return nil
-
-	default:
-		fmt.Println("data is not nil")
-		err = db.Select(&dest, query, data...)
-		if err != nil {
-			if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == undefinedTable {
-				return ErrUndefinedTable
-			}
-			return fmt.Errorf("namedselectcontext: %w", err)
-		}
-		defer rows.Close()
-		for rows.Next() {
-			v := new(T)
-			if err := rows.StructScan(v); err != nil {
-				return err
-			}
-			*dest = append(*dest, *v)
-		}
-
-		return nil
-	}
-}
-
-func Select[T any](ctx context.Context, log *logger.Logger, db *sqlx.DB, query string, data []interface{}, dest *[]T) (err error) {
+// use to fetch multiple rows
+func QueryContext[T any](ctx context.Context, log *logger.Logger, db *sqlx.DB, query string, data []interface{}, dest *[]T) (err error) {
 	ctx, span := web.AddSpan(ctx, "business.sys.database.Select", attribute.String("query", query))
 	defer span.End()
 
@@ -192,7 +154,7 @@ func Select[T any](ctx context.Context, log *logger.Logger, db *sqlx.DB, query s
 		}
 	}()
 
-	err = db.Select(dest, query, data...)
+	err = db.SelectContext(ctx, dest, query, data...)
 	if err != nil {
 		return fmt.Errorf("namedqueryslice: %w", err)
 	}
