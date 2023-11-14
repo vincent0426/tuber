@@ -30,26 +30,23 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 
 // // Create inserts a new trip into the database.
 func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
-	// dbUser := toDBUser(usr)
+	dbTrip := toDBTrip(trip)
+	fmt.Println("store: trip: create: dbTrip:", dbTrip)
+	sql, args, err := sq.
+		Insert("trip").
+		Columns("id", "driver_id", "passenger_limit", "source_id", "destination_id", "start_time", "created_at").
+		Values(dbTrip.ID, dbTrip.DriverID, dbTrip.PassengerLimit, dbTrip.SourceID, dbTrip.DestinationID, dbTrip.StartTime, dbTrip.CreatedAt).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
 
-	// sql, args, err := sq.
-	// 	Insert("users").
-	// 	Columns("id", "name", "email", "bio", "accept_notification", "sub").
-	// 	Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.Bio, dbUser.AcceptNotification, dbUser.Sub).
-	// 	PlaceholderFormat(sq.Dollar).
-	// 	ToSql()
+	if err != nil {
+		return fmt.Errorf("tosql: %w", err)
+	}
 
-	// if err != nil {
-	// 	return fmt.Errorf("tosql: %w", err)
-	// }
-
-	// // execute the sql
-	// if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
-	// 	if errors.Is(err, database.ErrDBDuplicatedEntry) {
-	// 		return user.ErrUniqueEmail
-	// 	}
-	// 	return fmt.Errorf("execcontext: %w", err)
-	// }
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
+		return fmt.Errorf("execcontext: %w", err)
+	}
 
 	return nil
 }

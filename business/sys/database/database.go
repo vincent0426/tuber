@@ -110,7 +110,7 @@ func ExecContext(ctx context.Context, log *logger.Logger, db *sqlx.DB, query str
 	ctx, span := web.AddSpan(ctx, "business.sys.database.ExecContext", attribute.String("query", query))
 	defer span.End()
 
-	_, err := db.ExecContext(ctx, query, data...)
+	_, err := db.Exec(query, data...)
 	if err != nil {
 		if pqerr, ok := err.(*pgconn.PgError); ok && pqerr.Code == uniqueViolation {
 			return ErrDBDuplicatedEntry

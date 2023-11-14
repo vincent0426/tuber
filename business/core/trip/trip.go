@@ -57,7 +57,7 @@ func (c *Core) Create(ctx context.Context, nu NewTrip) (Trip, error) {
 		StartTime:      nu.StartTime,
 		CreatedAt:      now,
 	}
-
+	fmt.Println("core: trip: create: trip:", trip)
 	if err := c.storer.Create(ctx, trip); err != nil {
 		return Trip{}, fmt.Errorf("create: %w", err)
 	}

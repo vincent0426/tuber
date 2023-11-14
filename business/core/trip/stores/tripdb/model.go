@@ -42,7 +42,6 @@ func toDBTrip(trip trip.Trip) dbTrip {
 		PassengerLimit: trip.PassengerLimit,
 		SourceID:       trip.SourceID,
 		DestinationID:  trip.DestinationID,
-		Status:         trip.Status,
 		StartTime:      trip.StartTime.UTC(),
 		CreatedAt:      trip.CreatedAt.UTC(),
 	}

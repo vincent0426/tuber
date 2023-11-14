@@ -28,7 +28,7 @@ func New(trip *trip.Core) *Handlers {
 	}
 }
 
-// Create adds a new user to the system.
+// Create adds a new trip to the system.
 func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	var app AppNewTrip
 	// Validate the request.
@@ -40,12 +40,9 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	if err != nil {
 		return response.NewError(err, http.StatusBadRequest)
 	}
-
+	fmt.Println("handlers: trip: create: nc:", nc)
 	trip, err := h.trip.Create(ctx, nc)
 	if err != nil {
-		if errors.Is(err, user.ErrUniqueEmail) {
-			return response.NewError(err, http.StatusConflict)
-		}
 		return fmt.Errorf("create: usr[%+v]: %w", trip, err)
 	}
 
