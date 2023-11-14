@@ -2,22 +2,29 @@ package mid
 
 import (
 	"context"
+	"fmt"
 
 	aauth "github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
+
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
 )
 
 // Authenticate validates a JWT from the `Authorization` header.
-func Authenticate(a *auth.Auth, authCore *aauth.Core) web.Middleware {
+func Authenticate(a *auth.Auth) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 		h := func(ctx context.Context, c *gin.Context) error {
-			userID, err := a.Authenticate(ctx, c.Request.Header.Get("Authorization"), authCore)
+			// get token from cookie
+			token, err := c.Cookie("token")
 			if err != nil {
-				//
 				return auth.NewAuthError("authenticate: failed: %s", err)
 			}
+			userID, err := a.Authenticate(ctx, token)
+			if err != nil {
+				return auth.NewAuthError("authenticate: failed: %s", err)
+			}
+			fmt.Println("userID: ", userID)
 			ctx = auth.SetUserID(ctx, userID)
 
 			return handler(ctx, c)

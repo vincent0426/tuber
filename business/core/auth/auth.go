@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TSMC-Uber/server/business/sys/cachedb"
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/google/uuid"
@@ -34,15 +35,13 @@ type RedisStorer interface {
 
 // Core manages the set of APIs for user access.
 type Core struct {
-	storer      Storer
-	redisStorer RedisStorer
+	storer Storer
 }
 
 // NewCore constructs a core for user api access.
-func NewCore(storer Storer, redisStorer RedisStorer) *Core {
+func NewCore(storer Storer) *Core {
 	return &Core{
-		storer:      storer,
-		redisStorer: redisStorer,
+		storer: storer,
 	}
 }
 
@@ -79,11 +78,21 @@ func (c *Core) GenerateSessionToken(userID uuid.UUID, ttl time.Duration) (*Sessi
 }
 
 func (c *Core) SetSessionToken(ctx context.Context, sessionToken SessionToken) error {
-	if err := c.redisStorer.Set(ctx, sessionToken.Hash, sessionToken.UserID, time.Until(sessionToken.Expiry)); err != nil {
+	userID := sessionToken.UserID.String()
+	if err := cachedb.Set(ctx, sessionToken.Hash, userID, time.Until(sessionToken.Expiry)); err != nil {
 		return fmt.Errorf("set session token: %w", err)
 	}
 
 	return nil
+}
+
+func (c *Core) GetSessionToken(ctx context.Context, sessionToken string) (uuid.UUID, error) {
+	userID, err := cachedb.Get(ctx, sessionToken)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("get session token: %w", err)
+	}
+
+	return uuid.Parse(userID)
 }
 
 func (c *Core) ParseIDToken(idToken string) (*IDTokenInfo, error) {

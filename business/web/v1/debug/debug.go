@@ -7,7 +7,7 @@ import (
 	"net/http/pprof"
 
 	"github.com/TSMC-Uber/server/business/web/v1/debug/checkgrp"
-	"go.uber.org/zap"
+	"github.com/TSMC-Uber/server/foundation/logger"
 )
 
 // StandardLibraryMux registers all the debug routes from the standard library
@@ -31,7 +31,7 @@ func StandardLibraryMux() *http.ServeMux {
 // debug application routes for the service. This bypassing the use of the
 // DefaultServerMux. Using the DefaultServerMux would be a security risk since
 // a dependency could inject a handler into our service without us knowing it.
-func Mux(build string, log *zap.SugaredLogger) http.Handler {
+func Mux(build string, log *logger.Logger) http.Handler {
 	mux := StandardLibraryMux()
 
 	cgh := checkgrp.Handlers{

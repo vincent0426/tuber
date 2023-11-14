@@ -5,15 +5,15 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
+	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 )
 
 // Config contains all the mandatory systems required by handlers.
 type Config struct {
-	Log  *zap.SugaredLogger
+	Log  *logger.Logger
 	Auth *auth.Auth
 	DB   *sqlx.DB
 }

@@ -3,22 +3,24 @@ package tripgrp
 import (
 	"net/http"
 
-	aauth "github.com/TSMC-Uber/server/business/core/auth"
-	"github.com/TSMC-Uber/server/business/core/auth/stores/authdb"
-	"github.com/TSMC-Uber/server/business/core/auth/stores/authredisdb"
-	"github.com/TSMC-Uber/server/business/core/user"
-	"github.com/TSMC-Uber/server/business/core/user/stores/userdb"
+	"github.com/TSMC-Uber/server/business/core/trip"
+	"github.com/TSMC-Uber/server/business/core/trip/stores/tripdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/mid"
+	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
+	"github.com/redis/go-redis/v9"
 )
 
 type Config struct {
-	Log  *zap.SugaredLogger
-	Auth *auth.Auth
-	DB   *sqlx.DB
+	Log     *logger.Logger
+	Auth    *auth.Auth
+	DB      *sqlx.DB
+	RedisDB struct {
+		Master  *redis.Client
+		Replica *redis.Client
+	}
 }
 
 // Routes adds specific routes for this group.
@@ -28,16 +30,16 @@ func Routes(app *web.App, cfg Config) {
 	// envCore := event.NewCore(cfg.Log)
 	// usrCore := user.NewCore(cfg.Log, envCore, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB)))
 
-	authCore := aauth.NewCore(authdb.NewStore(cfg.Log, cfg.DB), authredisdb.NewStore(cfg.Log, cfg.RedisDB))
-	usrCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
+	tripCore := trip.NewCore(tripdb.NewStore(cfg.Log, cfg.DB))
 
-	authen := mid.Authenticate(cfg.Auth, authCore)
+	authen := mid.Authenticate(cfg.Auth)
 
-	hdl := New(usrCore)
-	app.Handle(http.MethodGet, version, "/trips", hdl.Query)
+	hdl := New(tripCore)
+	app.Handle(http.MethodGet, version, "/trips/all", hdl.QueryAll)
+	app.Handle(http.MethodGet, version, "/trips", hdl.QueryByUserID, authen)
 	app.Handle(http.MethodGet, version, "/trips/:id", hdl.QueryByID, authen)
 	app.Handle(http.MethodPost, version, "/trips", hdl.Create)
-	app.Handle(http.MethodPost, version, "/trips/join", hdl.Join)
+	// app.Handle(http.MethodPost, version, "/trips/join", hdl.Join)
 	// app.Handle(http.MethodPut, version, "/users/:id", hdl.Update)
 	// app.Handle(http.MethodDelete, version, "/users/:id", hdl.Delete)
 }

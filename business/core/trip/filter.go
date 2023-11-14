@@ -2,7 +2,6 @@ package trip
 
 import (
 	"fmt"
-	"net/mail"
 	"time"
 
 	"github.com/TSMC-Uber/server/business/sys/validate"
@@ -11,11 +10,13 @@ import (
 
 // QueryFilter holds the available fields a query can be filtered on.
 type QueryFilter struct {
-	ID               *uuid.UUID    `validate:"omitempty"`
-	Name             *string       `validate:"omitempty,min=3"`
-	Email            *mail.Address `validate:"omitempty"`
-	StartCreatedDate *time.Time    `validate:"omitempty"`
-	EndCreatedDate   *time.Time    `validate:"omitempty"`
+	ID             *uuid.UUID `validate:"omitempty"`
+	DriverID       *uuid.UUID `validate:"omitempty"`
+	PassengerLimit *int       `validate:"omitempty"`
+	SourceID       *uuid.UUID `validate:"omitempty"`
+	DestinationID  *uuid.UUID `validate:"omitempty"`
+	StartStartDate *time.Time `validate:"omitempty"`
+	EndStartDate   *time.Time `validate:"omitempty"`
 }
 
 // Validate checks the data in the model is considered clean.
@@ -26,29 +27,41 @@ func (qf *QueryFilter) Validate() error {
 	return nil
 }
 
-// WithUserID sets the ID field of the QueryFilter value.
-func (qf *QueryFilter) WithUserID(userID uuid.UUID) {
-	qf.ID = &userID
+// WithID sets the ID field of the QueryFilter value.
+func (qf *QueryFilter) WithTripID(id uuid.UUID) {
+	qf.ID = &id
 }
 
-// WithName sets the Name field of the QueryFilter value.
-func (qf *QueryFilter) WithName(name string) {
-	qf.Name = &name
+// WithDriverID sets the ID field of the QueryFilter value.
+func (qf *QueryFilter) WithDriverID(driverID uuid.UUID) {
+	qf.DriverID = &driverID
 }
 
-// WithEmail sets the Email field of the QueryFilter value.
-func (qf *QueryFilter) WithEmail(email mail.Address) {
-	qf.Email = &email
+// WithPassengerLimit sets the ID field of the QueryFilter value.
+func (qf *QueryFilter) WithPassengerLimit(passengerLimit int) {
+	qf.PassengerLimit = &passengerLimit
 }
 
-// WithStartDateCreated sets the DateCreated field of the QueryFilter value.
-func (qf *QueryFilter) WithStartDateCreated(startDate time.Time) {
+// WithSourceID sets the ID field of the QueryFilter value.
+func (qf *QueryFilter) WithSourceID(sourceID uuid.UUID) {
+	qf.SourceID = &sourceID
+}
+
+// WithDestinationID sets the ID field of the QueryFilter value.
+func (qf *QueryFilter) WithDestinationID(destinationID uuid.UUID) {
+	qf.DestinationID = &destinationID
+}
+
+// WithStartStartDate sets the DateCreated field of the QueryFilter value.
+// query the trip which start time is after the startDate
+func (qf *QueryFilter) WithStartStartDate(startDate time.Time) {
 	d := startDate.UTC()
-	qf.StartCreatedDate = &d
+	qf.StartStartDate = &d
 }
 
 // WithEndCreatedDate sets the DateCreated field of the QueryFilter value.
-func (qf *QueryFilter) WithEndCreatedDate(endDate time.Time) {
+// query the trip which start time is before the endDate
+func (qf *QueryFilter) WithEndStartDate(endDate time.Time) {
 	d := endDate.UTC()
-	qf.EndCreatedDate = &d
+	qf.EndStartDate = &d
 }

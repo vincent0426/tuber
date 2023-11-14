@@ -106,7 +106,11 @@ CREATE TABLE favorite_driver (
 -- trip_view: trip + driverinfo + tripinfo + station_source + station_destination
 CREATE VIEW trip_view AS
 SELECT trip.*,
-  driver.license,
+  udriver.name AS driver_name,
+  driver.brand AS driver_brand,
+  driver.model AS driver_model,
+  driver.color AS driver_color,
+  driver.plate AS driver_plate,
   location_source.name AS source_name,
   location_source.address AS source_address,
   location_source.coordinates AS source_coordinates,
@@ -114,20 +118,24 @@ SELECT trip.*,
   location_destination.address AS destination_address,
   location_destination.coordinates AS destination_coordinates
 FROM trip
+  JOIN users AS udriver ON trip.driver_id = udriver.id
   JOIN driver ON trip.driver_id = driver.user_id
   JOIN locations AS location_source ON trip.source_id = location_source.id
   JOIN locations AS location_destination ON trip.destination_id = location_destination.id;
 -- trip_passenger_view
 CREATE VIEW trip_passenger_view AS
 SELECT trip_passenger.*,
-  trip.start_time AS trip_start_time,
-  trip.status AS trip_status,
-  location_source.name AS station_source_name,
-  location_source.address AS station_source_address,
-  location_source.coordinates AS station_source_coordinates,
-  location_destination.name AS station_destination_name,
-  location_destination.address AS station_destination_address,
-  location_destination.coordinates AS station_destination_coordinates,
+  udriver.name AS driver_name,
+  driver.brand AS driver_brand,
+  driver.model AS driver_model,
+  driver.color AS driver_color,
+  driver.plate AS driver_plate,
+  location_source.name AS source_name,
+  location_source.address AS source_address,
+  location_source.coordinates AS source_coordinates,
+  location_destination.name AS destination_name,
+  location_destination.address AS destination_address,
+  location_destination.coordinates AS destination_coordinates,
   passenger_location_source.name AS passenger_location_source_name,
   passenger_location_source.address AS passenger_location_source_address,
   passenger_location_source.coordinates AS passenger_location_source_coordinates,
@@ -136,6 +144,7 @@ SELECT trip_passenger.*,
   passenger_location_destination.coordinates AS passenger_location_destination_coordinates
 FROM trip_passenger
   JOIN trip ON trip_passenger.trip_id = trip.id
+  JOIN users AS udriver ON trip.driver_id = udriver.id
   JOIN locations AS location_source ON trip.source_id = location_source.id
   JOIN locations AS location_destination ON trip.destination_id = location_destination.id
   JOIN locations AS passenger_location_source ON trip_passenger.station_source_id = passenger_location_source.id

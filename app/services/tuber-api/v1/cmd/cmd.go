@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/config"
+	"github.com/TSMC-Uber/server/business/sys/cachedb"
 	"github.com/TSMC-Uber/server/business/sys/database"
-	"github.com/TSMC-Uber/server/business/sys/redisdb"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/debug"
-	"github.com/redis/go-redis/v9"
 
 	"github.com/TSMC-Uber/server/foundation/logger"
+	"github.com/TSMC-Uber/server/foundation/web"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
@@ -26,33 +26,38 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
-	"go.uber.org/zap"
 )
 
 func Main(build string, routeAdder v1.RouteAdder) error {
-	log, err := logger.New("TUBER-API")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	var log *logger.Logger
+
+	events := logger.Events{
+		Error: func(ctx context.Context, r logger.Record) {
+			log.Info(ctx, "******* SEND ALERT ******")
+		},
 	}
-	defer log.Sync()
+
+	traceIDFunc := func(ctx context.Context) string {
+		return web.GetTraceID(ctx)
+	}
+
+	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "TUBER-API", traceIDFunc, events)
 
 	ctx := context.Background()
 	if err := run(ctx, log, build, routeAdder); err != nil {
-		log.Errorw("startup", "ERROR", err)
-		log.Sync()
+		log.Error(ctx, "startup", "status", "shutdown with error", "ERROR", err)
 		os.Exit(1)
 	}
 
 	return nil
 }
 
-func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v1.RouteAdder) error {
+func run(ctx context.Context, log *logger.Logger, build string, routeAdder v1.RouteAdder) error {
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
 
-	log.Infow("startup", "GOMAXPROCS", runtime.GOMAXPROCS(0), "BUILD-", build)
+	log.Info(ctx, "startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	// -------------------------------------------------------------------------
 	// Configuration
@@ -62,25 +67,18 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		return fmt.Errorf("loading config: %w", err)
 	}
 
-	log.Infow("startup", "status", "loaded configuration", "config", cfg)
-	log.Infow("startup", "status", "debug v1 router started", "host", cfg.Web.DebugHost)
-
-	go func() {
-		if err := http.ListenAndServe(cfg.Web.DebugHost, debug.Mux(build, log)); err != nil {
-			log.Errorw("shutdown", "status", "debug v1 router closed", "host", cfg.Web.DebugHost, "ERROR", err)
-		}
-	}()
+	log.Info(ctx, "startup", "status", "loaded configuration", "config", cfg)
 
 	// -------------------------------------------------------------------------
 	// App Starting
 
-	log.Infow("starting service", "version", build)
-	defer log.Infow("shutdown complete")
+	log.Info(ctx, "starting service", "version", build)
+	defer log.Info(ctx, "shutdown complete")
 
 	// -------------------------------------------------------------------------
 	// Database Support
 
-	log.Infow("startup", "status", "initializing database support", "host", cfg.DB.Host)
+	log.Info(ctx, "startup", "status", "initializing database support", "host", cfg.DB.Host)
 
 	db, err := database.Open(database.Config{
 		User:         cfg.DB.User,
@@ -95,35 +93,25 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		return fmt.Errorf("connecting to db: %w", err)
 	}
 	defer func() {
-		log.Infow("shutdown", "status", "stopping database support", "host", cfg.DB.Host)
+		log.Info(ctx, "shutdown", "status", "stopping database support", "host", cfg.DB.Host)
 		db.Close()
 	}()
 
-	rdbm, err := redisdb.Open(redisdb.Config{
-		Host:     cfg.Redis.Host.Master,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
+	cachedb, err := cachedb.Open(cachedb.Config{
+		MasterHost:      cfg.Redis.Host.Master,
+		MasterPassword:  cfg.Redis.Password,
+		MasterDB:        cfg.Redis.DB,
+		ReplicaHost:     cfg.Redis.Host.Replica,
+		ReplicaPassword: cfg.Redis.Password,
+		ReplicaDB:       cfg.Redis.DB,
 	})
 	if err != nil {
 		return fmt.Errorf("connecting to master redis: %w", err)
 	}
 	defer func() {
-		log.Infow("shutdown", "status", "stopping redis support", "host", cfg.Redis.Host)
-		rdbm.Close()
-	}()
-
-	rdbr, err := redisdb.Open(redisdb.Config{
-		Host:     cfg.Redis.Host.Replica,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
-	})
-
-	if err != nil {
-		return fmt.Errorf("connecting to slave redis: %w", err)
-	}
-	defer func() {
-		log.Infow("shutdown", "status", "stopping redis support", "host", cfg.Redis.Host)
-		rdbr.Close()
+		log.Info(ctx, "shutdown", "status", "stopping redis support", "host", cfg.Redis.Host)
+		cachedb.Master.Close()
+		cachedb.Replica.Close()
 	}()
 
 	authCfg := auth.Config{
@@ -155,9 +143,20 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 	tracer := traceProvider.Tracer("service")
 
 	// -------------------------------------------------------------------------
+	// Start Debug Service
+
+	go func() {
+		log.Info(ctx, "startup", "status", "debug v1 router started", "host", cfg.Web.DebugHost)
+
+		if err := http.ListenAndServe(cfg.Web.DebugHost, debug.Mux(build, log)); err != nil {
+			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Web.DebugHost, "msg", err)
+		}
+	}()
+
+	// -------------------------------------------------------------------------
 	// Start API Service
 
-	log.Infow("startup", "status", "initializing V1 API support")
+	log.Info(ctx, "startup", "status", "initializing API support", "host", cfg.Web.APIHost)
 
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
@@ -167,14 +166,7 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		Log:      log,
 		Auth:     auth,
 		DB:       db,
-		RedisDB: struct {
-			Master  *redis.Client
-			Replica *redis.Client
-		}{
-			Master:  rdbm,
-			Replica: rdbr,
-		},
-		Tracer: tracer,
+		Tracer:   tracer,
 	}
 
 	apiMux := v1.APIMux(cfgMux, routeAdder)
@@ -185,13 +177,13 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		ReadTimeout:  cfg.Web.ReadTimeout,
 		WriteTimeout: cfg.Web.WriteTimeout,
 		IdleTimeout:  cfg.Web.IdleTimeout,
-		ErrorLog:     zap.NewStdLog(log.Desugar()),
+		ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
 	}
 
 	serverErrors := make(chan error, 1)
 
 	go func() {
-		log.Infow("startup", "status", "api router started", "host", api.Addr)
+		log.Info(ctx, "startup", "status", "api router started", "host", api.Addr)
 		serverErrors <- api.ListenAndServe()
 	}()
 
@@ -203,8 +195,8 @@ func run(ctx context.Context, log *zap.SugaredLogger, build string, routeAdder v
 		return fmt.Errorf("server error: %w", err)
 
 	case sig := <-shutdown:
-		log.Infow("shutdown", "status", "shutdown started", "signal", sig)
-		defer log.Infow("shutdown", "status", "shutdown complete", "signal", sig)
+		log.Info(ctx, "shutdown", "status", "shutdown started", "signal", sig)
+		defer log.Info(ctx, "shutdown", "status", "shutdown complete", "signal", sig)
 
 		ctx, cancel := context.WithTimeout(context.Background(), cfg.Web.ShutdownTimeout)
 		defer cancel()

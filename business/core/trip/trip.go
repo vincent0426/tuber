@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net/mail"
 	"time"
 
 	"github.com/TSMC-Uber/server/business/data/order"
@@ -22,14 +21,15 @@ var (
 // retrieve data.
 type Storer interface {
 	Create(ctx context.Context, trip Trip) error
-	Update(ctx context.Context, trip Trip) error
-	Delete(ctx context.Context, trip Trip) error
-	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error)
+	// Update(ctx context.Context, trip Trip) error
+	// Delete(ctx context.Context, trip Trip) error
+	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error)
+	QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
+	QueryByID(ctx context.Context, tripID uuid.UUID) (Trip, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	QueryByID(ctx context.Context, userID uuid.UUID) (Trip, error)
-	QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]Trip, error)
-	QueryByEmail(ctx context.Context, email mail.Address) (Trip, error)
-	QueryByGoogleID(ctx context.Context, googleID string) (Trip, error)
+	// QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]Trip, error)
+	// QueryByEmail(ctx context.Context, email mail.Address) (Trip, error)
+	// QueryByGoogleID(ctx context.Context, googleID string) (Trip, error)
 }
 
 // Core manages the set of APIs for user access.
@@ -98,9 +98,9 @@ func (c *Core) Create(ctx context.Context, nu NewTrip) (Trip, error) {
 // 	return nil
 // }
 
-// Query retrieves a list of existing trips from the database.
-func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error) {
-	trips, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
+// QueryQueryAll retrieves a list of existing trips from the database.
+func (c *Core) QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error) {
+	trips, err := c.storer.QueryAll(ctx, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -111,6 +111,17 @@ func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, 
 // Count returns the total number of users in the store.
 func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return c.storer.Count(ctx, filter)
+}
+
+// QueryByUserID returns the trip with the specified userID from the database.
+func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error) {
+	fmt.Println("core: trip: querybyuserid: userID:", userID)
+	trips, err := c.storer.QueryByUserID(ctx, userID, filter, orderBy, pageNumber, rowsPerPage)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	fmt.Println("core: trip: querybyuserid: trips:", trips)
+	return trips, nil
 }
 
 // QueryByID gets the specified user from the database.
@@ -124,11 +135,11 @@ func (c *Core) QueryByID(ctx context.Context, userID uuid.UUID) (Trip, error) {
 }
 
 // QueryByIDs gets the specified user from the database.
-func (c *Core) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]Trip, error) {
-	user, err := c.storer.QueryByIDs(ctx, userIDs)
-	if err != nil {
-		return nil, fmt.Errorf("query: userIDs[%s]: %w", userIDs, err)
-	}
+// func (c *Core) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]Trip, error) {
+// 	user, err := c.storer.QueryByIDs(ctx, userIDs)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("query: userIDs[%s]: %w", userIDs, err)
+// 	}
 
-	return user, nil
-}
+// 	return user, nil
+// }

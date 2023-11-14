@@ -5,16 +5,17 @@ package auth
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 
-	aauth "github.com/TSMC-Uber/server/business/core/auth"
+	"github.com/TSMC-Uber/server/business/sys/cachedb"
+	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"go.uber.org/zap"
 	"google.golang.org/api/idtoken"
 )
 
@@ -34,25 +35,31 @@ type KeyLookup interface {
 	PublicKey(kid string) (key string, err error)
 }
 
+type Cache interface {
+	Get(key string) (string, error)
+	Set(key string, value string) error
+}
+
 // Config represents information required to initialize auth.
 type Config struct {
-	Log       *zap.SugaredLogger
+	Log       *logger.Logger
 	DB        *sqlx.DB
 	KeyLookup KeyLookup
 	Issuer    string
+	Cache     Cache
 }
 
 // Auth is used to authenticate clients. It can generate a token for a
 // set of user claims and recreate the claims by parsing the token.
 type Auth struct {
-	log       *zap.SugaredLogger
+	log       *logger.Logger
 	keyLookup KeyLookup
 	method    jwt.SigningMethod
 	audience  string
 	// parser    *jwt.Parser
 	issuer string
 	mu     sync.RWMutex
-	cache  map[string]string
+	cache  Cache
 }
 
 // New creates an Auth to support authentication/authorization.
@@ -63,28 +70,38 @@ func New(cfg Config) (*Auth, error) {
 		method:    jwt.GetSigningMethod(jwt.SigningMethodRS256.Name),
 		// parser:    jwt.NewParser(jwt.WithValidMethods([]string{jwt.SigningMethodRS256.Name})),
 		issuer: cfg.Issuer,
-		cache:  make(map[string]string),
+		// cache:  cfg.Cache,
 	}
 
 	return &a, nil
 }
 
 // Authenticate processes the token to validate the sender's token is valid.
-func (a *Auth) Authenticate(ctx context.Context, bearerToken string, authCore *aauth.Core) (userID uuid.UUID, err error) {
-	parts := strings.Split(bearerToken, " ")
-	if len(parts) != 2 || parts[0] != "Bearer" {
-		return uuid.Nil, errors.New("expected authorization header format: Bearer <token>")
-	}
-
-	token := parts[1]
-
+func (a *Auth) Authenticate(ctx context.Context, token string) (uuid.UUID, error) {
 	if a.validateTokenPlaintext(token) != nil {
-		return uuid.Nil, errors.New("invalid plaintext token")
+		return uuid.Nil, wrapError(errors.New("invalid plaintext token"))
 	}
 
 	// TODO: get userID from redis
+	hash := sha256.Sum256([]byte(token))
+	hashToken := hex.EncodeToString(hash[:])
 
-	return uuid.Nil, nil
+	userID, err := cachedb.Get(ctx, hashToken)
+	if err != nil {
+		return uuid.Nil, wrapError(fmt.Errorf("get token from cache: %w", err))
+	}
+
+	if userID == "" {
+		return uuid.Nil, wrapError(errors.New("invalid token"))
+	}
+
+	// to uuid
+	usrID, err := uuid.Parse(userID)
+	if err != nil {
+		return uuid.Nil, wrapError(fmt.Errorf("parse userID: %w", err))
+	}
+
+	return usrID, nil
 }
 
 func (a *Auth) ValidateIDToken(idToken string) error {
@@ -116,32 +133,32 @@ func (a *Auth) Authorize(ctx context.Context, claims Claims, rule string) error 
 // =============================================================================
 
 // publicKeyLookup performs a lookup for the public pem for the specified kid.
-func (a *Auth) publicKeyLookup(kid string) (string, error) {
-	pem, err := func() (string, error) {
-		a.mu.RLock()
-		defer a.mu.RUnlock()
+// func (a *Auth) publicKeyLookup(kid string) (string, error) {
+// 	pem, err := func() (string, error) {
+// 		a.mu.RLock()
+// 		defer a.mu.RUnlock()
 
-		pem, exists := a.cache[kid]
-		if !exists {
-			return "", errors.New("not found")
-		}
-		return pem, nil
-	}()
-	if err == nil {
-		return pem, nil
-	}
+// 		pem, exists := a.cache[kid]
+// 		if !exists {
+// 			return "", errors.New("not found")
+// 		}
+// 		return pem, nil
+// 	}()
+// 	if err == nil {
+// 		return pem, nil
+// 	}
 
-	pem, err = a.keyLookup.PublicKey(kid)
-	if err != nil {
-		return "", fmt.Errorf("fetching public key: %w", err)
-	}
+// 	pem, err = a.keyLookup.PublicKey(kid)
+// 	if err != nil {
+// 		return "", fmt.Errorf("fetching public key: %w", err)
+// 	}
 
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	a.cache[kid] = pem
+// 	a.mu.Lock()
+// 	defer a.mu.Unlock()
+// 	a.cache[kid] = pem
 
-	return pem, nil
-}
+// 	return pem, nil
+// }
 
 // opaPolicyEvaluation asks opa to evaulate the token against the specified token
 // policy and public key.

@@ -3,22 +3,19 @@ package usergrp
 import (
 	"net/http"
 
-	aauth "github.com/TSMC-Uber/server/business/core/auth"
-	"github.com/TSMC-Uber/server/business/core/auth/stores/authdb"
-	"github.com/TSMC-Uber/server/business/core/auth/stores/authredisdb"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/core/user/stores/userdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/mid"
+	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
 	"github.com/redis/go-redis/v9"
-	"go.uber.org/zap"
 )
 
 // Config contains all the mandatory systems required by handlers.
 type Config struct {
-	Log     *zap.SugaredLogger
+	Log     *logger.Logger
 	Auth    *auth.Auth
 	DB      *sqlx.DB
 	RedisDB struct {
@@ -34,10 +31,10 @@ func Routes(app *web.App, cfg Config) {
 	// envCore := event.NewCore(cfg.Log)
 	// usrCore := user.NewCore(cfg.Log, envCore, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB)))
 
-	authCore := aauth.NewCore(authdb.NewStore(cfg.Log, cfg.DB), authredisdb.NewStore(cfg.Log, cfg.RedisDB))
+	// authCore := aauth.NewCore(authdb.NewStore(cfg.Log, cfg.DB))
 	usrCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
 
-	authen := mid.Authenticate(cfg.Auth, authCore)
+	authen := mid.Authenticate(cfg.Auth)
 
 	hdl := New(usrCore)
 	app.Handle(http.MethodGet, version, "/users", hdl.Query)

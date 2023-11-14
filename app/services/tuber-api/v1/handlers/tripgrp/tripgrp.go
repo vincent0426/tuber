@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/TSMC-Uber/server/business/core/trip"
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/paging"
@@ -51,8 +52,8 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
 }
 
-// Query returns a list of users with paging.
-func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
+// QueryAll returns a list of users with paging.
+func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
 		return err
@@ -68,13 +69,13 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	users, err := h.trip.Query(ctx, filter, orderBy, page.Number, page.RowsPerPage)
+	trips, err := h.trip.QueryAll(ctx, filter, orderBy, page.Number, page.RowsPerPage)
 	if err != nil {
 		return fmt.Errorf("query: %w", err)
 	}
 
 	items := make([]AppTrip, len(trips))
-	for i, usr := range users {
+	for i, usr := range trips {
 		items[i] = toAppTrip(usr)
 	}
 
@@ -84,6 +85,38 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	}
 
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
+}
+
+// Query returns a trip that matches the specified ID in the session.
+func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
+	id := auth.GetUserID(ctx)
+
+	page, err := paging.ParseRequest(c.Request)
+	if err != nil {
+		return err
+	}
+
+	filter, err := parseFilter(c.Request)
+	if err != nil {
+		return err
+	}
+
+	orderBy, err := parseOrder(c.Request)
+	if err != nil {
+		return err
+	}
+
+	trip, err := h.trip.QueryByUserID(ctx, id, filter, orderBy, page.Number, page.RowsPerPage)
+	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
+		}
+	}
+
+	return web.Respond(ctx, c.Writer, paging.NewResponse(trip, len(trip), page.Number, page.RowsPerPage), http.StatusOK)
 }
 
 // QueryByID returns a user by its ID.
@@ -103,25 +136,25 @@ func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTrip(usr), http.StatusOK)
 }
 
-func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
-	var app AppJoinTrip
-	// Validate the request.
-	if err := web.Decode(c, &app); err != nil {
-		return response.NewError(err, http.StatusBadRequest)
-	}
+// func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
+// 	var app AppJoinTrip
+// 	// Validate the request.
+// 	if err := web.Decode(c, &app); err != nil {
+// 		return response.NewError(err, http.StatusBadRequest)
+// 	}
 
-	nc, err := toCoreJoinTrip(app)
-	if err != nil {
-		return response.NewError(err, http.StatusBadRequest)
-	}
+// 	nc, err := toCoreJoinTrip(app)
+// 	if err != nil {
+// 		return response.NewError(err, http.StatusBadRequest)
+// 	}
 
-	trip, err := h.trip.Join(ctx, nc)
-	if err != nil {
-		if errors.Is(err, user.ErrUniqueEmail) {
-			return response.NewError(err, http.StatusConflict)
-		}
-		return fmt.Errorf("join: usr[%+v]: %w", trip, err)
-	}
+// 	trip, err := h.trip.Join(ctx, nc)
+// 	if err != nil {
+// 		if errors.Is(err, user.ErrUniqueEmail) {
+// 			return response.NewError(err, http.StatusConflict)
+// 		}
+// 		return fmt.Errorf("join: usr[%+v]: %w", trip, err)
+// 	}
 
-	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
-}
+// 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
+// }

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 )
 
-func Logger(log *zap.SugaredLogger) web.Middleware {
+func Logger(log *logger.Logger) web.Middleware {
 	m := func(handler web.Handler) web.Handler {
 
 		h := func(ctx context.Context, c *gin.Context) error {
@@ -21,12 +21,12 @@ func Logger(log *zap.SugaredLogger) web.Middleware {
 				path = fmt.Sprintf("%s?%s", path, r.URL.RawQuery)
 			}
 
-			log.Infow("request started", "trace_id", v.TraceID, "method", r.Method, "path", path,
-				"remoteaddr", r.RemoteAddr, "useragent", r.UserAgent())
+			log.Info(ctx, "request started", "method", r.Method, "path", path,
+				"remoteaddr", r.RemoteAddr)
 
 			err := handler(ctx, c)
 
-			log.Infow("request completed", "trace_id", v.TraceID, "method", r.Method, "path", path,
+			log.Info(ctx, "request completed", "method", r.Method, "path", path,
 				"remoteaddr", r.RemoteAddr, "statuscode", v.StatusCode, "since", time.Since(v.Now))
 
 			return err

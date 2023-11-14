@@ -58,12 +58,18 @@ func toCoreNewTrip(app AppNewTrip) (trip.NewTrip, error) {
 	if err != nil {
 		return trip.NewTrip{}, err
 	}
+
+	// turn string to time
+	startTime, err := time.Parse(time.RFC3339, app.StartTime)
+	if err != nil {
+		return trip.NewTrip{}, err
+	}
 	trip := trip.NewTrip{
-		DriverID:       app.DriverID,
+		DriverID:       uuDriverID,
 		PassengerLimit: app.PassengerLimit,
-		SourceID:       app.SourceID,
-		DestinationID:  app.DestinationID,
-		StartTime:      app.StartTime,
+		SourceID:       uuSourceID,
+		DestinationID:  uuDestinationID,
+		StartTime:      startTime,
 	}
 
 	return trip, nil

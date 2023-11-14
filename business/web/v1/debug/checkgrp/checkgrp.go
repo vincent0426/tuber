@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"os"
 
-	"go.uber.org/zap"
+	"github.com/TSMC-Uber/server/foundation/logger"
 )
 
 // Handlers manages the set of check endpoints.
 type Handlers struct {
 	Build string
-	Log   *zap.SugaredLogger
+	Log   *logger.Logger
 }
 
 // Readiness checks if the database is ready and if not will return a 500 status.
@@ -28,10 +28,10 @@ func (h Handlers) Readiness(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := response(w, statusCode, data); err != nil {
-		h.Log.Errorw("readiness", "ERROR", err)
+		h.Log.Error(r.Context(), "readiness", "ERROR", err)
 	}
 
-	h.Log.Infow("readiness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
+	h.Log.Info(r.Context(), "readiness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
 }
 
 // Liveness returns simple status info if the service is alive. If the
@@ -66,12 +66,12 @@ func (h Handlers) Liveness(w http.ResponseWriter, r *http.Request) {
 
 	statusCode := http.StatusOK
 	if err := response(w, statusCode, data); err != nil {
-		h.Log.Errorw("liveness", "ERROR", err)
+		h.Log.Error(r.Context(), "liveness", "ERROR", err)
 	}
 
 	// THIS IS A FREE TIMER. WE COULD UPDATE THE METRIC GOROUTINE COUNT HERE.
 
-	h.Log.Infow("liveness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
+	h.Log.Info(r.Context(), "liveness", "statusCode", statusCode, "method", r.Method, "path", r.URL.Path, "remoteaddr", r.RemoteAddr)
 }
 
 func response(w http.ResponseWriter, statusCode int, data any) error {
