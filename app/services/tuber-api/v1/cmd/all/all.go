@@ -7,6 +7,7 @@ import (
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/locationgrp"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/tripgrp"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/usergrp"
+	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/wsgrp"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/foundation/web"
 )
@@ -40,6 +41,11 @@ func (add) Add(app *web.App, cfg v1.APIMuxConfig) {
 		DB:   cfg.DB,
 	})
 	locationgrp.Routes(app, locationgrp.Config{
+		Log:  cfg.Log,
+		Auth: cfg.Auth,
+		DB:   cfg.DB,
+	})
+	wsgrp.Routes(app, wsgrp.Config{
 		Log:  cfg.Log,
 		Auth: cfg.Auth,
 		DB:   cfg.DB,

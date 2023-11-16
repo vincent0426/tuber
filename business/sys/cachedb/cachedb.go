@@ -84,3 +84,37 @@ func Get(ctx context.Context, key string) (string, error) {
 
 	return val, nil
 }
+
+func XRange(ctx context.Context, streamName string, start string, stop string) ([]redis.XMessage, error) {
+	val, err := cachedb.Replica.XRange(ctx, streamName, start, stop).Result()
+	if err != nil {
+		return nil, fmt.Errorf("get session token: %w", err)
+	}
+
+	return val, nil
+}
+
+func Subscribe(ctx context.Context, channelName string) *redis.PubSub {
+	return cachedb.Replica.Subscribe(ctx, channelName)
+}
+
+func XAdd(ctx context.Context, streamName string, values map[string]interface{}) (string, error) {
+	val, err := cachedb.Master.XAdd(ctx, &redis.XAddArgs{
+		Stream: streamName,
+		Values: values,
+	}).Result()
+	if err != nil {
+		return "", fmt.Errorf("xadd: %w", err)
+	}
+
+	return val, nil
+}
+
+func Publish(ctx context.Context, channelName string, message string) error {
+	err := cachedb.Master.Publish(ctx, channelName, message).Err()
+	if err != nil {
+		return fmt.Errorf("publish: %w", err)
+	}
+
+	return nil
+}
