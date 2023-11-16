@@ -168,26 +168,24 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID, filter trip
 
 // // Count returns the total number of trips in the DB.
 func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error) {
-	// data := map[string]interface{}{}
+	builder := sq.Select("COUNT(*) AS count").From("trip")
 
-	// builder := sq.Select("COUNT(*) AS count").From("users")
+	builder = s.applyFilter(builder, filter)
 
-	// builder = s.applyFilter(builder, filter)
+	// Convert the builder to SQL and args
+	sql, _, err := builder.ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("tosql: %w", err)
+	}
 
-	// // Convert the builder to SQL and args
-	// sql, _, err := builder.ToSql()
-	// if err != nil {
-	// 	return 0, fmt.Errorf("tosql: %w", err)
-	// }
+	var count struct {
+		Count int `db:"count"`
+	}
+	if err := database.GetContext(ctx, s.log, s.db, sql, nil, &count); err != nil {
+		return 0, fmt.Errorf("namedquerystruct: %w", err)
+	}
 
-	// var count struct {
-	// 	Count int `db:"count"`
-	// }
-	// if err := database.NamedQueryStruct(ctx, s.log, s.db, sql, data, &count); err != nil {
-	// 	return 0, fmt.Errorf("namedquerystruct: %w", err)
-	// }
-
-	return 0, nil
+	return count.Count, nil
 }
 
 // QueryByID gets the specified trip from the database.

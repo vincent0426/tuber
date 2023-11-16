@@ -10,16 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// ID               *uuid.UUID `validate:"omitempty"`
-// DriverID         *uuid.UUID `validate:"omitempty"`
-// PassengerLimit   *int       `validate:"omitempty"`
-// SourceID         *uuid.UUID `validate:"omitempty"`
-// DestinationID    *uuid.UUID `validate:"omitempty"`
-// Status           *string    `validate:"omitempty"`
-// StartTime        *time.Time `validate:"omitempty"`
-// StartCreatedDate *time.Time `validate:"omitempty"`
-// EndCreatedDate   *time.Time `validate:"omitempty"`
-
 func parseFilter(r *http.Request) (trip.QueryFilter, error) {
 	values := r.URL.Query()
 

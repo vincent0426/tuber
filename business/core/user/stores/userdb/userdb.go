@@ -144,8 +144,6 @@ func (s *Store) Query(ctx context.Context, filter user.QueryFilter, orderBy orde
 
 // Count returns the total number of users in the DB.
 func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error) {
-	data := map[string]interface{}{}
-
 	builder := sq.Select("COUNT(*) AS count").From("users")
 
 	builder = s.applyFilter(builder, filter)
@@ -159,7 +157,7 @@ func (s *Store) Count(ctx context.Context, filter user.QueryFilter) (int, error)
 	var count struct {
 		Count int `db:"count"`
 	}
-	if err := database.NamedQueryStruct(ctx, s.log, s.db, sql, data, &count); err != nil {
+	if err := database.GetContext(ctx, s.log, s.db, sql, nil, &count); err != nil {
 		return 0, fmt.Errorf("namedquerystruct: %w", err)
 	}
 

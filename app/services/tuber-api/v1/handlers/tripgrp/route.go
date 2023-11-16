@@ -35,8 +35,8 @@ func Routes(app *web.App, cfg Config) {
 	authen := mid.Authenticate(cfg.Auth)
 
 	hdl := New(tripCore)
-	app.Handle(http.MethodGet, version, "/trips/all", hdl.QueryAll)
-	app.Handle(http.MethodGet, version, "/trips", hdl.QueryByUserID, authen)
+	app.Handle(http.MethodGet, version, "/trips", hdl.QueryAll)
+	app.Handle(http.MethodGet, version, "/trips/my", hdl.QueryByUserID, authen)
 	app.Handle(http.MethodGet, version, "/trips/:id", hdl.QueryByID, authen)
 	app.Handle(http.MethodPost, version, "/trips", hdl.Create)
 	// app.Handle(http.MethodPost, version, "/trips/join", hdl.Join)
