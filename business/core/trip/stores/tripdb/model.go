@@ -23,8 +23,8 @@ type dbTrip struct {
 type dbUserTrip struct {
 	TripID               uuid.UUID `db:"trip_id"`
 	PassengerID          uuid.UUID `db:"passenger_id"`
-	StationSourceID      uuid.UUID `db:"station_source_id"`
-	StationDestinationID uuid.UUID `db:"station_destination_id"`
+	StationSourceID      uuid.UUID `db:"source_id"`
+	StationDestinationID uuid.UUID `db:"destination_id"`
 	PassengerStatus      string    `db:"tp_status"`
 	DriverID             uuid.UUID `db:"driver_id"`
 	PassengerLimit       int       `db:"passenger_limit"`
@@ -33,6 +33,15 @@ type dbUserTrip struct {
 	TripStatus           string    `db:"trip_status"`
 	StartTime            time.Time `db:"start_time"`
 	CreatedAt            time.Time `db:"trip_created_at"`
+}
+
+type dbTripPassenger struct {
+	TripID        uuid.UUID `db:"trip_id"`
+	PassengerID   uuid.UUID `db:"passenger_id"`
+	SourceID      uuid.UUID `db:"source_id"`
+	DestinationID uuid.UUID `db:"destination_id"`
+	Status        string    `db:"tp_status"`
+	CreatedAt     time.Time `db:"created_at"`
 }
 
 func toDBTrip(trip trip.Trip) dbTrip {
@@ -97,4 +106,15 @@ func toCoreUserTripSlice(dbUserTrips []dbUserTrip) []trip.UserTrip {
 		trips[i] = toCoreUserTrip(dbTrip)
 	}
 	return trips
+}
+
+func toDBTripPassenger(tripPassenger trip.TripPassenger) dbTripPassenger {
+	return dbTripPassenger{
+		TripID:        tripPassenger.TripID,
+		PassengerID:   tripPassenger.PassengerID,
+		SourceID:      tripPassenger.SourceID,
+		DestinationID: tripPassenger.DestinationID,
+		Status:        tripPassenger.Status,
+		CreatedAt:     tripPassenger.CreatedAt.UTC(),
+	}
 }

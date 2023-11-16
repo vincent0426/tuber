@@ -24,8 +24,8 @@ CREATE TABLE driver (
 CREATE TABLE locations (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
-  address TEXT,
-  coordinates GEOMETRY(Point, 4326)
+  place_id TEXT NOT NULL,
+  lat_lon GEOGRAPHY(POINT, 4326) NOT NULL
 );
 CREATE TABLE trip (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -67,15 +67,15 @@ CREATE TABLE trip_station (
 CREATE TABLE trip_passenger (
   trip_id UUID NOT NULL,
   passenger_id UUID NOT NULL,
-  station_source_id UUID NOT NULL,
-  station_destination_id UUID NOT NULL,
+  source_id UUID NOT NULL,
+  destination_id UUID NOT NULL,
   status TEXT CHECK (status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (trip_id, passenger_id),
   FOREIGN KEY (trip_id) REFERENCES trip(id),
   FOREIGN KEY (passenger_id) REFERENCES users(id),
-  FOREIGN KEY (station_source_id) REFERENCES locations(id),
-  FOREIGN KEY (station_destination_id) REFERENCES locations(id)
+  FOREIGN KEY (source_id) REFERENCES locations(id),
+  FOREIGN KEY (destination_id) REFERENCES locations(id)
 );
 CREATE TABLE alert (
   trip_id UUID PRIMARY KEY,
@@ -103,49 +103,50 @@ CREATE TABLE favorite_driver (
   FOREIGN KEY (driver_id) REFERENCES driver(user_id)
 );
 -- ------------------ view ------------------
--- trip_view: trip + driverinfo + tripinfo + station_source + station_destination
+-- trip_view: trip + driverinfo + tripinfo + source + destination
 CREATE VIEW trip_view AS
 SELECT trip.*,
-  udriver.name AS driver_name,
+  users.name AS driver_name,
   driver.brand AS driver_brand,
   driver.model AS driver_model,
   driver.color AS driver_color,
   driver.plate AS driver_plate,
   location_source.name AS source_name,
-  location_source.address AS source_address,
-  location_source.coordinates AS source_coordinates,
+  location_source.place_id AS source_place_id,
+  location_source.lat_lon AS source_lat_lon,
   location_destination.name AS destination_name,
-  location_destination.address AS destination_address,
-  location_destination.coordinates AS destination_coordinates
+  location_destination.place_id AS destination_place_id,
+  location_destination.lat_lon AS destination_lat_lon
 FROM trip
-  JOIN users AS udriver ON trip.driver_id = udriver.id
+  JOIN users ON users.id = trip.driver_id
   JOIN driver ON trip.driver_id = driver.user_id
   JOIN locations AS location_source ON trip.source_id = location_source.id
   JOIN locations AS location_destination ON trip.destination_id = location_destination.id;
 -- trip_passenger_view
 CREATE VIEW trip_passenger_view AS
 SELECT trip_passenger.*,
-  udriver.name AS driver_name,
+  users.name AS driver_name,
   driver.brand AS driver_brand,
   driver.model AS driver_model,
   driver.color AS driver_color,
   driver.plate AS driver_plate,
   location_source.name AS source_name,
-  location_source.address AS source_address,
-  location_source.coordinates AS source_coordinates,
+  location_source.place_id AS source_place_id,
+  location_source.lat_lon AS source_lat_lon,
   location_destination.name AS destination_name,
-  location_destination.address AS destination_address,
-  location_destination.coordinates AS destination_coordinates,
+  location_destination.place_id AS destination_place_id,
+  location_destination.lat_lon AS destination_lat_lon,
   passenger_location_source.name AS passenger_location_source_name,
-  passenger_location_source.address AS passenger_location_source_address,
-  passenger_location_source.coordinates AS passenger_location_source_coordinates,
+  passenger_location_source.place_id AS passenger_location_source_place_id,
+  passenger_location_source.lat_lon AS passenger_location_source_lat_lon,
   passenger_location_destination.name AS passenger_location_destination_name,
-  passenger_location_destination.address AS passenger_location_destination_address,
-  passenger_location_destination.coordinates AS passenger_location_destination_coordinates
+  passenger_location_destination.place_id AS passenger_location_destination_place_id,
+  passenger_location_destination.lat_lon AS passenger_location_destination_lat_lon
 FROM trip_passenger
   JOIN trip ON trip_passenger.trip_id = trip.id
-  JOIN users AS udriver ON trip.driver_id = udriver.id
+  JOIN users ON users.id = trip.driver_id
+  JOIN driver ON trip.driver_id = driver.user_id
   JOIN locations AS location_source ON trip.source_id = location_source.id
   JOIN locations AS location_destination ON trip.destination_id = location_destination.id
-  JOIN locations AS passenger_location_source ON trip_passenger.station_source_id = passenger_location_source.id
-  JOIN locations AS passenger_location_destination ON trip_passenger.station_destination_id = passenger_location_destination.id;
+  JOIN locations AS passenger_location_source ON trip_passenger.source_id = passenger_location_source.id
+  JOIN locations AS passenger_location_destination ON trip_passenger.destination_id = passenger_location_destination.id;

@@ -82,3 +82,54 @@ func (app AppNewTrip) Validate() error {
 	}
 	return nil
 }
+
+type AppTripPassenger struct {
+	TripID        string `json:"trip_id"`
+	PassengerID   string `json:"passenger_id"`
+	SourceID      string `json:"source_id"`
+	DestinationID string `json:"destination_id"`
+	Status        string `json:"status"`
+	CreatedAt     string `json:"createdAt"`
+}
+
+func toAppTripPassenger(tripPassenger trip.TripPassenger) AppTripPassenger {
+
+	return AppTripPassenger{
+		TripID:        tripPassenger.TripID.String(),
+		PassengerID:   tripPassenger.PassengerID.String(),
+		SourceID:      tripPassenger.SourceID.String(),
+		DestinationID: tripPassenger.DestinationID.String(),
+		Status:        tripPassenger.Status,
+		CreatedAt:     tripPassenger.CreatedAt.Format(time.RFC3339),
+	}
+}
+
+// =============================================================================
+type AppNewTripPassenger struct {
+	TripID        string `json:"trip_id" binding:"required"`
+	SourceID      string `json:"source_id" binding:"required"`
+	DestinationID string `json:"destination_id" binding:"required"`
+}
+
+func toCoreNewTripPassenger(app AppNewTripPassenger) (trip.NewTripPassenger, error) {
+	uuTripID, err := uuid.Parse(app.TripID)
+	if err != nil {
+		return trip.NewTripPassenger{}, err
+	}
+	uuSourceID, err := uuid.Parse(app.SourceID)
+	if err != nil {
+		return trip.NewTripPassenger{}, err
+	}
+	uuDestinationID, err := uuid.Parse(app.DestinationID)
+	if err != nil {
+		return trip.NewTripPassenger{}, err
+	}
+
+	tripPassenger := trip.NewTripPassenger{
+		TripID:        uuTripID,
+		SourceID:      uuSourceID,
+		DestinationID: uuDestinationID,
+	}
+
+	return tripPassenger, nil
+}

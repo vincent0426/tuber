@@ -30,15 +30,15 @@ SELECT id,
 FROM users
 WHERE email = 'john.doe@example.com';
 -- Insert data into 'locations' table
-INSERT INTO locations (name, address, coordinates)
+INSERT INTO locations (name, place_id, lat_lon)
 VALUES (
     'Location 1',
-    '1234 Main St, Anytown, USA',
+    'ChIJpTvG15DL1IkRd8S0KlBVNTI',
     ST_GeomFromText('POINT(-71.060316 48.432044)', 4326)
   ),
   (
     'Location 2',
-    '5678 Elm St, Anothertown, USA',
+    'D9iJyWEHuEmuEmsRm9hTkapTCrk',
     ST_GeomFromText('POINT(-69.445469 43.769196)', 4326)
   );
 -- Insert a trip (assuming John Doe is the driver)
@@ -101,8 +101,8 @@ SELECT (
 INSERT INTO trip_passenger (
     trip_id,
     passenger_id,
-    station_source_id,
-    station_destination_id
+    source_id,
+    destination_id
   )
 SELECT (
     SELECT id

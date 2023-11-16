@@ -17,6 +17,12 @@ var (
 	ErrAuthenticationFailure = errors.New("authentication failed")
 )
 
+var (
+	StatusPending  = "pending"
+	StatusAccepted = "accepted"
+	StatusRejected = "rejected"
+)
+
 // Storer interface declares the behavior this package needs to perists and
 // retrieve data.
 type Storer interface {
@@ -24,12 +30,10 @@ type Storer interface {
 	// Update(ctx context.Context, trip Trip) error
 	// Delete(ctx context.Context, trip Trip) error
 	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error)
-	QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
 	QueryByID(ctx context.Context, tripID string) (Trip, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	// QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]Trip, error)
-	// QueryByEmail(ctx context.Context, email mail.Address) (Trip, error)
-	// QueryByGoogleID(ctx context.Context, googleID string) (Trip, error)
+	QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
+	CreateTripPassenger(ctx context.Context, tripPassenger TripPassenger) error
 }
 
 // Core manages the set of APIs for user access.
@@ -45,16 +49,16 @@ func NewCore(storer Storer) *Core {
 }
 
 // Create inserts a new trip into the database.
-func (c *Core) Create(ctx context.Context, nu NewTrip) (Trip, error) {
+func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 	now := time.Now()
 
 	trip := Trip{
 		ID:             uuid.New(),
-		DriverID:       nu.DriverID,
-		PassengerLimit: nu.PassengerLimit,
-		SourceID:       nu.SourceID,
-		DestinationID:  nu.DestinationID,
-		StartTime:      nu.StartTime,
+		DriverID:       nt.DriverID,
+		PassengerLimit: nt.PassengerLimit,
+		SourceID:       nt.SourceID,
+		DestinationID:  nt.DestinationID,
+		StartTime:      nt.StartTime,
 		CreatedAt:      now,
 	}
 	fmt.Println("core: trip: create: trip:", trip)
@@ -115,12 +119,10 @@ func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
 
 // QueryByUserID returns the trip with the specified userID from the database.
 func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error) {
-	fmt.Println("core: trip: querybyuserid: userID:", userID)
 	trips, err := c.storer.QueryByUserID(ctx, userID, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
-	fmt.Println("core: trip: querybyuserid: trips:", trips)
 	return trips, nil
 }
 
@@ -134,12 +136,23 @@ func (c *Core) QueryByID(ctx context.Context, tripID string) (Trip, error) {
 	return user, nil
 }
 
-// QueryByIDs gets the specified user from the database.
-// func (c *Core) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]Trip, error) {
-// 	user, err := c.storer.QueryByIDs(ctx, userIDs)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("query: userIDs[%s]: %w", userIDs, err)
-// 	}
+// CreateTripPassenger inserts a new trip into the database.
+func (c *Core) Join(ctx context.Context, ntp NewTripPassenger) (TripPassenger, error) {
+	now := time.Now()
 
-// 	return user, nil
-// }
+	tripPassenger := TripPassenger{
+		TripID:        ntp.TripID,
+		PassengerID:   ntp.PassengerID,
+		SourceID:      ntp.SourceID,
+		DestinationID: ntp.DestinationID,
+		Status:        StatusPending,
+		CreatedAt:     now,
+	}
+
+	fmt.Println("core: trip: createtrippassenger: tripPassenger:", tripPassenger)
+	if err := c.storer.CreateTripPassenger(ctx, tripPassenger); err != nil {
+		return TripPassenger{}, fmt.Errorf("create: %w", err)
+	}
+
+	return tripPassenger, nil
+}

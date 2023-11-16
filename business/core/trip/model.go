@@ -27,6 +27,22 @@ type NewTrip struct {
 	StartTime      time.Time
 }
 
+type TripPassenger struct {
+	TripID        uuid.UUID
+	PassengerID   uuid.UUID
+	SourceID      uuid.UUID
+	DestinationID uuid.UUID
+	Status        string
+	CreatedAt     time.Time
+}
+type NewTripPassenger struct {
+	TripID        uuid.UUID
+	PassengerID   uuid.UUID
+	SourceID      uuid.UUID
+	DestinationID uuid.UUID
+	Status        string
+}
+
 type UserTrip struct {
 	TripID               uuid.UUID
 	PassengerID          uuid.UUID

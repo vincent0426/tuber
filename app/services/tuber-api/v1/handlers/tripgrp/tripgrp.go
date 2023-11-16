@@ -133,25 +133,27 @@ func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTrip(usr), http.StatusOK)
 }
 
-// func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
-// 	var app AppJoinTrip
-// 	// Validate the request.
-// 	if err := web.Decode(c, &app); err != nil {
-// 		return response.NewError(err, http.StatusBadRequest)
-// 	}
+func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
+	userID := auth.GetUserID(ctx)
+	var app AppNewTripPassenger
+	// Validate the request.
+	if err := web.Decode(c, &app); err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
 
-// 	nc, err := toCoreJoinTrip(app)
-// 	if err != nil {
-// 		return response.NewError(err, http.StatusBadRequest)
-// 	}
+	ntp, err := toCoreNewTripPassenger(app)
+	if err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+	ntp.PassengerID = userID
 
-// 	trip, err := h.trip.Join(ctx, nc)
-// 	if err != nil {
-// 		if errors.Is(err, user.ErrUniqueEmail) {
-// 			return response.NewError(err, http.StatusConflict)
-// 		}
-// 		return fmt.Errorf("join: usr[%+v]: %w", trip, err)
-// 	}
+	tripPassenger, err := h.trip.Join(ctx, ntp)
+	if err != nil {
+		if errors.Is(err, user.ErrUniqueEmail) {
+			return response.NewError(err, http.StatusConflict)
+		}
+		return fmt.Errorf("join: tripPassenger[%+v]: %w", tripPassenger, err)
+	}
 
-// 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
-// }
+	return web.Respond(ctx, c.Writer, toAppTripPassenger(tripPassenger), http.StatusCreated)
+}

@@ -1,17 +1,16 @@
-// Package userdb contains user related CRUD functionality.
-package tripdb
+// Package locationdb contains user related CRUD functionality.
+package locationdb
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/TSMC-Uber/server/business/core/trip"
+	"github.com/TSMC-Uber/server/business/core/location"
 	"github.com/TSMC-Uber/server/business/data/order"
 	"github.com/TSMC-Uber/server/business/sys/database"
 	"github.com/TSMC-Uber/server/foundation/logger"
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -30,13 +29,13 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 }
 
 // // Create inserts a new trip into the database.
-func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
-	dbTrip := toDBTrip(trip)
-	fmt.Println("store: trip: create: dbTrip:", dbTrip)
+func (s *Store) Create(ctx context.Context, location location.Location) error {
+	dbLocation := toDBLocation(location)
+	fmt.Println("store: trip: create: dbLocation:", dbLocation)
 	sql, args, err := sq.
-		Insert("trip").
-		Columns("id", "driver_id", "passenger_limit", "source_id", "destination_id", "start_time", "created_at").
-		Values(dbTrip.ID, dbTrip.DriverID, dbTrip.PassengerLimit, dbTrip.SourceID, dbTrip.DestinationID, dbTrip.StartTime, dbTrip.CreatedAt).
+		Insert("locations").
+		Columns("id", "name", "place_id", "lat_lon").
+		Values(dbLocation.ID, dbLocation.Name, dbLocation.PlaceID, squirrel.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)", dbLocation.Lat, dbLocation.Lon)).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -103,13 +102,14 @@ func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
 // }
 
 // // QueryAll retrieves a list of existing trips from the database.
-func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]trip.Trip, error) {
-	builder := sq.Select("*").From("trip")
+func (s *Store) QueryAll(ctx context.Context, filter location.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]location.Location, error) {
+	builder := sq.Select("id", "name", "place_id", "ST_Y(lat_lon::geometry) AS lat", "ST_X(lat_lon::geometry) AS lon").From("locations")
 
 	builder = s.applyFilter(builder, filter)
 
 	orderByClause, err := orderByClause(orderBy)
 	if err != nil {
+		fmt.Println("store: trip: queryall: err:", err)
 		return nil, err
 	}
 	builder = builder.OrderBy(orderByClause)
@@ -123,74 +123,52 @@ func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy o
 		return nil, fmt.Errorf("tosql: %w", err)
 	}
 
-	var dbTrips []dbTrip
-	if err := database.QueryContext(ctx, s.log, s.db, sql, nil, &dbTrips); err != nil {
+	var dbLocations []dbLocation
+	if err := database.QueryContext(ctx, s.log, s.db, sql, nil, &dbLocations); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toCoreTripSlice(dbTrips), nil
+	return toCoreLocationSlice(dbLocations), nil
 }
 
 // Query retrieves a trip from the database.
-func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID, filter trip.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]trip.UserTrip, error) {
-	sql, args, err := sq.
-		Select(
-			"trip_passenger.passenger_id",
-			"trip_passenger.source_id",
-			"trip_passenger.destination_id",
-			"trip_passenger.status AS tp_status",
-			"trip.id AS trip_id",
-			"trip.driver_id",
-			"trip.passenger_limit",
-			"trip.source_id",
-			"trip.destination_id",
-			"trip.status AS trip_status",
-			"trip.start_time",
-			"trip.created_at AS trip_created_at",
-		).
-		From("trip_passenger").
-		Join("trip ON trip_passenger.trip_id = trip.id").
-		Where(sq.Eq{"trip_passenger.passenger_id": userID.String()}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+// func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID, filter trip.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]trip.UserTrip, error) {
+// 	sql, args, err := sq.
+// 		Select(
+// 			"trip_passenger.passenger_id",
+// 			"trip_passenger.station_source_id",
+// 			"trip_passenger.station_destination_id",
+// 			"trip_passenger.status AS tp_status",
+// 			"trip.id AS trip_id",
+// 			"trip.driver_id",
+// 			"trip.passenger_limit",
+// 			"trip.source_id",
+// 			"trip.destination_id",
+// 			"trip.status AS trip_status",
+// 			"trip.start_time",
+// 			"trip.created_at AS trip_created_at",
+// 		).
+// 		From("trip_passenger").
+// 		Join("trip ON trip_passenger.trip_id = trip.id").
+// 		Where(sq.Eq{"trip_passenger.passenger_id": userID.String()}).
+// 		PlaceholderFormat(sq.Dollar).
+// 		ToSql()
 
-	if err != nil {
-		return nil, fmt.Errorf("tosql: %w", err)
-	}
+// 	if err != nil {
+// 		return nil, fmt.Errorf("tosql: %w", err)
+// 	}
 
-	var dbTrips []dbUserTrip
-	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
-		return nil, fmt.Errorf("namedqueryslice: %w", err)
-	}
+// 	var dbTrips []dbUserTrip
+// 	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
+// 		return nil, fmt.Errorf("namedqueryslice: %w", err)
+// 	}
 
-	return toCoreUserTripSlice(dbTrips), nil
-}
-
-func (s *Store) CreateTripPassenger(ctx context.Context, tripPassenger trip.TripPassenger) error {
-	dbTripPassenger := toDBTripPassenger(tripPassenger)
-	fmt.Println("store: trip: createtrippassenger: dbTripPassenger:", dbTripPassenger)
-	sql, args, err := sq.
-		Insert("trip_passenger").
-		Columns("trip_id", "passenger_id", "source_id", "destination_id", "status", "created_at").
-		Values(dbTripPassenger.TripID, dbTripPassenger.PassengerID, dbTripPassenger.SourceID, dbTripPassenger.DestinationID, dbTripPassenger.Status, dbTripPassenger.CreatedAt).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
-
-	if err != nil {
-		return fmt.Errorf("tosql: %w", err)
-	}
-
-	// execute the sql
-	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
-		return fmt.Errorf("execcontext: %w", err)
-	}
-
-	return nil
-}
+// 	return toCoreUserTripSlice(dbTrips), nil
+// }
 
 // // Count returns the total number of trips in the DB.
-func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error) {
-	builder := sq.Select("COUNT(*) AS count").From("trip")
+func (s *Store) Count(ctx context.Context, filter location.QueryFilter) (int, error) {
+	builder := sq.Select("COUNT(*) AS count").From("locations")
 
 	builder = s.applyFilter(builder, filter)
 
@@ -203,7 +181,7 @@ func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error)
 	var count struct {
 		Count int `db:"count"`
 	}
-	if err := database.GetContext(ctx, s.log, s.db, sql, nil, &count); err != nil {
+	if err = database.GetContext(ctx, s.log, s.db, sql, nil, &count); err != nil {
 		return 0, fmt.Errorf("namedquerystruct: %w", err)
 	}
 
@@ -211,28 +189,28 @@ func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error)
 }
 
 // QueryByID gets the specified trip from the database.
-func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.Trip, error) {
-	sql, args, err := sq.
-		Select("*").
-		From("trip").
-		Where(sq.Eq{"id": tripID}).
-		PlaceholderFormat(sq.Dollar).
-		ToSql()
+// func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.Trip, error) {
+// 	sql, args, err := sq.
+// 		Select("*").
+// 		From("trip").
+// 		Where(sq.Eq{"id": tripID}).
+// 		PlaceholderFormat(sq.Dollar).
+// 		ToSql()
 
-	if err != nil {
-		return trip.Trip{}, fmt.Errorf("tosql: %w", err)
-	}
+// 	if err != nil {
+// 		return trip.Trip{}, fmt.Errorf("tosql: %w", err)
+// 	}
 
-	var dbTrip dbTrip
-	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbTrip); err != nil {
-		if errors.Is(err, database.ErrDBNotFound) {
-			return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", trip.ErrNotFound)
-		}
-		return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", err)
-	}
+// 	var dbTrip dbTrip
+// 	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbTrip); err != nil {
+// 		if errors.Is(err, database.ErrDBNotFound) {
+// 			return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", trip.ErrNotFound)
+// 		}
+// 		return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", err)
+// 	}
 
-	return toCoreTrip(dbTrip), nil
-}
+// 	return toCoreTrip(dbTrip), nil
+// }
 
 // // QueryByIDs gets the specified users from the database.
 // func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]user.User, error) {
