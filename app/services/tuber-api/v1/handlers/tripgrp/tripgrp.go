@@ -72,8 +72,8 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 	}
 
 	items := make([]AppTrip, len(trips))
-	for i, usr := range trips {
-		items[i] = toAppTrip(usr)
+	for i, trip := range trips {
+		items[i] = toAppTrip(trip)
 	}
 
 	total, err := h.trip.Count(ctx, filter)
