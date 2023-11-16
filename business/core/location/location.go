@@ -2,6 +2,7 @@ package location
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/TSMC-Uber/server/business/data/order"
@@ -10,7 +11,8 @@ import (
 
 // Set of error variables for CRUD operations.
 var (
-// ErrNotFound              = errors.New("user not found")
+	ErrNotFound = errors.New("location not found")
+
 // ErrUniqueEmail           = errors.New("email is not unique")
 // ErrAuthenticationFailure = errors.New("authentication failed")
 )
@@ -22,8 +24,7 @@ type Storer interface {
 	// Update(ctx context.Context, trip Trip) error
 	// Delete(ctx context.Context, trip Trip) error
 	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Location, error)
-	// QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
-	// QueryByID(ctx context.Context, tripID string) (Trip, error)
+	QueryByID(ctx context.Context, locationID string) (Location, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	// QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]Trip, error)
 	// QueryByEmail(ctx context.Context, email mail.Address) (Trip, error)
@@ -108,26 +109,15 @@ func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return c.storer.Count(ctx, filter)
 }
 
-// // QueryByUserID returns the trip with the specified userID from the database.
-// func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error) {
-// 	fmt.Println("core: trip: querybyuserid: userID:", userID)
-// 	trips, err := c.storer.QueryByUserID(ctx, userID, filter, orderBy, pageNumber, rowsPerPage)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("query: %w", err)
-// 	}
-// 	fmt.Println("core: trip: querybyuserid: trips:", trips)
-// 	return trips, nil
-// }
-
 // // QueryByID gets the specified user from the database.
-// func (c *Core) QueryByID(ctx context.Context, tripID string) (Trip, error) {
-// 	user, err := c.storer.QueryByID(ctx, tripID)
-// 	if err != nil {
-// 		return Trip{}, fmt.Errorf("query: tripID[%s]: %w", tripID, err)
-// 	}
+func (c *Core) QueryByID(ctx context.Context, locationID string) (Location, error) {
+	location, err := c.storer.QueryByID(ctx, locationID)
+	if err != nil {
+		return Location{}, fmt.Errorf("query: tripID[%s]: %w", locationID, err)
+	}
 
-// 	return user, nil
-// }
+	return location, nil
+}
 
 // QueryByIDs gets the specified user from the database.
 // func (c *Core) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]Trip, error) {

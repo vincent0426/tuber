@@ -133,3 +133,64 @@ func toCoreNewTripPassenger(app AppNewTripPassenger) (trip.NewTripPassenger, err
 
 	return tripPassenger, nil
 }
+
+// ID:                   dbTripView.ID,
+//
+//	DriverName:           dbTripView.DriverName,
+//	DriverBrand:          dbTripView.DriverBrand,
+//	DriverModel:          dbTripView.DriverModel,
+//	DriverColor:          dbTripView.DriverColor,
+//	DriverPlate:          dbTripView.DriverPlate,
+//	SourceName:           dbTripView.SourceName,
+//	SourcePlaceID:        dbTripView.SourcePlaceID,
+//	SourceLatitude:       dbTripView.SourceLatitude,
+//	SourceLongitude:      dbTripView.SourceLongitude,
+//	DestinationName:      dbTripView.DestinationName,
+//	DestinationPlaceID:   dbTripView.DestinationPlaceID,
+//	DestinationLatitude:  dbTripView.DestinationLatitude,
+//	DestinationLongitude: dbTripView.DestinationLongitude,
+//	Status:               dbTripView.Status,
+//	StartTime:            dbTripView.StartTime.In(time.Local),
+//	CreatedAt:            dbTripView.CreatedAt.In(time.Local),
+type AppTripView struct {
+	ID                   string  `json:"id"`
+	DriverName           string  `json:"driver_name"`
+	DriverBrand          string  `json:"driver_brand"`
+	DriverModel          string  `json:"driver_model"`
+	DriverColor          string  `json:"driver_color"`
+	DriverPlate          string  `json:"driver_plate"`
+	SourceName           string  `json:"source_name"`
+	SourcePlaceID        string  `json:"source_place_id"`
+	SourceLatitude       float64 `json:"source_latitude"`
+	SourceLongitude      float64 `json:"source_longitude"`
+	DestinationName      string  `json:"destination_name"`
+	DestinationPlaceID   string  `json:"destination_place_id"`
+	DestinationLatitude  float64 `json:"destination_latitude"`
+	DestinationLongitude float64 `json:"destination_longitude"`
+	Status               string  `json:"status"`
+	StartTime            string  `json:"start_time"`
+	CreatedAt            string  `json:"createdAt"`
+}
+
+func toAppTripView(tripView trip.TripView) AppTripView {
+
+	return AppTripView{
+		ID:                   tripView.ID.String(),
+		DriverName:           tripView.DriverName,
+		DriverBrand:          tripView.DriverBrand,
+		DriverModel:          tripView.DriverModel,
+		DriverColor:          tripView.DriverColor,
+		DriverPlate:          tripView.DriverPlate,
+		SourceName:           tripView.SourceName,
+		SourcePlaceID:        tripView.SourcePlaceID,
+		SourceLatitude:       tripView.SourceLatitude,
+		SourceLongitude:      tripView.SourceLongitude,
+		DestinationName:      tripView.DestinationName,
+		DestinationPlaceID:   tripView.DestinationPlaceID,
+		DestinationLatitude:  tripView.DestinationLatitude,
+		DestinationLongitude: tripView.DestinationLongitude,
+		Status:               tripView.Status,
+		StartTime:            tripView.StartTime.Format(time.RFC3339),
+		CreatedAt:            tripView.CreatedAt.Format(time.RFC3339),
+	}
+}

@@ -29,8 +29,8 @@ type Storer interface {
 	Create(ctx context.Context, trip Trip) error
 	// Update(ctx context.Context, trip Trip) error
 	// Delete(ctx context.Context, trip Trip) error
-	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error)
-	QueryByID(ctx context.Context, tripID string) (Trip, error)
+	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]TripView, error)
+	QueryByID(ctx context.Context, tripID string) (TripView, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
 	CreateTripPassenger(ctx context.Context, tripPassenger TripPassenger) error
@@ -103,7 +103,7 @@ func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 // }
 
 // QueryQueryAll retrieves a list of existing trips from the database.
-func (c *Core) QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Trip, error) {
+func (c *Core) QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]TripView, error) {
 	trips, err := c.storer.QueryAll(ctx, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
@@ -127,13 +127,13 @@ func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter Query
 }
 
 // QueryByID gets the specified user from the database.
-func (c *Core) QueryByID(ctx context.Context, tripID string) (Trip, error) {
-	user, err := c.storer.QueryByID(ctx, tripID)
+func (c *Core) QueryByID(ctx context.Context, tripID string) (TripView, error) {
+	trip, err := c.storer.QueryByID(ctx, tripID)
 	if err != nil {
-		return Trip{}, fmt.Errorf("query: tripID[%s]: %w", tripID, err)
+		return TripView{}, fmt.Errorf("query: tripID[%s]: %w", tripID, err)
 	}
 
-	return user, nil
+	return trip, nil
 }
 
 // CreateTripPassenger inserts a new trip into the database.

@@ -3,6 +3,7 @@ package locationgrp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -81,54 +82,22 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// Query returns a trip that matches the specified ID in the session.
-// func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
-// 	id := auth.GetUserID(ctx)
-
-// 	page, err := paging.ParseRequest(c.Request)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	filter, err := parseFilter(c.Request)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	orderBy, err := parseOrder(c.Request)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	trip, err := h.trip.QueryByUserID(ctx, id, filter, orderBy, page.Number, page.RowsPerPage)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, user.ErrNotFound):
-// 			return response.NewError(err, http.StatusNotFound)
-// 		default:
-// 			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
-// 		}
-// 	}
-
-// 	return web.Respond(ctx, c.Writer, paging.NewResponse(trip, len(trip), page.Number, page.RowsPerPage), http.StatusOK)
-// }
-
 // QueryByID returns a trip by its ID.
-// func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
-// 	id := c.Param("id")
+func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
+	id := c.Param("id")
 
-// 	usr, err := h.trip.QueryByID(ctx, id)
-// 	if err != nil {
-// 		switch {
-// 		case errors.Is(err, user.ErrNotFound):
-// 			return response.NewError(err, http.StatusNotFound)
-// 		default:
-// 			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
-// 		}
-// 	}
+	qlocation, err := h.location.QueryByID(ctx, id)
+	if err != nil {
+		switch {
+		case errors.Is(err, location.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
+		}
+	}
 
-// 	return web.Respond(ctx, c.Writer, toAppTrip(usr), http.StatusOK)
-// }
+	return web.Respond(ctx, c.Writer, toAppLocation(qlocation), http.StatusOK)
+}
 
 // func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
 // 	var app AppJoinTrip

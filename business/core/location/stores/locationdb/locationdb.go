@@ -3,6 +3,7 @@ package locationdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
@@ -189,28 +190,28 @@ func (s *Store) Count(ctx context.Context, filter location.QueryFilter) (int, er
 }
 
 // QueryByID gets the specified trip from the database.
-// func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.Trip, error) {
-// 	sql, args, err := sq.
-// 		Select("*").
-// 		From("trip").
-// 		Where(sq.Eq{"id": tripID}).
-// 		PlaceholderFormat(sq.Dollar).
-// 		ToSql()
+func (s *Store) QueryByID(ctx context.Context, locationID string) (location.Location, error) {
+	sql, args, err := sq.
+		Select("*").
+		From("locations").
+		Where(sq.Eq{"id": locationID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
 
-// 	if err != nil {
-// 		return trip.Trip{}, fmt.Errorf("tosql: %w", err)
-// 	}
+	if err != nil {
+		return location.Location{}, fmt.Errorf("tosql: %w", err)
+	}
 
-// 	var dbTrip dbTrip
-// 	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbTrip); err != nil {
-// 		if errors.Is(err, database.ErrDBNotFound) {
-// 			return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", trip.ErrNotFound)
-// 		}
-// 		return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", err)
-// 	}
+	var dbLocation dbLocation
+	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbLocation); err != nil {
+		if errors.Is(err, database.ErrDBNotFound) {
+			return location.Location{}, fmt.Errorf("getcontext: %w", location.ErrNotFound)
+		}
+		return location.Location{}, fmt.Errorf("getcontext: %w", err)
+	}
 
-// 	return toCoreTrip(dbTrip), nil
-// }
+	return toCoreLocation(dbLocation), nil
+}
 
 // // QueryByIDs gets the specified users from the database.
 // func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]user.User, error) {

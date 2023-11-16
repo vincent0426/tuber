@@ -116,8 +116,8 @@ SELECT trip.*,
   location_source.lat_lon AS source_lat_lon,
   location_destination.name AS destination_name,
   location_destination.place_id AS destination_place_id,
-  location_destination.lat_lon AS destination_lat_lon
-FROM trip
+  location_destination.lat_lon AS destination_lat_lon,
+  FROM trip
   JOIN users ON users.id = trip.driver_id
   JOIN driver ON trip.driver_id = driver.user_id
   JOIN locations AS location_source ON trip.source_id = location_source.id

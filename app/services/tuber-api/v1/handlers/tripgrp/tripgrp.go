@@ -71,9 +71,9 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 		return fmt.Errorf("query: %w", err)
 	}
 
-	items := make([]AppTrip, len(trips))
+	items := make([]AppTripView, len(trips))
 	for i, trip := range trips {
-		items[i] = toAppTrip(trip)
+		items[i] = toAppTripView(trip)
 	}
 
 	total, err := h.trip.Count(ctx, filter)
@@ -103,34 +103,34 @@ func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	trip, err := h.trip.QueryByUserID(ctx, id, filter, orderBy, page.Number, page.RowsPerPage)
+	qtrip, err := h.trip.QueryByUserID(ctx, id, filter, orderBy, page.Number, page.RowsPerPage)
 	if err != nil {
 		switch {
-		case errors.Is(err, user.ErrNotFound):
+		case errors.Is(err, trip.ErrNotFound):
 			return response.NewError(err, http.StatusNotFound)
 		default:
 			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
 		}
 	}
 
-	return web.Respond(ctx, c.Writer, paging.NewResponse(trip, len(trip), page.Number, page.RowsPerPage), http.StatusOK)
+	return web.Respond(ctx, c.Writer, paging.NewResponse(qtrip, len(qtrip), page.Number, page.RowsPerPage), http.StatusOK)
 }
 
 // QueryByID returns a trip by its ID.
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	id := c.Param("id")
 
-	usr, err := h.trip.QueryByID(ctx, id)
+	qtrip, err := h.trip.QueryByID(ctx, id)
 	if err != nil {
 		switch {
-		case errors.Is(err, user.ErrNotFound):
+		case errors.Is(err, trip.ErrNotFound):
 			return response.NewError(err, http.StatusNotFound)
 		default:
 			return fmt.Errorf("querybyid: id[%s]: %w", id, err)
 		}
 	}
 
-	return web.Respond(ctx, c.Writer, toAppTrip(usr), http.StatusOK)
+	return web.Respond(ctx, c.Writer, toAppTripView(qtrip), http.StatusOK)
 }
 
 func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {

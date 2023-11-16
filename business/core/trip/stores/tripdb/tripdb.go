@@ -103,8 +103,26 @@ func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
 // }
 
 // // QueryAll retrieves a list of existing trips from the database.
-func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]trip.Trip, error) {
-	builder := sq.Select("*").From("trip")
+func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]trip.TripView, error) {
+	builder := sq.Select(
+		"trip_view.id",
+		"trip_view.driver_name",
+		"trip_view.driver_brand",
+		"trip_view.driver_model",
+		"trip_view.driver_color",
+		"trip_view.driver_plate",
+		"trip_view.source_name",
+		"trip_view.source_place_id",
+		"ST_Y(trip_view.source_lat_lon::geometry) AS source_latitude",
+		"ST_X(trip_view.source_lat_lon::geometry) AS source_longitude",
+		"trip_view.destination_name",
+		"trip_view.destination_place_id",
+		"ST_Y(trip_view.destination_lat_lon::geometry) AS destination_latitude",
+		"ST_X(trip_view.destination_lat_lon::geometry) AS destination_longitude",
+		"trip_view.status",
+		"trip_view.start_time",
+		"trip_view.created_at",
+	).From("trip_view")
 
 	builder = s.applyFilter(builder, filter)
 
@@ -123,12 +141,12 @@ func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy o
 		return nil, fmt.Errorf("tosql: %w", err)
 	}
 
-	var dbTrips []dbTrip
-	if err := database.QueryContext(ctx, s.log, s.db, sql, nil, &dbTrips); err != nil {
+	var dbTripViews []dbTripView
+	if err := database.QueryContext(ctx, s.log, s.db, sql, nil, &dbTripViews); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)
 	}
 
-	return toCoreTripSlice(dbTrips), nil
+	return toCoreTripViewSlice(dbTripViews), nil
 }
 
 // Query retrieves a trip from the database.
@@ -211,27 +229,43 @@ func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error)
 }
 
 // QueryByID gets the specified trip from the database.
-func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.Trip, error) {
-	sql, args, err := sq.
-		Select("*").
-		From("trip").
+func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.TripView, error) {
+	sql, args, err := sq.Select(
+		"trip_view.id",
+		"trip_view.driver_name",
+		"trip_view.driver_brand",
+		"trip_view.driver_model",
+		"trip_view.driver_color",
+		"trip_view.driver_plate",
+		"trip_view.source_name",
+		"trip_view.source_place_id",
+		"ST_Y(trip_view.source_lat_lon::geometry) AS source_latitude",
+		"ST_X(trip_view.source_lat_lon::geometry) AS source_longitude",
+		"trip_view.destination_name",
+		"trip_view.destination_place_id",
+		"ST_Y(trip_view.destination_lat_lon::geometry) AS destination_latitude",
+		"ST_X(trip_view.destination_lat_lon::geometry) AS destination_longitude",
+		"trip_view.status",
+		"trip_view.start_time",
+		"trip_view.created_at",
+	).From("trip_view").
 		Where(sq.Eq{"id": tripID}).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
 	if err != nil {
-		return trip.Trip{}, fmt.Errorf("tosql: %w", err)
+		return trip.TripView{}, fmt.Errorf("tosql: %w", err)
 	}
 
-	var dbTrip dbTrip
+	var dbTrip dbTripView
 	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbTrip); err != nil {
 		if errors.Is(err, database.ErrDBNotFound) {
-			return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", trip.ErrNotFound)
+			return trip.TripView{}, fmt.Errorf("namedquerystruct: %w", trip.ErrNotFound)
 		}
-		return trip.Trip{}, fmt.Errorf("namedquerystruct: %w", err)
+		return trip.TripView{}, fmt.Errorf("namedquerystruct: %w", err)
 	}
 
-	return toCoreTrip(dbTrip), nil
+	return toCoreTripView(dbTrip), nil
 }
 
 // // QueryByIDs gets the specified users from the database.
