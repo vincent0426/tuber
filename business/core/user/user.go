@@ -56,6 +56,7 @@ func (c *Core) Create(ctx context.Context, nu NewUser) (User, error) {
 		ID:                 uuid.New(),
 		Name:               nu.Name,
 		Email:              nu.Email,
+		ImageURL:           nu.ImageURL,
 		Bio:                nu.Bio,
 		AcceptNotification: nu.AcceptNotification,
 		Sub:                nu.Sub,
@@ -77,6 +78,9 @@ func (c *Core) Update(ctx context.Context, usr User, uu UpdateUser) (User, error
 	}
 	if uu.Email != nil {
 		usr.Email = *uu.Email
+	}
+	if uu.ImageURL != nil {
+		usr.ImageURL = *uu.ImageURL
 	}
 	if uu.Bio != nil {
 		usr.Bio = *uu.Bio

@@ -1,13 +1,15 @@
 -- Insert data into 'users' table
-INSERT INTO users (name, email, bio)
+INSERT INTO users (name, email, image_url, bio)
 VALUES (
     'John Doe',
     'john.doe@example.com',
+    'https://example.com/john.doe.jpg',
     'Loves traveling.'
   ),
   (
     'Jane Smith',
     'jane.smith@example.com',
+    'https://example.com/jane.smith.jpg',
     'Enjoys long drives.'
   );
 -- Insert data into 'driver' table

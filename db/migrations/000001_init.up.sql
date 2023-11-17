@@ -4,6 +4,7 @@ CREATE TABLE users (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
+  image_url TEXT,
   bio TEXT,
   accept_notification BOOLEAN NOT NULL DEFAULT TRUE,
   sub TEXT,
@@ -107,6 +108,7 @@ CREATE TABLE favorite_driver (
 CREATE VIEW trip_view AS
 SELECT trip.*,
   users.name AS driver_name,
+  users.image_url AS driver_image_url,
   driver.brand AS driver_brand,
   driver.model AS driver_model,
   driver.color AS driver_color,
@@ -116,8 +118,8 @@ SELECT trip.*,
   location_source.lat_lon AS source_lat_lon,
   location_destination.name AS destination_name,
   location_destination.place_id AS destination_place_id,
-  location_destination.lat_lon AS destination_lat_lon,
-  FROM trip
+  location_destination.lat_lon AS destination_lat_lon
+FROM trip
   JOIN users ON users.id = trip.driver_id
   JOIN driver ON trip.driver_id = driver.user_id
   JOIN locations AS location_source ON trip.source_id = location_source.id
@@ -126,6 +128,7 @@ SELECT trip.*,
 CREATE VIEW trip_passenger_view AS
 SELECT trip_passenger.*,
   users.name AS driver_name,
+  users.image_url AS driver_image_url,
   driver.brand AS driver_brand,
   driver.model AS driver_model,
   driver.color AS driver_color,

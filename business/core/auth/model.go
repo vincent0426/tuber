@@ -43,3 +43,9 @@ type IDTokenInfo struct {
 	Local         string `json:"locale"`
 	jwt.StandardClaims
 }
+
+type userSessionInfo struct {
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	ImageURL string    `json:"image_url"`
+}

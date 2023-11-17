@@ -107,6 +107,7 @@ func (s *Store) QueryAll(ctx context.Context, filter trip.QueryFilter, orderBy o
 	builder := sq.Select(
 		"trip_view.id",
 		"trip_view.driver_name",
+		"trip_view.driver_image_url",
 		"trip_view.driver_brand",
 		"trip_view.driver_model",
 		"trip_view.driver_color",
@@ -233,6 +234,7 @@ func (s *Store) QueryByID(ctx context.Context, tripID string) (trip.TripView, er
 	sql, args, err := sq.Select(
 		"trip_view.id",
 		"trip_view.driver_name",
+		"trip_view.driver_image_url",
 		"trip_view.driver_brand",
 		"trip_view.driver_model",
 		"trip_view.driver_color",

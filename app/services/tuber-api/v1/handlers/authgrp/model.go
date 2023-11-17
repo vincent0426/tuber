@@ -16,9 +16,10 @@ func toCoreNewUser(tokenInfo *auth.IDTokenInfo) (user.NewUser, error) {
 		return user.NewUser{}, mid.WrapError(fmt.Errorf("parsing email: %w", err))
 	}
 	usr := user.NewUser{
-		Name:  tokenInfo.Name,
-		Email: *addr,
-		Sub:   tokenInfo.Sub,
+		Name:     tokenInfo.Name,
+		Email:    *addr,
+		ImageURL: tokenInfo.Picture,
+		Sub:      tokenInfo.Sub,
 	}
 
 	return usr, nil

@@ -41,8 +41,8 @@ func (s *Store) Create(ctx context.Context, usr user.User) error {
 
 	sql, args, err := sq.
 		Insert("users").
-		Columns("id", "name", "email", "bio", "accept_notification", "sub").
-		Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.Bio, dbUser.AcceptNotification, dbUser.Sub).
+		Columns("id", "name", "email", "image_url", "bio", "accept_notification", "sub").
+		Values(dbUser.ID, dbUser.Name, dbUser.Email, dbUser.ImageURL, dbUser.Bio, dbUser.AcceptNotification, dbUser.Sub).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 
@@ -69,6 +69,7 @@ func (s *Store) Update(ctx context.Context, usr user.User) error {
 		Update("users").
 		Set("name", dbUser.Name).
 		Set("email", dbUser.Email).
+		Set("image_url", dbUser.ImageURL).
 		Set("bio", dbUser.Bio).
 		Set("accept_notification", dbUser.AcceptNotification).
 		Set("updated_at", dbUser.UpdatedAt).

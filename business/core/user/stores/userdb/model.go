@@ -14,6 +14,7 @@ type dbUser struct {
 	ID                 uuid.UUID `db:"id"`
 	Name               string    `db:"name"`
 	Email              string    `db:"email"`
+	ImageURL           string    `db:"image_url"`
 	Bio                string    `db:"bio"`
 	AcceptNotification bool      `db:"accept_notification"`
 	Sub                string    `db:"sub"`
@@ -26,6 +27,7 @@ func toDBUser(usr user.User) dbUser {
 		ID:                 usr.ID,
 		Name:               usr.Name,
 		Email:              usr.Email.Address,
+		ImageURL:           usr.ImageURL,
 		Bio:                usr.Bio,
 		AcceptNotification: usr.AcceptNotification,
 		Sub:                usr.Sub,
@@ -43,6 +45,7 @@ func toCoreUser(dbUsr dbUser) user.User {
 		ID:                 dbUsr.ID,
 		Name:               dbUsr.Name,
 		Email:              addr,
+		ImageURL:           dbUsr.ImageURL,
 		Bio:                dbUsr.Bio,
 		AcceptNotification: dbUsr.AcceptNotification,
 		CreatedAt:          dbUsr.CreatedAt.In(time.Local),

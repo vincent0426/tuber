@@ -12,6 +12,7 @@ type User struct {
 	ID                 uuid.UUID
 	Name               string
 	Email              mail.Address
+	ImageURL           string
 	Bio                string
 	AcceptNotification bool
 	Sub                string
@@ -23,6 +24,7 @@ type User struct {
 type NewUser struct {
 	Name               string
 	Email              mail.Address
+	ImageURL           string
 	Bio                string
 	AcceptNotification bool
 	Sub                string
@@ -32,6 +34,7 @@ type NewUser struct {
 type UpdateUser struct {
 	Name               *string
 	Email              *mail.Address
+	ImageURL           *string
 	Bio                *string
 	AcceptNotification *bool
 }

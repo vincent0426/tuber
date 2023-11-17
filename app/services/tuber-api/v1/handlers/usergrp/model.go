@@ -15,6 +15,7 @@ type AppUser struct {
 	ID                 string `json:"id"`
 	Name               string `json:"name"`
 	Email              string `json:"email"`
+	ImageURL           string `json:"imageURL"`
 	Bio                string `json:"bio"`
 	AcceptNotification bool   `json:"acceptNotification"`
 	CreatedAt          string `json:"createdAt"`
@@ -27,6 +28,7 @@ func toAppUser(usr user.User) AppUser {
 		ID:                 usr.ID.String(),
 		Name:               usr.Name,
 		Email:              usr.Email.Address,
+		ImageURL:           usr.ImageURL,
 		Bio:                usr.Bio,
 		AcceptNotification: usr.AcceptNotification,
 		CreatedAt:          usr.CreatedAt.Format(time.RFC3339),
@@ -74,6 +76,7 @@ func (app AppNewUser) Validate() error {
 type AppUpdateUser struct {
 	Name               *string `json:"name"`
 	Email              *string `json:"email" validate:"omitempty,email"`
+	ImageURL           *string `json:"imageURL"`
 	Bio                *string `json:"bio"`
 	AcceptNotification *bool   `json:"acceptNotification"`
 }
@@ -91,6 +94,7 @@ func toCoreUpdateUser(app AppUpdateUser) (user.UpdateUser, error) {
 	nu := user.UpdateUser{
 		Name:               app.Name,
 		Email:              addr,
+		ImageURL:           app.ImageURL,
 		Bio:                app.Bio,
 		AcceptNotification: app.AcceptNotification,
 	}
