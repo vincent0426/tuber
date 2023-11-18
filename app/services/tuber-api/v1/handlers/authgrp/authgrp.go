@@ -55,13 +55,13 @@ func (h *Handlers) Login(ctx context.Context, c *gin.Context) error {
 	}
 
 	// store session token to redis
-	err = h.auth.SetSessionToken(ctx, *sessionToken)
+	err = h.auth.SetSessionToken(ctx, *sessionToken, usr)
 	if err != nil {
 		return mid.WrapError(fmt.Errorf("set session token: %w", err))
 	}
 	// set cookie
 	c.SetCookie("token", sessionToken.Plaintext, 3600, "/", "localhost", false, true)
-	return web.Respond(ctx, c.Writer, "login success", http.StatusOK)
+	return web.Respond(ctx, c.Writer, fmt.Sprintf("Welcome %s", usr.Name), http.StatusOK)
 }
 
 // Logout updates a user in the system.

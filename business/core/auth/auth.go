@@ -9,9 +9,11 @@ import (
 	"crypto/sha256"
 	"encoding/base32"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/sys/cachedb"
 	"github.com/golang-jwt/jwt/v4"
 
@@ -77,9 +79,18 @@ func (c *Core) GenerateSessionToken(userID uuid.UUID, ttl time.Duration) (*Sessi
 	return token, nil
 }
 
-func (c *Core) SetSessionToken(ctx context.Context, sessionToken SessionToken) error {
-	userID := sessionToken.UserID.String()
-	if err := cachedb.Set(ctx, sessionToken.Hash, userID, time.Until(sessionToken.Expiry)); err != nil {
+func (c *Core) SetSessionToken(ctx context.Context, sessionToken SessionToken, user user.User) error {
+	userSessionInfo := userSessionInfo{
+		ID:       user.ID,       // replace 'user.ID' with actual user ID
+		Name:     user.Name,     // replace 'user.Name' with actual user name
+		ImageURL: user.ImageURL, // replace 'user.ImageURL' with actual image URL
+	}
+
+	jsonUserInfo, err := json.Marshal(userSessionInfo)
+	if err != nil {
+		return fmt.Errorf("json marshal: %w", err)
+	}
+	if err := cachedb.Set(ctx, sessionToken.Hash, jsonUserInfo, time.Until(sessionToken.Expiry)); err != nil {
 		return fmt.Errorf("set session token: %w", err)
 	}
 
@@ -87,12 +98,17 @@ func (c *Core) SetSessionToken(ctx context.Context, sessionToken SessionToken) e
 }
 
 func (c *Core) GetSessionToken(ctx context.Context, sessionToken string) (uuid.UUID, error) {
-	userID, err := cachedb.Get(ctx, sessionToken)
+	userInfo, err := cachedb.Get(ctx, sessionToken)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("get session token: %w", err)
 	}
 
-	return uuid.Parse(userID)
+	var userSessionInfo userSessionInfo
+	if err := json.Unmarshal([]byte(userInfo), &userSessionInfo); err != nil {
+		return uuid.Nil, fmt.Errorf("json unmarshal: %w", err)
+	}
+
+	return uuid.Parse(userSessionInfo.ID.String())
 }
 
 func (c *Core) ParseIDToken(idToken string) (*IDTokenInfo, error) {
@@ -100,9 +116,10 @@ func (c *Core) ParseIDToken(idToken string) (*IDTokenInfo, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse unverified: %w", err)
 	}
-	if tokenInfo, ok := token.Claims.(*IDTokenInfo); ok {
-		return tokenInfo, nil
-	} else {
+	tokenInfo, ok := token.Claims.(*IDTokenInfo)
+	if !ok {
 		return nil, fmt.Errorf("token claims: %w", err)
 	}
+
+	return tokenInfo, nil
 }

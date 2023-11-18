@@ -2,9 +2,11 @@ package ws
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/TSMC-Uber/server/business/sys/cachedb"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
 )
@@ -17,11 +19,15 @@ type Storer interface {
 }
 
 // Core manages the set of APIs for user access.
-type Core struct{}
+type Core struct {
+	storer Storer
+}
 
 // NewCore constructs a core for user api access.
-func NewCore() *Core {
-	return &Core{}
+func NewCore(storer Storer) *Core {
+	return &Core{
+		storer: storer,
+	}
 }
 
 func (c *Core) SendChatHistory(ctx context.Context, streamName string, channelName string, conn *websocket.Conn) error {
@@ -31,31 +37,43 @@ func (c *Core) SendChatHistory(ctx context.Context, streamName string, channelNa
 	}
 
 	for _, xMessage := range messages {
-		msg, ok := xMessage.Values["message"].(string)
-		if ok {
-			conn.WriteMessage(websocket.TextMessage, []byte(msg))
-		} else {
-			return fmt.Errorf("message is not string: %w", err)
+		jsonMsg, ok := xMessage.Values["message"].(string)
+		if !ok {
+			fmt.Println("Invalid message format in stream")
+			continue
 		}
+
+		conn.WriteMessage(websocket.TextMessage, []byte(jsonMsg))
 	}
 
 	return nil
 }
 
-func (c *Core) ReceiveChatMessages(ctx context.Context, streamName string, channelName string, conn *websocket.Conn, ch <-chan *redis.Message) error {
+func (c *Core) ReceiveChatMessages(ctx context.Context, userID uuid.UUID, streamName string, channelName string, conn *websocket.Conn, ch <-chan *redis.Message) error {
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
 			return fmt.Errorf("read message: %w", err)
 		}
+
+		chatMessage := ChatMessage{
+			UserID:  userID.String(),
+			Message: string(message),
+		}
+
+		jsonMessage, err := json.Marshal(chatMessage)
+		if err != nil {
+			return fmt.Errorf("json marshal: %w", err)
+		}
+
 		// Add message to the Stream
-		val, err := cachedb.XAdd(ctx, streamName, map[string]interface{}{"message": string(message)})
+		val, err := cachedb.XAdd(ctx, streamName, map[string]interface{}{"message": jsonMessage})
 		if err != nil {
 			return fmt.Errorf("xadd: %w", err)
 		}
 		fmt.Println("Message added to Stream:", val)
 		// Publish message for real-time updates
-		err = cachedb.Publish(ctx, channelName, string(message))
+		err = cachedb.Publish(ctx, channelName, string(jsonMessage))
 		if err != nil {
 			return fmt.Errorf("publish: %w", err)
 		}

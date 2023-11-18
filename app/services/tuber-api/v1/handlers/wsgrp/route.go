@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/core/ws"
+	"github.com/TSMC-Uber/server/business/core/ws/stores/wsdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
@@ -28,7 +29,7 @@ func Routes(app *web.App, cfg Config) {
 	// envCore := event.NewCore(cfg.Log)
 	// usrCore := user.NewCore(cfg.Log, envCore, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB)))
 
-	wsCore := ws.NewCore()
+	wsCore := ws.NewCore(wsdb.NewStore(cfg.Log, cfg.DB))
 
 	// authen := mid.Authenticate(cfg.Auth)
 
