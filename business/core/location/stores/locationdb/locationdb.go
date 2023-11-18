@@ -29,7 +29,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	}
 }
 
-// // Create inserts a new trip into the database.
+// Create inserts a new trip into the database.
 func (s *Store) Create(ctx context.Context, location location.Location) error {
 	dbLocation := toDBLocation(location)
 	fmt.Println("store: trip: create: dbLocation:", dbLocation)
@@ -102,7 +102,7 @@ func (s *Store) Create(ctx context.Context, location location.Location) error {
 // 	return nil
 // }
 
-// // QueryAll retrieves a list of existing trips from the database.
+// QueryAll retrieves a list of existing trips from the database.
 func (s *Store) QueryAll(ctx context.Context, filter location.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]location.Location, error) {
 	builder := sq.Select("id", "name", "place_id", "ST_Y(lat_lon::geometry) AS lat", "ST_X(lat_lon::geometry) AS lon").From("locations")
 
@@ -167,7 +167,7 @@ func (s *Store) QueryAll(ctx context.Context, filter location.QueryFilter, order
 // 	return toCoreUserTripSlice(dbTrips), nil
 // }
 
-// // Count returns the total number of trips in the DB.
+// Count returns the total number of trips in the DB.
 func (s *Store) Count(ctx context.Context, filter location.QueryFilter) (int, error) {
 	builder := sq.Select("COUNT(*) AS count").From("locations")
 

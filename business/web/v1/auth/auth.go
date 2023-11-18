@@ -7,6 +7,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -62,6 +63,12 @@ type Auth struct {
 	cache  Cache
 }
 
+type userSessionInfo struct {
+	ID       string
+	Name     string
+	ImageURL string
+}
+
 // New creates an Auth to support authentication/authorization.
 func New(cfg Config) (*Auth, error) {
 	a := Auth{
@@ -86,17 +93,22 @@ func (a *Auth) Authenticate(ctx context.Context, token string) (uuid.UUID, error
 	hash := sha256.Sum256([]byte(token))
 	hashToken := hex.EncodeToString(hash[:])
 
-	userID, err := cachedb.Get(ctx, hashToken)
+	user, err := cachedb.Get(ctx, hashToken)
 	if err != nil {
 		return uuid.Nil, wrapError(fmt.Errorf("get token from cache: %w", err))
 	}
 
-	if userID == "" {
+	var userSessionInfo userSessionInfo
+	if err := json.Unmarshal([]byte(user), &userSessionInfo); err != nil {
+		return uuid.Nil, wrapError(fmt.Errorf("json unmarshal: %w", err))
+	}
+
+	if userSessionInfo.ID == "" {
 		return uuid.Nil, wrapError(errors.New("invalid token"))
 	}
 
 	// to uuid
-	usrID, err := uuid.Parse(userID)
+	usrID, err := uuid.Parse(userSessionInfo.ID)
 	if err != nil {
 		return uuid.Nil, wrapError(fmt.Errorf("parse userID: %w", err))
 	}
