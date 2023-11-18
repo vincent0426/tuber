@@ -25,3 +25,15 @@ type NewDriver struct {
 	Color   string    `json:"color"`
 	Plate   string    `json:"plate"`
 }
+
+type FavoriteDriver struct {
+	ID              uuid.UUID `json:"id"`
+	DriverID        uuid.UUID `json:"driver_id"`
+	DriverName      string    `json:"driver_name"`
+	DriverImageURL  string    `json:"driver_image_url"`
+	DriverBrand     string    `json:"driver_brand"`
+	DriverModel     string    `json:"driver_model"`
+	DriverColor     string    `json:"driver_color"`
+	DriverPlate     string    `json:"driver_plate"`
+	DriverCreatedAt time.Time `json:"driver_created_at"`
+}

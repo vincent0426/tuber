@@ -33,7 +33,6 @@ func New(ws *ws.Core) *Handlers {
 // Create adds a new trip to the system.
 func (h *Handlers) Connect(ctx context.Context, c *gin.Context) error {
 	userID := auth.GetUserID(c)
-	fmt.Println("User ID:", userID)
 	// temp fix for testing, will remove later when auth is implemented
 	// we need to implement a middleware to get user info from DB
 	if userID == uuid.Nil {

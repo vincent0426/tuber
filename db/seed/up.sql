@@ -155,7 +155,7 @@ SELECT (
   ),
   'Driver was late.';
 -- Insert data into 'favorite_driver' table
-INSERT INTO favorite_driver (user_id, driver_id, note)
+INSERT INTO favorite_driver (user_id, driver_id)
 SELECT (
     SELECT id
     FROM users
@@ -165,5 +165,4 @@ SELECT (
     SELECT user_id
     FROM driver
     WHERE license = 'DL123456'
-  ),
-  'Favorite driver, always on time.';
+  );

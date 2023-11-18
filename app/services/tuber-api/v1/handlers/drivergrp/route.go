@@ -38,4 +38,6 @@ func Routes(app *web.App, cfg Config) {
 	app.Handle(http.MethodPost, version, "/drivers", hdl.Create, authen)
 	app.Handle(http.MethodGet, version, "/drivers", hdl.QueryAll)
 	app.Handle(http.MethodGet, version, "/drivers/:id", hdl.QueryByID)
+	app.Handle(http.MethodGet, version, "/favorite-drivers", hdl.QueryFavorite, authen)
+	app.Handle(http.MethodPost, version, "/favorite-drivers/:id", hdl.AddFavorite, authen)
 }

@@ -56,3 +56,49 @@ func toCoreDriverSlice(dbDrivers []dbDriver) []driver.Driver {
 	}
 	return drivers
 }
+
+// "id", // favorite_driver_id
+//
+//	"driver_id",
+//	"driver_name",
+//	"driver_image_url",
+//	"driver_brand",
+//	"driver_model",
+//	"driver_color",
+//	"driver_plate",
+//	"driver_created_at",
+type dbFavoriteDriver struct {
+	FavoriteDriverID uuid.UUID `db:"id"`
+	DriverID         uuid.UUID `db:"driver_id"`
+	DriverName       string    `db:"driver_name"`
+	DriverImageURL   string    `db:"driver_image_url"`
+	DriverBrand      string    `db:"driver_brand"`
+	DriverModel      string    `db:"driver_model"`
+	DriverColor      string    `db:"driver_color"`
+	DriverPlate      string    `db:"driver_plate"`
+	DriverCreatedAt  time.Time `db:"driver_created_at"`
+}
+
+func toCoreFavoriteDriver(dbDriver dbFavoriteDriver) driver.FavoriteDriver {
+	driver := driver.FavoriteDriver{
+		ID:              dbDriver.DriverID,
+		DriverID:        dbDriver.DriverID,
+		DriverName:      dbDriver.DriverName,
+		DriverImageURL:  dbDriver.DriverImageURL,
+		DriverBrand:     dbDriver.DriverBrand,
+		DriverModel:     dbDriver.DriverModel,
+		DriverColor:     dbDriver.DriverColor,
+		DriverPlate:     dbDriver.DriverPlate,
+		DriverCreatedAt: dbDriver.DriverCreatedAt.In(time.Local),
+	}
+
+	return driver
+}
+
+func toCoreFavoriteDriverSlice(dbFavoriteDrivers []dbFavoriteDriver) []driver.FavoriteDriver {
+	drivers := make([]driver.FavoriteDriver, len(dbFavoriteDrivers))
+	for i, dbDriver := range dbFavoriteDrivers {
+		drivers[i] = toCoreFavoriteDriver(dbDriver)
+	}
+	return drivers
+}

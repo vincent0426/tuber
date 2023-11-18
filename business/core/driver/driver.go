@@ -7,11 +7,13 @@ import (
 	"time"
 
 	"github.com/TSMC-Uber/server/business/data/order"
+	"github.com/google/uuid"
 )
 
 // Set of error variables for CRUD operations.
 var (
 	ErrNotFound = errors.New("driver not found")
+	ErrNoUserID = errors.New("no user id")
 )
 
 var (
@@ -26,6 +28,9 @@ type Storer interface {
 	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Driver, error)
 	QueryByID(ctx context.Context, driverID string) (Driver, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
+
+	AddFavorite(ctx context.Context, userID uuid.UUID, driverID string) error
+	QueryFavorite(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]FavoriteDriver, error)
 	// Update(ctx context.Context, trip Trip) error
 	// Delete(ctx context.Context, trip Trip) error
 	// QueryByIDs(ctx context.Context, userID []uuid.UUID) ([]Trip, error)
@@ -58,7 +63,7 @@ func (c *Core) Create(ctx context.Context, nu NewDriver) (Driver, error) {
 		Plate:     nu.Plate,
 		CreatedAt: time.Now(),
 	}
-	fmt.Println("core: driver: create: driver:", driver)
+
 	if err := c.storer.Create(ctx, driver); err != nil {
 		return Driver{}, fmt.Errorf("create: %w", err)
 	}
@@ -122,6 +127,28 @@ func (c *Core) QueryByID(ctx context.Context, driverID string) (Driver, error) {
 	}
 
 	return driver, nil
+}
+
+func (c *Core) AddFavorite(ctx context.Context, userID uuid.UUID, driverID string) error {
+	if userID == uuid.Nil {
+		return ErrNoUserID
+	}
+
+	if err := c.storer.AddFavorite(ctx, userID, driverID); err != nil {
+		return fmt.Errorf("add favorite: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Core) QueryFavorite(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]FavoriteDriver, error) {
+	drivers, err := c.storer.QueryFavorite(ctx, userID, filter, orderBy, pageNumber, rowsPerPage)
+
+	if err != nil {
+		return nil, fmt.Errorf("query favorite: %w", err)
+	}
+
+	return drivers, nil
 }
 
 // QueryByIDs gets the specified user from the database.

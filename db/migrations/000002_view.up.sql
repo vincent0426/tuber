@@ -57,3 +57,15 @@ FROM trip_passenger
   JOIN locations AS location_destination ON trip.destination_id = location_destination.id
   JOIN locations AS passenger_location_source ON trip_passenger.source_id = passenger_location_source.id
   JOIN locations AS passenger_location_destination ON trip_passenger.destination_id = passenger_location_destination.id;
+CREATE VIEW favorite_driver_view AS
+SELECT favorite_driver.*,
+  users.name AS driver_name,
+  users.image_url AS driver_image_url,
+  driver.brand AS driver_brand,
+  driver.model AS driver_model,
+  driver.color AS driver_color,
+  driver.plate AS driver_plate,
+  driver.created_at AS driver_created_at
+FROM favorite_driver
+  JOIN users ON users.id = favorite_driver.driver_id
+  JOIN driver ON favorite_driver.driver_id = driver.user_id;

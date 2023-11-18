@@ -2,7 +2,6 @@ package mid
 
 import (
 	"context"
-	"fmt"
 
 	aauth "github.com/TSMC-Uber/server/business/core/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
@@ -24,7 +23,7 @@ func Authenticate(a *auth.Auth) web.Middleware {
 			if err != nil {
 				return auth.NewAuthError("authenticate: failed: %s", err)
 			}
-			fmt.Println("userID: ", userID)
+
 			ctx = auth.SetUserID(ctx, userID)
 
 			return handler(ctx, c)

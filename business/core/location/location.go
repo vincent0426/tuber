@@ -53,7 +53,7 @@ func (c *Core) Create(ctx context.Context, nu NewLocation) (Location, error) {
 		Lat:     nu.Lat,
 		Lon:     nu.Lon,
 	}
-	fmt.Println("core: trip: create: location:", location)
+
 	if err := c.storer.Create(ctx, location); err != nil {
 		return Location{}, fmt.Errorf("create: %w", err)
 	}

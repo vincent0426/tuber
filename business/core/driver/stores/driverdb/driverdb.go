@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
 
 	"github.com/TSMC-Uber/server/business/core/driver"
 	"github.com/TSMC-Uber/server/business/data/order"
@@ -32,7 +33,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 // Create inserts a new trip into the database.
 func (s *Store) Create(ctx context.Context, driver driver.Driver) error {
 	dbDriver := toDBDriver(driver)
-	fmt.Println("store: driver: create: dbDriver:", dbDriver)
+
 	sql, args, err := sq.
 		Insert("driver").
 		Columns("user_id", "license", "verified", "brand", "model", "color", "plate", "created_at").
@@ -71,7 +72,6 @@ func (s *Store) QueryAll(ctx context.Context, filter driver.QueryFilter, orderBy
 
 	orderByClause, err := orderByClause(orderBy)
 	if err != nil {
-		fmt.Println("store: trip: queryall: err:", err)
 		return nil, err
 	}
 	builder = builder.OrderBy(orderByClause)
@@ -146,4 +146,71 @@ func (s *Store) QueryByID(ctx context.Context, driverID string) (driver.Driver, 
 	}
 
 	return toCoreDriver(dbDriver), nil
+}
+
+func (s *Store) AddFavorite(ctx context.Context, userID uuid.UUID, driverID string) error {
+	if userID == uuid.Nil {
+		return fmt.Errorf("addfavorite: userID: %w", driver.ErrNoUserID)
+	}
+
+	sql, args, err := sq.
+		Insert("favorite_driver").
+		Columns("user_id", "driver_id").
+		Values(userID, driverID).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("tosql: %w", err)
+	}
+
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
+		return fmt.Errorf("execcontext: %w", err)
+	}
+
+	return nil
+}
+
+func (s *Store) QueryFavorite(ctx context.Context, userID uuid.UUID, filter driver.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]driver.FavoriteDriver, error) {
+	if userID == uuid.Nil {
+		return nil, fmt.Errorf("queryfavorite: userID: %w", driver.ErrNoUserID)
+	}
+
+	builder := sq.Select(
+		"id", // favorite_driver_id
+		"driver_id",
+		"driver_name",
+		"driver_image_url",
+		"driver_brand",
+		"driver_model",
+		"driver_color",
+		"driver_plate",
+		"driver_created_at",
+	).
+		From("favorite_driver_view")
+
+	builder = s.applyFilter(builder, filter)
+
+	orderByClause, err := orderByClauseFavoriteDriver(orderBy)
+	if err != nil {
+		return nil, err
+	}
+	builder = builder.OrderBy(orderByClause)
+
+	// add paging
+	builder = builder.Limit(uint64(rowsPerPage)).Offset(uint64((pageNumber - 1) * rowsPerPage))
+
+	// Convert the builder to SQL and args
+	sql, args, err := builder.Where(sq.Eq{"user_id": userID}).PlaceholderFormat(sq.Dollar).ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("tosql: %w, sql: %s", err, sql)
+	}
+
+	var dbFavoriteDrivers []dbFavoriteDriver
+	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbFavoriteDrivers); err != nil {
+		return nil, fmt.Errorf("namedqueryslice: %w", err)
+	}
+
+	return toCoreFavoriteDriverSlice(dbFavoriteDrivers), nil
 }

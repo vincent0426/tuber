@@ -40,7 +40,7 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	if err != nil {
 		return response.NewError(err, http.StatusBadRequest)
 	}
-	fmt.Println("handlers: trip: create: nc:", nc)
+
 	trip, err := h.trip.Create(ctx, nc)
 	if err != nil {
 		return fmt.Errorf("create: usr[%+v]: %w", trip, err)

@@ -32,7 +32,6 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 // // Create inserts a new trip into the database.
 func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
 	dbTrip := toDBTrip(trip)
-	fmt.Println("store: trip: create: dbTrip:", dbTrip)
 	sql, args, err := sq.
 		Insert("trip").
 		Columns("id", "driver_id", "passenger_limit", "source_id", "destination_id", "start_time", "created_at").
@@ -187,7 +186,6 @@ func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID, filter trip
 
 func (s *Store) CreateTripPassenger(ctx context.Context, tripPassenger trip.TripPassenger) error {
 	dbTripPassenger := toDBTripPassenger(tripPassenger)
-	fmt.Println("store: trip: createtrippassenger: dbTripPassenger:", dbTripPassenger)
 	sql, args, err := sq.
 		Insert("trip_passenger").
 		Columns("trip_id", "passenger_id", "source_id", "destination_id", "status", "created_at").

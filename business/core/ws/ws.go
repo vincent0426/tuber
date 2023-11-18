@@ -39,7 +39,6 @@ func (c *Core) SendChatHistory(ctx context.Context, streamName string, channelNa
 	for _, xMessage := range messages {
 		jsonMsg, ok := xMessage.Values["message"].(string)
 		if !ok {
-			fmt.Println("Invalid message format in stream")
 			continue
 		}
 
@@ -67,11 +66,11 @@ func (c *Core) ReceiveChatMessages(ctx context.Context, userID uuid.UUID, stream
 		}
 
 		// Add message to the Stream
-		val, err := cachedb.XAdd(ctx, streamName, map[string]interface{}{"message": jsonMessage})
+		_, err = cachedb.XAdd(ctx, streamName, map[string]interface{}{"message": jsonMessage})
 		if err != nil {
 			return fmt.Errorf("xadd: %w", err)
 		}
-		fmt.Println("Message added to Stream:", val)
+
 		// Publish message for real-time updates
 		err = cachedb.Publish(ctx, channelName, string(jsonMessage))
 		if err != nil {

@@ -55,3 +55,30 @@ func toCoreNewDriver(app AppNewDriver) (driver.NewDriver, error) {
 
 	return driver, nil
 }
+
+type AppFavoriteDriver struct {
+	ID              string `json:"id"`
+	DriverID        string `json:"driver_id"`
+	DriverName      string `json:"driver_name"`
+	DriverImageURL  string `json:"driver_image_url"`
+	DriverBrand     string `json:"driver_brand"`
+	DriverModel     string `json:"driver_model"`
+	DriverColor     string `json:"driver_color"`
+	DriverPlate     string `json:"driver_plate"`
+	DriverCreatedAt string `json:"driver_created_at"`
+}
+
+func toAppFavoriteDriver(driver driver.FavoriteDriver) AppFavoriteDriver {
+
+	return AppFavoriteDriver{
+		ID:              driver.ID.String(),
+		DriverID:        driver.DriverID.String(),
+		DriverName:      driver.DriverName,
+		DriverImageURL:  driver.DriverImageURL,
+		DriverBrand:     driver.DriverBrand,
+		DriverModel:     driver.DriverModel,
+		DriverColor:     driver.DriverColor,
+		DriverPlate:     driver.DriverPlate,
+		DriverCreatedAt: driver.DriverCreatedAt.Format(time.RFC3339),
+	}
+}

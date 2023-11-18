@@ -10,3 +10,11 @@ const (
 	OrderByModel = "model"
 	OrderByColor = "color"
 )
+
+var DefaultOrderByFavoriteDriver = order.NewBy(OrderByBrandFavoriteDriver, order.ASC)
+
+const (
+	OrderByBrandFavoriteDriver = "driver_brand"
+	OrderByModelFavoriteDriver = "driver_model"
+	OrderByColorFavoriteDriver = "driver_color"
+)

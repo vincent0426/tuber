@@ -59,11 +59,12 @@ CREATE TABLE rating (
   FOREIGN KEY (trip_id) REFERENCES trip(id),
   FOREIGN KEY (commenter_id) REFERENCES users(id)
 );
-CREATE TABLE trip_station (
+CREATE TABLE trip_location (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   trip_id UUID NOT NULL,
-  name TEXT NOT NULL,
-  FOREIGN KEY (trip_id) REFERENCES trip(id)
+  location_id UUID NOT NULL,
+  FOREIGN KEY (trip_id) REFERENCES trip(id),
+  FOREIGN KEY (location_id) REFERENCES locations(id)
 );
 CREATE TABLE trip_passenger (
   trip_id UUID NOT NULL,
@@ -96,10 +97,9 @@ CREATE TABLE report (
   FOREIGN KEY (defendant) REFERENCES users(id)
 );
 CREATE TABLE favorite_driver (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   user_id UUID NOT NULL,
   driver_id UUID NOT NULL,
-  note TEXT,
-  PRIMARY KEY (user_id, driver_id),
   FOREIGN KEY (user_id) REFERENCES users(id),
   FOREIGN KEY (driver_id) REFERENCES driver(user_id)
 );

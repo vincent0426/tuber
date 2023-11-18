@@ -61,7 +61,7 @@ func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 		StartTime:      nt.StartTime,
 		CreatedAt:      now,
 	}
-	fmt.Println("core: trip: create: trip:", trip)
+
 	if err := c.storer.Create(ctx, trip); err != nil {
 		return Trip{}, fmt.Errorf("create: %w", err)
 	}
@@ -149,7 +149,6 @@ func (c *Core) Join(ctx context.Context, ntp NewTripPassenger) (TripPassenger, e
 		CreatedAt:     now,
 	}
 
-	fmt.Println("core: trip: createtrippassenger: tripPassenger:", tripPassenger)
 	if err := c.storer.CreateTripPassenger(ctx, tripPassenger); err != nil {
 		return TripPassenger{}, fmt.Errorf("create: %w", err)
 	}

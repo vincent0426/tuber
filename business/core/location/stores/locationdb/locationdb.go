@@ -32,7 +32,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 // Create inserts a new trip into the database.
 func (s *Store) Create(ctx context.Context, location location.Location) error {
 	dbLocation := toDBLocation(location)
-	fmt.Println("store: trip: create: dbLocation:", dbLocation)
+
 	sql, args, err := sq.
 		Insert("locations").
 		Columns("id", "name", "place_id", "lat_lon").
@@ -110,7 +110,6 @@ func (s *Store) QueryAll(ctx context.Context, filter location.QueryFilter, order
 
 	orderByClause, err := orderByClause(orderBy)
 	if err != nil {
-		fmt.Println("store: trip: queryall: err:", err)
 		return nil, err
 	}
 	builder = builder.OrderBy(orderByClause)

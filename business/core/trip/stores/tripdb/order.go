@@ -16,7 +16,6 @@ var orderByFields = map[string]string{
 func orderByClause(orderBy order.By) (string, error) {
 	by, exists := orderByFields[orderBy.Field]
 	if !exists {
-		fmt.Println("orderByFields", orderByFields)
 		return "", fmt.Errorf("field %q does not exist", orderBy.Field)
 	}
 
