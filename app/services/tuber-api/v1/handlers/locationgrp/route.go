@@ -35,7 +35,7 @@ func Routes(app *web.App, cfg Config) {
 	authen := mid.Authenticate(cfg.Auth)
 
 	hdl := New(locationCore)
-	app.Handle(http.MethodGet, version, "/locations", hdl.QueryAll)
+	app.Handle(http.MethodGet, version, "/locations", hdl.Query)
 	// app.Handle(http.MethodGet, version, "/trips", hdl.QueryByUserID, authen)
 	app.Handle(http.MethodGet, version, "/locations/:id", hdl.QueryByID)
 	app.Handle(http.MethodPost, version, "/locations", hdl.Create, authen)

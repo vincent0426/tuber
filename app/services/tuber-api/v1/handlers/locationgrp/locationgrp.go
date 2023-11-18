@@ -47,8 +47,8 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppLocation(location), http.StatusCreated)
 }
 
-// QueryAll returns a list of users with paging.
-func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
+// Query returns a list of locations with paging.
+func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	locations, err := h.location.QueryAll(ctx, filter, orderBy, page.Number, page.RowsPerPage)
+	locations, err := h.location.Query(ctx, filter, orderBy, page.Number, page.RowsPerPage)
 	if err != nil {
 		return fmt.Errorf("query: %w", err)
 	}
@@ -98,26 +98,3 @@ func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 
 	return web.Respond(ctx, c.Writer, toAppLocation(qlocation), http.StatusOK)
 }
-
-// func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
-// 	var app AppJoinTrip
-// 	// Validate the request.
-// 	if err := web.Decode(c, &app); err != nil {
-// 		return response.NewError(err, http.StatusBadRequest)
-// 	}
-
-// 	nc, err := toCoreJoinTrip(app)
-// 	if err != nil {
-// 		return response.NewError(err, http.StatusBadRequest)
-// 	}
-
-// 	trip, err := h.trip.Join(ctx, nc)
-// 	if err != nil {
-// 		if errors.Is(err, user.ErrUniqueEmail) {
-// 			return response.NewError(err, http.StatusConflict)
-// 		}
-// 		return fmt.Errorf("join: usr[%+v]: %w", trip, err)
-// 	}
-
-// 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
-// }

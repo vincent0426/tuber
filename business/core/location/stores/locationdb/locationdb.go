@@ -29,7 +29,7 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	}
 }
 
-// Create inserts a new trip into the database.
+// Create inserts a new location into the database.
 func (s *Store) Create(ctx context.Context, location location.Location) error {
 	dbLocation := toDBLocation(location)
 
@@ -39,7 +39,6 @@ func (s *Store) Create(ctx context.Context, location location.Location) error {
 		Values(dbLocation.ID, dbLocation.Name, dbLocation.PlaceID, squirrel.Expr("ST_SetSRID(ST_MakePoint(?, ?), 4326)", dbLocation.Lat, dbLocation.Lon)).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
-
 	if err != nil {
 		return fmt.Errorf("tosql: %w", err)
 	}
@@ -102,8 +101,8 @@ func (s *Store) Create(ctx context.Context, location location.Location) error {
 // 	return nil
 // }
 
-// QueryAll retrieves a list of existing trips from the database.
-func (s *Store) QueryAll(ctx context.Context, filter location.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]location.Location, error) {
+// Query retrieves a list of existing locations from the database.
+func (s *Store) Query(ctx context.Context, filter location.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]location.Location, error) {
 	builder := sq.Select("id", "name", "place_id", "ST_Y(lat_lon::geometry) AS lat", "ST_X(lat_lon::geometry) AS lon").From("locations")
 
 	builder = s.applyFilter(builder, filter)
@@ -130,41 +129,6 @@ func (s *Store) QueryAll(ctx context.Context, filter location.QueryFilter, order
 
 	return toCoreLocationSlice(dbLocations), nil
 }
-
-// Query retrieves a trip from the database.
-// func (s *Store) QueryByUserID(ctx context.Context, userID uuid.UUID, filter trip.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]trip.UserTrip, error) {
-// 	sql, args, err := sq.
-// 		Select(
-// 			"trip_passenger.passenger_id",
-// 			"trip_passenger.station_source_id",
-// 			"trip_passenger.station_destination_id",
-// 			"trip_passenger.status AS tp_status",
-// 			"trip.id AS trip_id",
-// 			"trip.driver_id",
-// 			"trip.passenger_limit",
-// 			"trip.source_id",
-// 			"trip.destination_id",
-// 			"trip.status AS trip_status",
-// 			"trip.start_time",
-// 			"trip.created_at AS trip_created_at",
-// 		).
-// 		From("trip_passenger").
-// 		Join("trip ON trip_passenger.trip_id = trip.id").
-// 		Where(sq.Eq{"trip_passenger.passenger_id": userID.String()}).
-// 		PlaceholderFormat(sq.Dollar).
-// 		ToSql()
-
-// 	if err != nil {
-// 		return nil, fmt.Errorf("tosql: %w", err)
-// 	}
-
-// 	var dbTrips []dbUserTrip
-// 	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
-// 		return nil, fmt.Errorf("namedqueryslice: %w", err)
-// 	}
-
-// 	return toCoreUserTripSlice(dbTrips), nil
-// }
 
 // Count returns the total number of trips in the DB.
 func (s *Store) Count(ctx context.Context, filter location.QueryFilter) (int, error) {
@@ -211,89 +175,3 @@ func (s *Store) QueryByID(ctx context.Context, locationID string) (location.Loca
 
 	return toCoreLocation(dbLocation), nil
 }
-
-// // QueryByIDs gets the specified users from the database.
-// func (s *Store) QueryByIDs(ctx context.Context, userIDs []uuid.UUID) ([]user.User, error) {
-// 	ids := make([]string, len(userIDs))
-// 	for i, userID := range userIDs {
-// 		ids[i] = userID.String()
-// 	}
-
-// 	data := struct {
-// 		UserID interface {
-// 			driver.Valuer
-// 			sql.Scanner
-// 		} `db:"user_id"`
-// 	}{
-// 		UserID: dbarray.Array(ids),
-// 	}
-
-// 	const q = `
-// 	SELECT
-// 		*
-// 	FROM
-// 		users
-// 	WHERE
-// 		user_id = ANY(:user_id)`
-
-// 	var usrs []dbUser
-// 	if err := database.NamedQuerySlice(ctx, s.log, s.db, q, data, &usrs); err != nil {
-// 		if errors.Is(err, database.ErrDBNotFound) {
-// 			return nil, user.ErrNotFound
-// 		}
-// 		return nil, fmt.Errorf("namedquerystruct: %w", err)
-// 	}
-
-// 	return toCoreUserSlice(usrs), nil
-// }
-
-// // QueryByEmail gets the specified user from the database by email.
-// func (s *Store) QueryByEmail(ctx context.Context, email mail.Address) (user.User, error) {
-// 	data := struct {
-// 		Email string `db:"email"`
-// 	}{
-// 		Email: email.Address,
-// 	}
-
-// 	const q = `
-// 	SELECT
-// 		*
-// 	FROM
-// 		users
-// 	WHERE
-// 		email = :email`
-
-// 	var dbUsr dbUser
-// 	if err := database.NamedQueryStruct(ctx, s.log, s.db, q, data, &dbUsr); err != nil {
-// 		if errors.Is(err, database.ErrDBNotFound) {
-// 			return user.User{}, fmt.Errorf("namedquerystruct: %w", user.ErrNotFound)
-// 		}
-// 		return user.User{}, fmt.Errorf("namedquerystruct: %w", err)
-// 	}
-
-// 	return toCoreUser(dbUsr), nil
-// }
-
-// // QueryByGoogleID gets the specified user from the database by googleID.
-// func (s *Store) QueryByGoogleID(ctx context.Context, googleID string) (user.User, error) {
-// 	sql, args, err := sq.
-// 		Select("*").
-// 		From("users").
-// 		Where(sq.Eq{"sub": googleID}).
-// 		PlaceholderFormat(sq.Dollar).
-// 		ToSql()
-
-// 	if err != nil {
-// 		return user.User{}, fmt.Errorf("tosql: %w", err)
-// 	}
-
-// 	var dbUsr dbUser
-// 	if err := database.GetContext(ctx, s.log, s.db, sql, args, &dbUsr); err != nil {
-// 		if errors.Is(err, database.ErrDBNotFound) {
-// 			return user.User{}, fmt.Errorf("namedquerystruct: %w", database.ErrDBNotFound)
-// 		}
-// 		return user.User{}, fmt.Errorf("namedquerystruct: %w", err)
-// 	}
-
-// 	return toCoreUser(dbUsr), nil
-// }
