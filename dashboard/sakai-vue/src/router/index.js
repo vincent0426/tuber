@@ -20,6 +20,31 @@ const router = createRouter({
                     component: () => import('@/views/pages/passenger/PassengerHistory.vue')
                 },
                 {
+                    path: '/logo',
+                    name: 'logo',
+                    component: () => import('@/views/UI/logo.vue')
+                },
+                {
+                    path: '/register',
+                    name: 'register',
+                    component: () => import('@/views/UI/register.vue')
+                },
+                {
+                    path: '/login',
+                    name: 'UIlogin',
+                    component: () => import('@/views/UI/login.vue')
+                },
+                {
+                    path: '/profile',
+                    name: 'profile',
+                    component: () => import('@/views/UI/profile.vue')
+                },
+                {
+                    path: '/uikit/formlayout',
+                    name: 'formlayout',
+                    component: () => import('@/views/uikit/FormLayout.vue')
+                },
+                {
                     path: '/passenger/search', // /search?q=yourSearchQuery
                     name: 'PassengerSearch',
                     component: () => import('@/views/pages/Empty.vue')
