@@ -26,35 +26,32 @@ func toAppTrip(trip trip.Trip) AppTrip {
 		ID:             trip.ID.String(),
 		DriverID:       trip.DriverID.String(),
 		PassengerLimit: trip.PassengerLimit,
-		SourceID:       trip.SourceID.String(),
-		DestinationID:  trip.DestinationID.String(),
+		SourceID:       trip.Source.ID.String(),
+		DestinationID:  trip.Destination.ID.String(),
 		Status:         trip.Status,
 		StartTime:      trip.StartTime.Format(time.RFC3339),
 		CreatedAt:      trip.CreatedAt.Format(time.RFC3339),
 	}
 }
 
-// =============================================================================
+type AppNewTripLocation struct {
+	Name    string  `json:"name" binding:"required"`
+	PlaceID string  `json:"place_id" binding:"required"`
+	Lat     float64 `json:"lat" binding:"required"`
+	Lon     float64 `json:"lon" binding:"required"`
+}
 
-// AppNewUser contains information needed to create a new user.
 type AppNewTrip struct {
-	DriverID       string `json:"driver_id" binding:"required"`
-	PassengerLimit int    `json:"passenger_limit" binding:"required"`
-	SourceID       string `json:"source_id" binding:"required"`
-	DestinationID  string `json:"destination_id" binding:"required"`
-	StartTime      string `json:"start_time" binding:"required"`
+	DriverID       string               `json:"driver_id"`
+	PassengerLimit int                  `json:"passenger_limit"`
+	Source         AppNewTripLocation   `json:"source"`
+	Destination    AppNewTripLocation   `json:"destination"`
+	Mid            []AppNewTripLocation `json:"mid"`
+	StartTime      string               `json:"start_time" binding:"required"`
 }
 
 func toCoreNewTrip(app AppNewTrip) (trip.NewTrip, error) {
 	uuDriverID, err := uuid.Parse(app.DriverID)
-	if err != nil {
-		return trip.NewTrip{}, err
-	}
-	uuSourceID, err := uuid.Parse(app.SourceID)
-	if err != nil {
-		return trip.NewTrip{}, err
-	}
-	uuDestinationID, err := uuid.Parse(app.DestinationID)
 	if err != nil {
 		return trip.NewTrip{}, err
 	}
@@ -64,12 +61,35 @@ func toCoreNewTrip(app AppNewTrip) (trip.NewTrip, error) {
 	if err != nil {
 		return trip.NewTrip{}, err
 	}
+
+	// construct mid
+	mid := []trip.TripLocation{}
+	for _, appMid := range app.Mid {
+		mid = append(mid, trip.TripLocation{
+			Name:    appMid.Name,
+			PlaceID: appMid.PlaceID,
+			Lat:     appMid.Lat,
+			Lon:     appMid.Lon,
+		})
+	}
+
 	trip := trip.NewTrip{
 		DriverID:       uuDriverID,
 		PassengerLimit: app.PassengerLimit,
-		SourceID:       uuSourceID,
-		DestinationID:  uuDestinationID,
-		StartTime:      startTime,
+		Source: trip.TripLocation{
+			Name:    app.Source.Name,
+			PlaceID: app.Source.PlaceID,
+			Lat:     app.Source.Lat,
+			Lon:     app.Source.Lon,
+		},
+		Destination: trip.TripLocation{
+			Name:    app.Destination.Name,
+			PlaceID: app.Destination.PlaceID,
+			Lat:     app.Destination.Lat,
+			Lon:     app.Destination.Lon,
+		},
+		Mid:       mid,
+		StartTime: startTime,
 	}
 
 	return trip, nil

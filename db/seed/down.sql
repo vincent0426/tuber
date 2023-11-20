@@ -6,8 +6,8 @@ TRUNCATE TABLE report CASCADE;
 TRUNCATE TABLE alert CASCADE;
 -- Truncate 'trip_passenger' table
 TRUNCATE TABLE trip_passenger CASCADE;
--- Truncate 'trip_station' table
-TRUNCATE TABLE trip_station CASCADE;
+-- Truncate 'trip_location' table
+TRUNCATE TABLE trip_location CASCADE;
 -- Truncate 'rating' table
 TRUNCATE TABLE rating CASCADE;
 -- Truncate 'chat_history' table

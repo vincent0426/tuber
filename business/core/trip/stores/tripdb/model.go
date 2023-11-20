@@ -7,55 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// dbTrip represent the structure we need for moving data
-// between the app and the database.
-type dbTrip struct {
-	ID             uuid.UUID `db:"id"`
-	DriverID       uuid.UUID `db:"driver_id"`
-	PassengerLimit int       `db:"passenger_limit"`
-	SourceID       uuid.UUID `db:"source_id"`
-	DestinationID  uuid.UUID `db:"destination_id"`
-	Status         string    `db:"status"`
-	StartTime      time.Time `db:"start_time"`
-	CreatedAt      time.Time `db:"created_at"`
-}
-
-func toDBTrip(trip trip.Trip) dbTrip {
-	return dbTrip{
-		ID:             trip.ID,
-		DriverID:       trip.DriverID,
-		PassengerLimit: trip.PassengerLimit,
-		SourceID:       trip.SourceID,
-		DestinationID:  trip.DestinationID,
-		StartTime:      trip.StartTime.UTC(),
-		CreatedAt:      trip.CreatedAt.UTC(),
-	}
-}
-
-func toCoreTrip(dbTrip dbTrip) trip.Trip {
-
-	trip := trip.Trip{
-		ID:             dbTrip.ID,
-		DriverID:       dbTrip.DriverID,
-		PassengerLimit: dbTrip.PassengerLimit,
-		SourceID:       dbTrip.SourceID,
-		DestinationID:  dbTrip.DestinationID,
-		Status:         dbTrip.Status,
-		StartTime:      dbTrip.StartTime.In(time.Local),
-		CreatedAt:      dbTrip.CreatedAt.In(time.Local),
-	}
-
-	return trip
-}
-
-func toCoreTripSlice(dbTrips []dbTrip) []trip.Trip {
-	trips := make([]trip.Trip, len(dbTrips))
-	for i, dbTrip := range dbTrips {
-		trips[i] = toCoreTrip(dbTrip)
-	}
-	return trips
-}
-
 // ------------------------------------------------------------
 type dbUserTrip struct {
 	TripID               uuid.UUID `db:"trip_id"`
@@ -173,4 +124,21 @@ func toCoreTripViewSlice(dbTripViews []dbTripView) []trip.TripView {
 		tripViews[i] = toCoreTripView(dbTripView)
 	}
 	return tripViews
+}
+
+// ------------------------------------------------------------
+type dbLocation struct {
+	Name    string  `db:"name"`
+	PlaceID string  `db:"place_id"`
+	Lat     float64 `db:"lat"`
+	Lon     float64 `db:"lon"`
+}
+
+func toDBLocation(location trip.TripLocation) dbLocation {
+	return dbLocation{
+		Name:    location.Name,
+		PlaceID: location.PlaceID,
+		Lat:     location.Lat,
+		Lon:     location.Lon,
+	}
 }

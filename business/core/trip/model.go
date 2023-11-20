@@ -11,19 +11,28 @@ type Trip struct {
 	ID             uuid.UUID
 	DriverID       uuid.UUID
 	PassengerLimit int
-	SourceID       uuid.UUID
-	DestinationID  uuid.UUID
+	Source         TripLocation
+	Destination    TripLocation
+	Mid            []TripLocation
 	Status         string
 	StartTime      time.Time
 	CreatedAt      time.Time
 }
 
-// NewTrip contains information needed to create a new trip.
+type TripLocation struct {
+	ID      uuid.UUID
+	Name    string
+	PlaceID string
+	Lat     float64
+	Lon     float64
+}
+
 type NewTrip struct {
 	DriverID       uuid.UUID
 	PassengerLimit int
-	SourceID       uuid.UUID
-	DestinationID  uuid.UUID
+	Source         TripLocation
+	Destination    TripLocation
+	Mid            []TripLocation
 	StartTime      time.Time
 }
 
@@ -58,24 +67,6 @@ type UserTrip struct {
 	CreatedAt            time.Time
 }
 
-// ID:                   dbTripView.ID,
-//
-//	DriverName:           dbTripView.DriverName,
-//	DriverBrand:          dbTripView.DriverBrand,
-//	DriverModel:          dbTripView.DriverModel,
-//	DriverColor:          dbTripView.DriverColor,
-//	DriverPlate:          dbTripView.DriverPlate,
-//	SourceName:           dbTripView.SourceName,
-//	SourcePlaceID:        dbTripView.SourcePlaceID,
-//	SourceLatitude:       dbTripView.SourceLatitude,
-//	SourceLongitude:      dbTripView.SourceLongitude,
-//	DestinationName:      dbTripView.DestinationName,
-//	DestinationPlaceID:   dbTripView.DestinationPlaceID,
-//	DestinationLatitude:  dbTripView.DestinationLatitude,
-//	DestinationLongitude: dbTripView.DestinationLongitude,
-//	Status:               dbTripView.Status,
-//	StartTime:            dbTripView.StartTime.In(time.Local),
-//	CreatedAt:            dbTripView.CreatedAt.In(time.Local),
 type TripView struct {
 	ID                   uuid.UUID
 	DriverName           string

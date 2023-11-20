@@ -92,13 +92,17 @@ SELECT (
     WHERE email = 'jane.smith@example.com'
   ),
   'Great trip, very comfortable.';
--- Insert data into 'trip_station' table
-INSERT INTO trip_station (trip_id, name)
+-- Insert data into 'trip_location' table, data should be from locations table
+INSERT INTO trip_location (trip_id, location_id)
 SELECT (
     SELECT id
     FROM trip
     LIMIT 1
-  ), 'Intermediate Stop';
+  ), (
+    SELECT id
+    FROM locations
+    WHERE name = 'Location 1'
+  );
 -- Insert data into 'trip_passenger' table
 INSERT INTO trip_passenger (
     trip_id,

@@ -33,16 +33,19 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	var app AppNewTrip
 	// Validate the request.
 	if err := web.Decode(c, &app); err != nil {
+		fmt.Println("app:create:decode:err:", err)
 		return response.NewError(err, http.StatusBadRequest)
 	}
 
 	nc, err := toCoreNewTrip(app)
 	if err != nil {
+		fmt.Println("app:create:toCoreNewTrip:err:", err)
 		return response.NewError(err, http.StatusBadRequest)
 	}
 
 	trip, err := h.trip.Create(ctx, nc)
 	if err != nil {
+		fmt.Println("app:create:trip:create:err:", err)
 		return fmt.Errorf("create: usr[%+v]: %w", trip, err)
 	}
 

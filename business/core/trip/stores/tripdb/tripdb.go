@@ -3,6 +3,7 @@ package tripdb
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -29,23 +30,89 @@ func NewStore(log *logger.Logger, db *sqlx.DB) *Store {
 	}
 }
 
-// // Create inserts a new trip into the database.
+func insertLocationAndGetID(ctx context.Context, tx *sql.Tx, loc dbLocation) (uuid.UUID, error) {
+	var locationID uuid.UUID
+
+	// Prepare statement to insert a new location and return its ID
+	stmt, err := tx.PrepareContext(ctx, "INSERT INTO locations (name, place_id, lat_lon) VALUES ($1, $2, ST_SetSRID(ST_MakePoint($3, $4), 4326)) RETURNING id")
+	if err != nil {
+		return locationID, fmt.Errorf("prepare: %w", err)
+	}
+	defer stmt.Close()
+
+	// Execute the prepared statement
+	err = stmt.QueryRowContext(ctx, loc.Name, loc.PlaceID, loc.Lon, loc.Lat).Scan(&locationID)
+	if err != nil {
+		return locationID, fmt.Errorf("queryrow: %w", err)
+	}
+
+	return locationID, nil
+}
+
+// Create inserts a new trip into the database.
 func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
-	dbTrip := toDBTrip(trip)
+	// Start a transaction
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tx: %w", err)
+	}
+
+	// Defer to handle transaction commit/rollback
+	defer func() {
+		if p := recover(); p != nil {
+			tx.Rollback()
+			panic(p) // re-throw panic after Rollback
+		} else if err != nil {
+			tx.Rollback() // err is non-nil; don't change it
+		} else {
+			err = tx.Commit() // err is nil; if Commit returns error update err
+		}
+	}()
+	// Insert source and destination locations and get their IDs
+	sourceID, err := insertLocationAndGetID(ctx, tx, toDBLocation(trip.Source))
+	if err != nil {
+		return fmt.Errorf("insert source: %w", err)
+	}
+
+	destinationID, err := insertLocationAndGetID(ctx, tx, toDBLocation(trip.Destination))
+	if err != nil {
+		return fmt.Errorf("insert destination: %w", err)
+	}
+
+	// Insert trip with source and destination IDs
 	sql, args, err := sq.
 		Insert("trip").
-		Columns("id", "driver_id", "passenger_limit", "source_id", "destination_id", "start_time", "created_at").
-		Values(dbTrip.ID, dbTrip.DriverID, dbTrip.PassengerLimit, dbTrip.SourceID, dbTrip.DestinationID, dbTrip.StartTime, dbTrip.CreatedAt).
+		Columns("id", "driver_id", "passenger_limit", "source_id", "destination_id", "status", "start_time", "created_at").
+		Values(trip.ID, trip.DriverID, trip.PassengerLimit, sourceID, destinationID, trip.Status, trip.StartTime, trip.CreatedAt).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
-
 	if err != nil {
 		return fmt.Errorf("tosql: %w", err)
 	}
-
-	// execute the sql
-	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
+	if _, err := tx.ExecContext(ctx, sql, args...); err != nil {
 		return fmt.Errorf("execcontext: %w", err)
+	}
+
+	// Insert mid locations and associate them with the trip
+	for _, mid := range trip.Mid {
+		midID, err := insertLocationAndGetID(ctx, tx, toDBLocation(mid))
+		if err != nil {
+			return fmt.Errorf("insert mid: %w", err)
+		}
+
+		// Insert into trip_location table
+		sql, args, err := sq.
+			Insert("trip_location").
+			Columns("trip_id", "location_id").
+			Values(trip.ID, midID).
+			PlaceholderFormat(sq.Dollar).
+			ToSql()
+		if err != nil {
+			return fmt.Errorf("tosql: %w", err)
+		}
+		if _, err := tx.ExecContext(ctx, sql, args...); err != nil {
+			return fmt.Errorf("execcontext: %w", err)
+		}
 	}
 
 	return nil

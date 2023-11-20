@@ -18,6 +18,12 @@ var (
 )
 
 var (
+	TripStatusNotStarted = "not_start"
+	TripStatusIn         = "in_trip"
+	TripStatusFinished   = "finished"
+)
+
+var (
 	StatusPending  = "pending"
 	StatusAccepted = "accepted"
 	StatusRejected = "rejected"
@@ -52,14 +58,33 @@ func NewCore(storer Storer) *Core {
 func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 	now := time.Now()
 
+	// add id to each element in []mid
+	for i := range nt.Mid {
+		nt.Mid[i].ID = uuid.New()
+	}
+
 	trip := Trip{
 		ID:             uuid.New(),
 		DriverID:       nt.DriverID,
 		PassengerLimit: nt.PassengerLimit,
-		SourceID:       nt.SourceID,
-		DestinationID:  nt.DestinationID,
-		StartTime:      nt.StartTime,
-		CreatedAt:      now,
+		Source: TripLocation{
+			ID:      uuid.New(),
+			Name:    nt.Source.Name,
+			PlaceID: nt.Source.PlaceID,
+			Lat:     nt.Source.Lat,
+			Lon:     nt.Source.Lon,
+		},
+		Destination: TripLocation{
+			ID:      uuid.New(),
+			Name:    nt.Destination.Name,
+			PlaceID: nt.Destination.PlaceID,
+			Lat:     nt.Destination.Lat,
+			Lon:     nt.Destination.Lon,
+		},
+		Mid:       nt.Mid,
+		Status:    TripStatusNotStarted,
+		StartTime: nt.StartTime,
+		CreatedAt: now,
 	}
 
 	if err := c.storer.Create(ctx, trip); err != nil {
