@@ -4,7 +4,7 @@ DB_DSN=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
 # Define dependencies
 NAMESPACE			  := tuber-system
 APP							:= tuber
-BASE_IMAGE_NAME := tuber/service
+BASE_IMAGE_NAME := tuber
 KIND            := kindest/node:v1.27.3
 KIND_CLUSTER    := tuber
 # POSTGRES        := postgres:15.4

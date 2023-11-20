@@ -9,15 +9,15 @@ https://www.conventionalcommits.org/en/v1.0.0/
 
 # Not Complete
 ## Setup
-1. run k8s cluster
+1. create k8s cluster with Kind
 ```sh
 make dev-up
 ```
-2. 
+2. create docker image for main server named `tuber/tuber-api`
 ```sh
 make service
 ```
-3. 
+3. load tuber/tuber-api to kind container
 ```sh
 make dev-load
 ```

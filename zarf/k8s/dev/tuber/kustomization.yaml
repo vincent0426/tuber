@@ -8,5 +8,5 @@ patches:
 - path: ./dev-tuber-patch-configmap.yaml
 images:
 - name: service-image
-  newName: tuber/service/tuber-api
+  newName: tuber/tuber-api
   newTag: 0.0.1
