@@ -5,14 +5,6 @@ import (
 	"github.com/TSMC-Uber/server/business/core/trip"
 )
 
-// ID             *uuid.UUID `validate:"omitempty"`
-//
-//	DriverID       *uuid.UUID `validate:"omitempty"`
-//	PassengerLimit *int       `validate:"omitempty"`
-//	SourceID       *uuid.UUID `validate:"omitempty"`
-//	DestinationID  *uuid.UUID `validate:"omitempty"`
-//	StartStartDate *time.Time `validate:"omitempty"`
-//	EndStartDate   *time.Time `validate:"omitempty"`
 func (s *Store) applyFilter(builder squirrel.SelectBuilder, filter trip.QueryFilter) squirrel.SelectBuilder {
 	if filter.ID != nil {
 		builder = builder.Where(squirrel.Eq{"id": *filter.ID})
@@ -40,6 +32,18 @@ func (s *Store) applyFilter(builder squirrel.SelectBuilder, filter trip.QueryFil
 
 	if filter.EndStartDate != nil {
 		builder = builder.Where(squirrel.LtOrEq{"start_time": *filter.EndStartDate})
+	}
+
+	return builder
+}
+
+func (s *Store) applyFilterByUser(builder squirrel.SelectBuilder, filter trip.QueryFilterByUser) squirrel.SelectBuilder {
+	if filter.Status != nil {
+		builder = builder.Where(squirrel.Eq{"trip.status": *filter.Status})
+	}
+
+	if filter.IsDriver != nil {
+		builder = builder.Where(squirrel.Eq{"trip_passenger.roles": tripDriverRole})
 	}
 
 	return builder

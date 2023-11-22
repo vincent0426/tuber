@@ -57,16 +57,6 @@ func toCoreDriverSlice(dbDrivers []dbDriver) []driver.Driver {
 	return drivers
 }
 
-// "id", // favorite_driver_id
-//
-//	"driver_id",
-//	"driver_name",
-//	"driver_image_url",
-//	"driver_brand",
-//	"driver_model",
-//	"driver_color",
-//	"driver_plate",
-//	"driver_created_at",
 type dbFavoriteDriver struct {
 	FavoriteDriverID uuid.UUID `db:"id"`
 	DriverID         uuid.UUID `db:"driver_id"`

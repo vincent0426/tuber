@@ -43,7 +43,7 @@ VALUES (
     'D9iJyWEHuEmuEmsRm9hTkapTCrk',
     ST_GeomFromText('POINT(-69.445469 43.769196)', 4326)
   );
--- Insert a trip (assuming John Doe is the driver)
+-- Insert trip
 INSERT INTO trip (
     driver_id,
     passenger_limit,
@@ -51,23 +51,44 @@ INSERT INTO trip (
     destination_id,
     start_time
   )
-SELECT (
-    SELECT user_id
-    FROM driver
-    WHERE license = 'DL123456'
+VALUES (
+    (
+      SELECT user_id
+      FROM driver
+      WHERE license = 'DL123456'
+    ),
+    3,
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 1'
+    ),
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 2'
+    ),
+    '2023-01-01 08:00:00'
   ),
-  3,
   (
-    SELECT id
-    FROM locations
-    WHERE name = 'Location 1'
-  ),
-  (
-    SELECT id
-    FROM locations
-    WHERE name = 'Location 2'
-  ),
-  '2023-01-01 08:00:00';
+    (
+      SELECT user_id
+      FROM driver
+      WHERE license = 'DL123456'
+    ),
+    10,
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 1'
+    ),
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 2'
+    ),
+    '2023-01-01 08:00:00'
+  );
 -- Insert data into 'chat_history'
 INSERT INTO chat_history (trip_id, sender_id, msg_content)
 SELECT (
@@ -108,26 +129,52 @@ INSERT INTO trip_passenger (
     trip_id,
     passenger_id,
     source_id,
-    destination_id
+    destination_id,
+    roles
   )
-SELECT (
-    SELECT id
-    FROM trip
-    LIMIT 1
-  ), (
-    SELECT id
-    FROM users
-    WHERE email = 'jane.smith@example.com'
+VALUES (
+    (
+      SELECT id
+      FROM trip
+      LIMIT 1
+    ), (
+      SELECT id
+      FROM users
+      WHERE email = 'jane.smith@example.com'
+    ),
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 1'
+    ),
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 2'
+    ),
+    'passenger'
   ),
   (
-    SELECT id
-    FROM locations
-    WHERE name = 'Location 1'
-  ),
-  (
-    SELECT id
-    FROM locations
-    WHERE name = 'Location 2'
+    (
+      SELECT id
+      FROM trip
+      LIMIT 1
+    ), (
+      SELECT id
+      FROM users
+      WHERE email = 'john.doe@example.com'
+    ),
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 1'
+    ),
+    (
+      SELECT id
+      FROM locations
+      WHERE name = 'Location 2'
+    ),
+    'driver'
   );
 -- Insert data into 'alert' table
 INSERT INTO alert (trip_id, passenger_id, comment)

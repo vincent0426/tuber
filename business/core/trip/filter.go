@@ -17,6 +17,9 @@ type QueryFilter struct {
 	DestinationID  *uuid.UUID `validate:"omitempty"`
 	StartStartDate *time.Time `validate:"omitempty"`
 	EndStartDate   *time.Time `validate:"omitempty"`
+
+	// in another table
+	UserID *uuid.UUID `validate:"omitempty"`
 }
 
 // Validate checks the data in the model is considered clean.
@@ -64,4 +67,29 @@ func (qf *QueryFilter) WithStartStartDate(startDate time.Time) {
 func (qf *QueryFilter) WithEndStartDate(endDate time.Time) {
 	d := endDate.UTC()
 	qf.EndStartDate = &d
+}
+
+// QueryFilterByUser
+type QueryFilterByUser struct {
+	UserID   uuid.UUID
+	Status   *string `validate:"omitempty"`
+	IsDriver *bool   `validate:"omitempty"`
+}
+
+// Validate checks the data in the model is considered clean.
+func (qf *QueryFilterByUser) Validate() error {
+	if err := validate.Check(qf); err != nil {
+		return fmt.Errorf("validate: %w", err)
+	}
+	return nil
+}
+
+// WithStatus sets the ID field of the QueryFilter value.
+func (qf *QueryFilterByUser) WithStatus(status string) {
+	qf.Status = &status
+}
+
+// WithIsDriver sets the ID field of the QueryFilter value.
+func (qf *QueryFilterByUser) WithIsDriver(isDriver bool) {
+	qf.IsDriver = &isDriver
 }

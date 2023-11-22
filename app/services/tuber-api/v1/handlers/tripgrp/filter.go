@@ -1,6 +1,7 @@
 package tripgrp
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 	"time"
@@ -73,6 +74,34 @@ func parseFilter(r *http.Request) (trip.QueryFilter, error) {
 
 	if err := filter.Validate(); err != nil {
 		return trip.QueryFilter{}, err
+	}
+
+	return filter, nil
+}
+
+func parseFilterByUser(r *http.Request) (trip.QueryFilterByUser, error) {
+	values := r.URL.Query()
+
+	var filter trip.QueryFilterByUser
+
+	if status := values.Get("status"); status != "" {
+		// status should only have 3 values: "not_start", "in_trip", "finished"
+		if status != "not_start" && status != "in_trip" && status != "finished" {
+			return trip.QueryFilterByUser{}, errors.New("status should only have 3 values: not_start, in_trip, finished")
+		}
+		filter.WithStatus(status)
+	}
+
+	if isDriver := values.Get("is_driver"); isDriver != "" {
+		isDriverBool, err := strconv.ParseBool(isDriver)
+		if err != nil {
+			return trip.QueryFilterByUser{}, validate.NewFieldsError("is_driver", err)
+		}
+		filter.IsDriver = &isDriverBool
+	}
+
+	if err := filter.Validate(); err != nil {
+		return trip.QueryFilterByUser{}, err
 	}
 
 	return filter, nil
