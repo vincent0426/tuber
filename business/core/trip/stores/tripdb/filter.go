@@ -43,7 +43,11 @@ func (s *Store) applyFilterByUser(builder squirrel.SelectBuilder, filter trip.Qu
 	}
 
 	if filter.IsDriver != nil {
-		builder = builder.Where(squirrel.Eq{"trip_passenger.roles": tripDriverRole})
+		if *filter.IsDriver {
+			builder = builder.Where(squirrel.Eq{"trip_passenger.roles": tripDriverRole})
+		} else {
+			builder = builder.Where(squirrel.Eq{"trip_passenger.roles": tripPassengerRole})
+		}
 	}
 
 	return builder
