@@ -182,3 +182,27 @@ func toDBLocation(location trip.TripLocation) dbLocation {
 		Lon:     location.Lon,
 	}
 }
+
+func toCoreTripDetails(tripDetails trip.TripDetails) trip.TripDetails {
+	trip := trip.TripDetails{
+		TripID:               tripDetails.TripID,
+		DriverID:             tripDetails.DriverID,
+		DriverName:           tripDetails.DriverName,
+		DriverImageURL:       tripDetails.DriverImageURL,
+		DriverBrand:          tripDetails.DriverBrand,
+		DriverModel:          tripDetails.DriverModel,
+		DriverColor:          tripDetails.DriverColor,
+		DriverPlate:          tripDetails.DriverPlate,
+		SourceName:           tripDetails.SourceName,
+		SourcePlaceID:        tripDetails.SourcePlaceID,
+		SourceLatitude:       tripDetails.SourceLatitude,
+		SourceLongitude:      tripDetails.SourceLongitude,
+		DestinationName:      tripDetails.DestinationName,
+		DestinationPlaceID:   tripDetails.DestinationPlaceID,
+		DestinationLatitude:  tripDetails.DestinationLatitude,
+		DestinationLongitude: tripDetails.DestinationLongitude,
+		PassengerDetails:     tripDetails.PassengerDetails,
+	}
+
+	return trip
+}

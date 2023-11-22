@@ -99,3 +99,35 @@ type TripView struct {
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
 }
+
+type PassengerDetails struct {
+	PassengerID          uuid.UUID
+	SourceName           string
+	SourcePlaceID        string
+	SourceLatitude       float64
+	SourceLongitude      float64
+	DestinationName      string
+	DestinationPlaceID   string
+	DestinationLatitude  float64
+	DestinationLongitude float64
+}
+
+type TripDetails struct {
+	TripID               uuid.UUID
+	DriverID             uuid.UUID
+	DriverName           string
+	DriverImageURL       string
+	DriverBrand          string
+	DriverModel          string
+	DriverColor          string
+	DriverPlate          string
+	SourceName           string
+	SourcePlaceID        string
+	SourceLatitude       float64
+	SourceLongitude      float64
+	DestinationName      string
+	DestinationPlaceID   string
+	DestinationLatitude  float64
+	DestinationLongitude float64
+	PassengerDetails     []PassengerDetails
+}

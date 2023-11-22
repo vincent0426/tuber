@@ -40,6 +40,8 @@ type Storer interface {
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 	QueryMyTrip(ctx context.Context, userID uuid.UUID, filter QueryFilterByUser, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
 	Join(ctx context.Context, tripPassenger TripPassenger) error
+
+	QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetails, error)
 }
 
 // Core manages the set of APIs for user access.
@@ -191,4 +193,14 @@ func (c *Core) Join(ctx context.Context, ntp NewTripPassenger) (TripPassenger, e
 	}
 
 	return tripPassenger, nil
+}
+
+// QueryPassengers retrieves a list of existing trips from the database.
+func (c *Core) QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetails, error) {
+	tripDetails, err := c.storer.QueryPassengers(ctx, tripID)
+	if err != nil {
+		return TripDetails{}, fmt.Errorf("query: %w", err)
+	}
+
+	return tripDetails, nil
 }

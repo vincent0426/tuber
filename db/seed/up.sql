@@ -102,12 +102,12 @@ SELECT (
   ),
   'Hello, I am your driver.';
 -- Insert data into 'rating'
-INSERT INTO rating (trip_id, commenter_id, comment)
+INSERT INTO rating (trip_id, rate, commenter_id, comment)
 SELECT (
     SELECT id
     FROM trip
     LIMIT 1
-  ), (
+  ), 5, (
     SELECT id
     FROM users
     WHERE email = 'jane.smith@example.com'

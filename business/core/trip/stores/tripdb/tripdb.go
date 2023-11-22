@@ -111,9 +111,6 @@ func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
 	}
 
 	if _, err := tx.ExecContext(ctx, sql, args...); err != nil {
-		fmt.Println("--------------------")
-		fmt.Println("err %w", err, sql, args)
-		fmt.Println("--------------------")
 		return fmt.Errorf("execcontext:create trip_passenger: %w", err)
 	}
 
@@ -370,4 +367,55 @@ func (s *Store) QueryByID(ctx context.Context, tripID uuid.UUID) (trip.TripView,
 	}
 
 	return toCoreTripView(dbTrip), nil
+}
+
+func (s *Store) QueryPassengers(ctx context.Context, tripID uuid.UUID) (trip.TripDetails, error) {
+	sql, args, err := sq.Select(
+		"trip_id",
+		"passenger_id",
+		"driver_id", "driver_name", "driver_image_url", "driver_brand", "driver_model", "driver_color", "driver_plate",
+		"source_name", "source_place_id", "ST_Y(source_lat_lon::geometry) AS source_latitude", "ST_X(source_lat_lon::geometry) AS source_longitude",
+		"destination_name", "destination_place_id", "ST_Y(destination_lat_lon::geometry) AS destination_latitude", "ST_X(destination_lat_lon::geometry) AS destination_longitude",
+		"passenger_location_source_name", "passenger_location_source_place_id", "ST_Y(passenger_location_source_lat_lon::geometry) AS passenger_location_source_latitude", "ST_X(passenger_location_source_lat_lon::geometry) AS passenger_location_source_longitude",
+		"passenger_location_destination_name", "passenger_location_destination_place_id", "ST_Y(passenger_location_destination_lat_lon::geometry) AS passenger_location_destination_latitude", "ST_X(passenger_location_destination_lat_lon::geometry) AS passenger_location_destination_longitude",
+	).
+		From("trip_passenger_view").
+		Where(sq.Eq{"trip_id": tripID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return trip.TripDetails{}, fmt.Errorf("tosql: %w", err)
+	}
+
+	// Execute the query
+	rows, err := s.db.QueryContext(ctx, sql, args...)
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	var ttrip trip.TripDetails
+
+	for rows.Next() {
+		var passenger trip.PassengerDetails
+		if err := rows.Scan(
+			&ttrip.TripID,
+			&passenger.PassengerID,
+			&ttrip.DriverID, &ttrip.DriverName, &ttrip.DriverImageURL, &ttrip.DriverBrand, &ttrip.DriverModel, &ttrip.DriverColor, &ttrip.DriverPlate,
+			&ttrip.SourceName, &ttrip.SourcePlaceID, &ttrip.SourceLatitude, &ttrip.SourceLongitude,
+			&ttrip.DestinationName, &ttrip.DestinationPlaceID, &ttrip.DestinationLatitude, &ttrip.DestinationLongitude,
+			&passenger.SourceName, &passenger.SourcePlaceID, &passenger.SourceLatitude, &passenger.SourceLongitude,
+			&passenger.DestinationName, &passenger.DestinationPlaceID, &passenger.DestinationLatitude, &passenger.DestinationLongitude); err != nil {
+			return trip.TripDetails{}, fmt.Errorf("scan: %w", err)
+		}
+
+		ttrip.PassengerDetails = append(ttrip.PassengerDetails, passenger)
+	}
+
+	if err = rows.Err(); err != nil {
+		return trip.TripDetails{}, fmt.Errorf("rows: %w", err)
+	}
+
+	return toCoreTripDetails(ttrip), nil
 }

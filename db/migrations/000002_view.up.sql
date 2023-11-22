@@ -38,7 +38,9 @@ FROM trip
   JOIN locations AS location_destination ON trip.destination_id = location_destination.id;
 -- trip_passenger_view
 CREATE VIEW trip_passenger_view AS
-SELECT trip_passenger.*,
+SELECT trip_passenger.trip_id AS trip_id,
+  trip_passenger.passenger_id AS passenger_id,
+  users.id AS driver_id,
   users.name AS driver_name,
   users.image_url AS driver_image_url,
   driver.brand AS driver_brand,

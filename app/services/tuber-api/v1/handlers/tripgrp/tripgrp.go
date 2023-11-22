@@ -35,20 +35,17 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	var app AppNewTrip
 	// Validate the request.
 	if err := web.Decode(c, &app); err != nil {
-		fmt.Println("app:create:decode:err:", err)
 		return response.NewError(err, http.StatusBadRequest)
 	}
 
 	nc, err := toCoreNewTrip(app)
 	if err != nil {
-		fmt.Println("app:create:toCoreNewTrip:err:", err)
 		return response.NewError(err, http.StatusBadRequest)
 	}
 	nc.DriverID = userID
 
 	trip, err := h.trip.Create(ctx, nc)
 	if err != nil {
-		fmt.Println("app:create:trip:create:err:", err)
 		return fmt.Errorf("create: trip[%+v]: %w", trip, err)
 	}
 
@@ -78,7 +75,6 @@ func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
 
 	// check if the user is the driver of the trip
 	if qtrip.DriverID != userID {
-		fmt.Println("app:update:trip:userID:", userID, "qtrip.DriverID:", qtrip.DriverID)
 		return response.NewError(errors.New("user is not the driver of the trip"), http.StatusForbidden)
 	}
 
@@ -202,4 +198,20 @@ func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
 	}
 
 	return web.Respond(ctx, c.Writer, toAppTripPassenger(tripPassenger), http.StatusCreated)
+}
+
+func (h *Handlers) QueryPassengers(ctx context.Context, c *gin.Context) error {
+	tripID := c.Param("id")
+
+	tripDetails, err := h.trip.QueryPassengers(ctx, uuid.Must(uuid.Parse(tripID)))
+	if err != nil {
+		switch {
+		case errors.Is(err, trip.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querypassengers: tripID[%s]: %w", tripID, err)
+		}
+	}
+
+	return web.Respond(ctx, c.Writer, toAppTripDetails(tripDetails), http.StatusOK)
 }
