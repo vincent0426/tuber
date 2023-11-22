@@ -33,13 +33,13 @@ var (
 // retrieve data.
 type Storer interface {
 	Create(ctx context.Context, trip Trip) error
-	// Update(ctx context.Context, trip Trip) error
+	Update(ctx context.Context, trip Trip) error
 	// Delete(ctx context.Context, trip Trip) error
-	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]TripView, error)
-	QueryByID(ctx context.Context, tripID string) (TripView, error)
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]TripView, error)
+	QueryByID(ctx context.Context, tripID uuid.UUID) (TripView, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
-	QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
-	CreateTripPassenger(ctx context.Context, tripPassenger TripPassenger) error
+	QueryMyTrip(ctx context.Context, userID uuid.UUID, filter QueryFilterByUser, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error)
+	Join(ctx context.Context, tripPassenger TripPassenger) error
 }
 
 // Core manages the set of APIs for user access.
@@ -85,6 +85,7 @@ func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 		Status:    TripStatusNotStarted,
 		StartTime: nt.StartTime,
 		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
 	if err := c.storer.Create(ctx, trip); err != nil {
@@ -95,28 +96,39 @@ func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 }
 
 // Update replaces a user document in the database.
-// func (c *Core) Update(ctx context.Context, trip User, uu UpdateUser) (User, error) {
-// 	if uu.Name != nil {
-// 		trip.Name = *uu.Name
-// 	}
-// 	if uu.Email != nil {
-// 		trip.Email = *uu.Email
-// 	}
-// 	if uu.Bio != nil {
-// 		trip.Bio = *uu.Bio
-// 	}
-// 	if uu.AcceptNotification != nil {
-// 		trip.AcceptNotification = *uu.AcceptNotification
-// 	}
+func (c *Core) Update(ctx context.Context, trip TripView, ut UpdateTrip) (Trip, error) {
+	if ut.PassengerLimit != nil {
+		trip.PassengerLimit = *ut.PassengerLimit
+	}
 
-// 	trip.UpdatedAt = time.Now()
+	if ut.Status != nil {
+		trip.Status = *ut.Status
+	}
 
-// 	if err := c.storer.Update(ctx, trip); err != nil {
-// 		return User{}, fmt.Errorf("update: %w", err)
-// 	}
+	trip.UpdatedAt = time.Now()
 
-// 	return trip, nil
-// }
+	buildTrip := Trip{
+		ID:             trip.ID,
+		DriverID:       trip.DriverID,
+		PassengerLimit: trip.PassengerLimit,
+		Status:         trip.Status,
+		Source: TripLocation{
+			ID: trip.SourceID,
+		},
+		Destination: TripLocation{
+			ID: trip.DestinationID,
+		},
+		StartTime: trip.StartTime,
+		CreatedAt: trip.CreatedAt,
+		UpdatedAt: trip.UpdatedAt,
+	}
+
+	if err := c.storer.Update(ctx, buildTrip); err != nil {
+		return Trip{}, fmt.Errorf("update: %w", err)
+	}
+
+	return buildTrip, nil
+}
 
 // Delete removes a user from the database.
 // func (c *Core) Delete(ctx context.Context, trip User) error {
@@ -127,9 +139,9 @@ func (c *Core) Create(ctx context.Context, nt NewTrip) (Trip, error) {
 // 	return nil
 // }
 
-// QueryQueryAll retrieves a list of existing trips from the database.
-func (c *Core) QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]TripView, error) {
-	trips, err := c.storer.QueryAll(ctx, filter, orderBy, pageNumber, rowsPerPage)
+// QueryQuery retrieves a list of existing trips from the database.
+func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]TripView, error) {
+	trips, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -142,9 +154,9 @@ func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
 	return c.storer.Count(ctx, filter)
 }
 
-// QueryByUserID returns the trip with the specified userID from the database.
-func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error) {
-	trips, err := c.storer.QueryByUserID(ctx, userID, filter, orderBy, pageNumber, rowsPerPage)
+// QueryMyTrip returns the trip with the specified userID from the database.
+func (c *Core) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter QueryFilterByUser, orderBy order.By, pageNumber int, rowsPerPage int) ([]UserTrip, error) {
+	trips, err := c.storer.QueryMyTrip(ctx, userID, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
@@ -152,7 +164,7 @@ func (c *Core) QueryByUserID(ctx context.Context, userID uuid.UUID, filter Query
 }
 
 // QueryByID gets the specified user from the database.
-func (c *Core) QueryByID(ctx context.Context, tripID string) (TripView, error) {
+func (c *Core) QueryByID(ctx context.Context, tripID uuid.UUID) (TripView, error) {
 	trip, err := c.storer.QueryByID(ctx, tripID)
 	if err != nil {
 		return TripView{}, fmt.Errorf("query: tripID[%s]: %w", tripID, err)
@@ -174,7 +186,7 @@ func (c *Core) Join(ctx context.Context, ntp NewTripPassenger) (TripPassenger, e
 		CreatedAt:     now,
 	}
 
-	if err := c.storer.CreateTripPassenger(ctx, tripPassenger); err != nil {
+	if err := c.storer.Join(ctx, tripPassenger); err != nil {
 		return TripPassenger{}, fmt.Errorf("create: %w", err)
 	}
 

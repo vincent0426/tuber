@@ -37,6 +37,7 @@ CREATE TABLE trip (
   status TEXT CHECK (status IN ('not_start', 'in_trip', 'finished')) DEFAULT 'not_start',
   start_time TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (driver_id) REFERENCES driver(user_id),
   FOREIGN KEY (source_id) REFERENCES locations(id),
   FOREIGN KEY (destination_id) REFERENCES locations(id)
@@ -71,8 +72,9 @@ CREATE TABLE trip_passenger (
   passenger_id UUID NOT NULL,
   source_id UUID NOT NULL,
   destination_id UUID NOT NULL,
-  status TEXT CHECK (status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
+  status TEXT DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  roles TEXT DEFAULT 'passenger',
   PRIMARY KEY (trip_id, passenger_id),
   FOREIGN KEY (trip_id) REFERENCES trip(id),
   FOREIGN KEY (passenger_id) REFERENCES users(id),

@@ -42,7 +42,6 @@ type AppNewTripLocation struct {
 }
 
 type AppNewTrip struct {
-	DriverID       string               `json:"driver_id"`
 	PassengerLimit int                  `json:"passenger_limit"`
 	Source         AppNewTripLocation   `json:"source"`
 	Destination    AppNewTripLocation   `json:"destination"`
@@ -51,11 +50,6 @@ type AppNewTrip struct {
 }
 
 func toCoreNewTrip(app AppNewTrip) (trip.NewTrip, error) {
-	uuDriverID, err := uuid.Parse(app.DriverID)
-	if err != nil {
-		return trip.NewTrip{}, err
-	}
-
 	// turn string to time
 	startTime, err := time.Parse(time.RFC3339, app.StartTime)
 	if err != nil {
@@ -74,7 +68,6 @@ func toCoreNewTrip(app AppNewTrip) (trip.NewTrip, error) {
 	}
 
 	trip := trip.NewTrip{
-		DriverID:       uuDriverID,
 		PassengerLimit: app.PassengerLimit,
 		Source: trip.TripLocation{
 			Name:    app.Source.Name,
@@ -90,6 +83,21 @@ func toCoreNewTrip(app AppNewTrip) (trip.NewTrip, error) {
 		},
 		Mid:       mid,
 		StartTime: startTime,
+	}
+
+	return trip, nil
+}
+
+type AppUpdateTrip struct {
+	PassengerLimit int    `json:"passenger_limit"`
+	Status         string `json:"status"`
+}
+
+func toCoreUpdateTrip(app AppUpdateTrip) (trip.UpdateTrip, error) {
+
+	trip := trip.UpdateTrip{
+		PassengerLimit: &app.PassengerLimit,
+		Status:         &app.Status,
 	}
 
 	return trip, nil
@@ -154,63 +162,57 @@ func toCoreNewTripPassenger(app AppNewTripPassenger) (trip.NewTripPassenger, err
 	return tripPassenger, nil
 }
 
-// ID:                   dbTripView.ID,
-//
-//	DriverName:           dbTripView.DriverName,
-//	DriverBrand:          dbTripView.DriverBrand,
-//	DriverModel:          dbTripView.DriverModel,
-//	DriverColor:          dbTripView.DriverColor,
-//	DriverPlate:          dbTripView.DriverPlate,
-//	SourceName:           dbTripView.SourceName,
-//	SourcePlaceID:        dbTripView.SourcePlaceID,
-//	SourceLatitude:       dbTripView.SourceLatitude,
-//	SourceLongitude:      dbTripView.SourceLongitude,
-//	DestinationName:      dbTripView.DestinationName,
-//	DestinationPlaceID:   dbTripView.DestinationPlaceID,
-//	DestinationLatitude:  dbTripView.DestinationLatitude,
-//	DestinationLongitude: dbTripView.DestinationLongitude,
-//	Status:               dbTripView.Status,
-//	StartTime:            dbTripView.StartTime.In(time.Local),
-//	CreatedAt:            dbTripView.CreatedAt.In(time.Local),
 type AppTripView struct {
 	ID                   string  `json:"id"`
+	DriverID             string  `json:"driver_id"`
 	DriverName           string  `json:"driver_name"`
+	DriverImageURL       string  `json:"driver_image_url"`
 	DriverBrand          string  `json:"driver_brand"`
 	DriverModel          string  `json:"driver_model"`
 	DriverColor          string  `json:"driver_color"`
 	DriverPlate          string  `json:"driver_plate"`
+	SourceID             string  `json:"source_id"`
 	SourceName           string  `json:"source_name"`
 	SourcePlaceID        string  `json:"source_place_id"`
 	SourceLatitude       float64 `json:"source_latitude"`
 	SourceLongitude      float64 `json:"source_longitude"`
+	DestinationID        string  `json:"destination_id"`
 	DestinationName      string  `json:"destination_name"`
 	DestinationPlaceID   string  `json:"destination_place_id"`
 	DestinationLatitude  float64 `json:"destination_latitude"`
 	DestinationLongitude float64 `json:"destination_longitude"`
+	PassengerLimit       int     `json:"passenger_limit"`
 	Status               string  `json:"status"`
 	StartTime            string  `json:"start_time"`
 	CreatedAt            string  `json:"createdAt"`
+	UpdatedAt            string  `json:"updatedAt"`
 }
 
 func toAppTripView(tripView trip.TripView) AppTripView {
 
 	return AppTripView{
 		ID:                   tripView.ID.String(),
+		DriverID:             tripView.DriverID.String(),
 		DriverName:           tripView.DriverName,
+		DriverImageURL:       tripView.DriverImageURL,
 		DriverBrand:          tripView.DriverBrand,
 		DriverModel:          tripView.DriverModel,
 		DriverColor:          tripView.DriverColor,
 		DriverPlate:          tripView.DriverPlate,
+		SourceID:             tripView.SourceID.String(),
 		SourceName:           tripView.SourceName,
 		SourcePlaceID:        tripView.SourcePlaceID,
 		SourceLatitude:       tripView.SourceLatitude,
 		SourceLongitude:      tripView.SourceLongitude,
+		DestinationID:        tripView.DestinationID.String(),
 		DestinationName:      tripView.DestinationName,
 		DestinationPlaceID:   tripView.DestinationPlaceID,
 		DestinationLatitude:  tripView.DestinationLatitude,
 		DestinationLongitude: tripView.DestinationLongitude,
+		PassengerLimit:       tripView.PassengerLimit,
 		Status:               tripView.Status,
 		StartTime:            tripView.StartTime.Format(time.RFC3339),
 		CreatedAt:            tripView.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:            tripView.UpdatedAt.Format(time.RFC3339),
 	}
 }

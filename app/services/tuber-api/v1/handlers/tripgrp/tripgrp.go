@@ -14,6 +14,7 @@ import (
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Handlers manages the set of user endpoints.
@@ -30,6 +31,7 @@ func New(trip *trip.Core) *Handlers {
 
 // Create adds a new trip to the system.
 func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
+	userID := auth.GetUserID(ctx)
 	var app AppNewTrip
 	// Validate the request.
 	if err := web.Decode(c, &app); err != nil {
@@ -42,18 +44,59 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 		fmt.Println("app:create:toCoreNewTrip:err:", err)
 		return response.NewError(err, http.StatusBadRequest)
 	}
+	nc.DriverID = userID
 
 	trip, err := h.trip.Create(ctx, nc)
 	if err != nil {
 		fmt.Println("app:create:trip:create:err:", err)
-		return fmt.Errorf("create: usr[%+v]: %w", trip, err)
+		return fmt.Errorf("create: trip[%+v]: %w", trip, err)
 	}
 
 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
 }
 
-// QueryAll returns a list of users with paging.
-func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
+// Update updates a trip in the system.
+func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
+	userID := auth.GetUserID(ctx)
+
+	var app AppUpdateTrip
+	if err := web.Decode(c, &app); err != nil {
+		return err
+	}
+
+	tripID := uuid.Must(uuid.Parse(c.Param("id")))
+
+	qtrip, err := h.trip.QueryByID(ctx, tripID)
+	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querybyid: tripID[%s]: %w", tripID, err)
+		}
+	}
+
+	// check if the user is the driver of the trip
+	if qtrip.DriverID != userID {
+		fmt.Println("app:update:trip:userID:", userID, "qtrip.DriverID:", qtrip.DriverID)
+		return response.NewError(errors.New("user is not the driver of the trip"), http.StatusForbidden)
+	}
+
+	ut, err := toCoreUpdateTrip(app)
+	if err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+
+	trip, err := h.trip.Update(ctx, qtrip, ut)
+	if err != nil {
+		return fmt.Errorf("update: tripID[%s] ut[%+v]: %w", tripID, ut, err)
+	}
+
+	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusOK)
+}
+
+// Query returns a list of users with paging.
+func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
 		return err
@@ -69,7 +112,7 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	trips, err := h.trip.QueryAll(ctx, filter, orderBy, page.Number, page.RowsPerPage)
+	trips, err := h.trip.Query(ctx, filter, orderBy, page.Number, page.RowsPerPage)
 	if err != nil {
 		return fmt.Errorf("query: %w", err)
 	}
@@ -87,8 +130,8 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// Query returns a trip that matches the specified ID in the session.
-func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
+// QueryMyTrip returns a trip that the user is in.
+func (h *Handlers) QueryMyTrip(ctx context.Context, c *gin.Context) error {
 	id := auth.GetUserID(ctx)
 
 	page, err := paging.ParseRequest(c.Request)
@@ -96,7 +139,7 @@ func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	filter, err := parseFilter(c.Request)
+	filter, err := parseFilterByUser(c.Request)
 	if err != nil {
 		return err
 	}
@@ -106,7 +149,7 @@ func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	qtrip, err := h.trip.QueryByUserID(ctx, id, filter, orderBy, page.Number, page.RowsPerPage)
+	qtrip, err := h.trip.QueryMyTrip(ctx, id, filter, orderBy, page.Number, page.RowsPerPage)
 	if err != nil {
 		switch {
 		case errors.Is(err, trip.ErrNotFound):
@@ -123,7 +166,7 @@ func (h *Handlers) QueryByUserID(ctx context.Context, c *gin.Context) error {
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	id := c.Param("id")
 
-	qtrip, err := h.trip.QueryByID(ctx, id)
+	qtrip, err := h.trip.QueryByID(ctx, uuid.Must(uuid.Parse(id)))
 	if err != nil {
 		switch {
 		case errors.Is(err, trip.ErrNotFound):

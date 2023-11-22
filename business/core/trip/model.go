@@ -17,6 +17,7 @@ type Trip struct {
 	Status         string
 	StartTime      time.Time
 	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type TripLocation struct {
@@ -36,6 +37,11 @@ type NewTrip struct {
 	StartTime      time.Time
 }
 
+type UpdateTrip struct {
+	PassengerLimit *int
+	Status         *string
+}
+
 type TripPassenger struct {
 	TripID        uuid.UUID
 	PassengerID   uuid.UUID
@@ -53,36 +59,43 @@ type NewTripPassenger struct {
 }
 
 type UserTrip struct {
-	TripID               uuid.UUID
-	PassengerID          uuid.UUID
-	StationSourceID      uuid.UUID
-	StationDestinationID uuid.UUID
-	PassengerStatus      string
-	DriverID             uuid.UUID
-	PassengerLimit       int
-	SourceID             uuid.UUID
-	DestinationID        uuid.UUID
-	TripStatus           string
-	StartTime            time.Time
-	CreatedAt            time.Time
+	TripID          uuid.UUID
+	PassengerID     uuid.UUID
+	MySourceID      uuid.UUID
+	MyDestinationID uuid.UUID
+	MyStatus        string
+	DriverID        uuid.UUID
+	PassengerLimit  int
+	SourceID        uuid.UUID
+	DestinationID   uuid.UUID
+	TripStatus      string
+	StartTime       time.Time
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
 }
 
 type TripView struct {
 	ID                   uuid.UUID
+	DriverID             uuid.UUID
 	DriverName           string
+	DriverImageURL       string
 	DriverBrand          string
 	DriverModel          string
 	DriverColor          string
 	DriverPlate          string
+	SourceID             uuid.UUID
 	SourceName           string
 	SourcePlaceID        string
 	SourceLatitude       float64
 	SourceLongitude      float64
+	DestinationID        uuid.UUID
 	DestinationName      string
 	DestinationPlaceID   string
 	DestinationLatitude  float64
 	DestinationLongitude float64
+	PassengerLimit       int
 	Status               string
 	StartTime            time.Time
 	CreatedAt            time.Time
+	UpdatedAt            time.Time
 }
