@@ -43,4 +43,6 @@ func Routes(app *web.App, cfg Config) {
 	// app.Handle(http.MethodDelete, version, "/users/:id", hdl.Delete)
 	app.Handle(http.MethodGet, version, "/trips/my", hdl.QueryMyTrip, authen)
 	app.Handle(http.MethodPost, version, "/trips/join", hdl.Join, authen)
+
+	app.Handle(http.MethodGet, version, "/trips/:id/passengers", hdl.QueryPassengers, authen)
 }

@@ -216,3 +216,81 @@ func toAppTripView(tripView trip.TripView) AppTripView {
 		UpdatedAt:            tripView.UpdatedAt.Format(time.RFC3339),
 	}
 }
+
+type AppPassengerDetails struct {
+	PassengerID          string  `json:"passenger_id"`
+	SourceName           string  `json:"source_name"`
+	SourcePlaceID        string  `json:"source_place_id"`
+	SourceLatitude       float64 `json:"source_latitude"`
+	SourceLongitude      float64 `json:"source_longitude"`
+	DestinationName      string  `json:"destination_name"`
+	DestinationPlaceID   string  `json:"destination_place_id"`
+	DestinationLatitude  float64 `json:"destination_latitude"`
+	DestinationLongitude float64 `json:"destination_longitude"`
+}
+type AppTripDriverDetails struct {
+	DriverID       string `json:"driver_id"`
+	DriverName     string `json:"driver_name"`
+	DriverImageURL string `json:"driver_image_url"`
+	DriverBrand    string `json:"driver_brand"`
+	DriverModel    string `json:"driver_model"`
+	DriverColor    string `json:"driver_color"`
+	DriverPlate    string `json:"driver_plate"`
+}
+
+type AppTripDetails struct {
+	TripID               string                `json:"trip_id"`
+	DriverDetails        AppTripDriverDetails  `json:"driver_details"`
+	SourceName           string                `json:"source_name"`
+	SourcePlaceID        string                `json:"source_place_id"`
+	SourceLatitude       float64               `json:"source_latitude"`
+	SourceLongitude      float64               `json:"source_longitude"`
+	DestinationName      string                `json:"destination_name"`
+	DestinationPlaceID   string                `json:"destination_place_id"`
+	DestinationLatitude  float64               `json:"destination_latitude"`
+	DestinationLongitude float64               `json:"destination_longitude"`
+	PassengerDetails     []AppPassengerDetails `json:"passenger_details"`
+}
+
+func toAppPassengerDetails(passengerDetails []trip.PassengerDetails) []AppPassengerDetails {
+	appPassengerDetails := []AppPassengerDetails{}
+	for _, passengerDetail := range passengerDetails {
+		appPassengerDetails = append(appPassengerDetails, AppPassengerDetails{
+			PassengerID:          passengerDetail.PassengerID.String(),
+			SourceName:           passengerDetail.SourceName,
+			SourcePlaceID:        passengerDetail.SourcePlaceID,
+			SourceLatitude:       passengerDetail.SourceLatitude,
+			SourceLongitude:      passengerDetail.SourceLongitude,
+			DestinationName:      passengerDetail.DestinationName,
+			DestinationPlaceID:   passengerDetail.DestinationPlaceID,
+			DestinationLatitude:  passengerDetail.DestinationLatitude,
+			DestinationLongitude: passengerDetail.DestinationLongitude,
+		})
+	}
+	return appPassengerDetails
+}
+
+func toAppTripDetails(tripDetails trip.TripDetails) AppTripDetails {
+
+	return AppTripDetails{
+		TripID: tripDetails.TripID.String(),
+		DriverDetails: AppTripDriverDetails{
+			DriverID:       tripDetails.DriverID.String(),
+			DriverName:     tripDetails.DriverName,
+			DriverImageURL: tripDetails.DriverImageURL,
+			DriverBrand:    tripDetails.DriverBrand,
+			DriverModel:    tripDetails.DriverModel,
+			DriverColor:    tripDetails.DriverColor,
+			DriverPlate:    tripDetails.DriverPlate,
+		},
+		SourceName:           tripDetails.SourceName,
+		SourcePlaceID:        tripDetails.SourcePlaceID,
+		SourceLatitude:       tripDetails.SourceLatitude,
+		SourceLongitude:      tripDetails.SourceLongitude,
+		DestinationName:      tripDetails.DestinationName,
+		DestinationPlaceID:   tripDetails.DestinationPlaceID,
+		DestinationLatitude:  tripDetails.DestinationLatitude,
+		DestinationLongitude: tripDetails.DestinationLongitude,
+		PassengerDetails:     toAppPassengerDetails(tripDetails.PassengerDetails),
+	}
+}
