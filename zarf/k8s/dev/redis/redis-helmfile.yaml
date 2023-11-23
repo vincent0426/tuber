@@ -1,12 +1,8 @@
-repositories:
-  - name: redis
-    url: https://charts.bitnami.com/bitnami
-
 # Add the redis release
 releases:
   - name: redis
     namespace: tuber-system
-    chart: bitnami/redis
-    # version:
+    chart: oci://registry-1.docker.io/bitnamicharts/redis
+    version: 18.4.0
     values:
       - redis-values.yaml

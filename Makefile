@@ -65,10 +65,10 @@ dev-apply:
 
 # helmfile is used to deploy helm charts.
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml sync
-	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=300s
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=600s
 	
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml sync
-	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=300s
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/loki-helmfile.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=600s
 	
 # create redis secret
 	kustomize build zarf/k8s/dev/redis | kubectl apply -f -
@@ -79,9 +79,9 @@ dev-apply:
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=300s --for=condition=Ready
 
 dev-delete:
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
+# helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml destroy
-	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/dev-loki.yaml destroy
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/loki-helmfile.yaml destroy
 	kustomize build zarf/k8s/dev/redis | kubectl delete -f -
 	kustomize build zarf/k8s/dev/tempo | kubectl delete -f -
 	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
