@@ -53,7 +53,7 @@ CREATE TABLE chat_history (
 );
 CREATE TABLE rating (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-  rate INTEGER NOT NULL,
+  rating INTEGER NOT NULL,
   trip_id UUID NOT NULL,
   commenter_id UUID NOT NULL,
   comment TEXT,

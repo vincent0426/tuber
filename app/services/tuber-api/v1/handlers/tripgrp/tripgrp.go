@@ -215,3 +215,25 @@ func (h *Handlers) QueryPassengers(ctx context.Context, c *gin.Context) error {
 
 	return web.Respond(ctx, c.Writer, toAppTripDetails(tripDetails), http.StatusOK)
 }
+
+func (h *Handlers) CreateRating(ctx context.Context, c *gin.Context) error {
+	userID := auth.GetUserID(ctx)
+	var app AppNewRating
+	// Validate the request.
+	if err := web.Decode(c, &app); err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+
+	nr, err := toCoreNewRating(app)
+	if err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+	nr.CommenterID = userID
+
+	rating, err := h.trip.CreateRating(ctx, nr)
+	if err != nil {
+		return fmt.Errorf("create: rating[%+v]: %w", rating, err)
+	}
+
+	return web.Respond(ctx, c.Writer, toAppRating(rating), http.StatusCreated)
+}

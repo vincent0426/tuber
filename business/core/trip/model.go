@@ -131,3 +131,19 @@ type TripDetails struct {
 	DestinationLongitude float64
 	PassengerDetails     []PassengerDetails
 }
+
+type Rating struct {
+	ID          uuid.UUID
+	CommenterID uuid.UUID
+	TripID      uuid.UUID
+	Rating      int
+	Comment     string
+	CreatedAt   time.Time
+}
+
+type NewRating struct {
+	CommenterID uuid.UUID
+	TripID      uuid.UUID
+	Rating      int
+	Comment     string
+}

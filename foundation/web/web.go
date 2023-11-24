@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -32,12 +33,24 @@ type App struct {
 
 // NewApp creates an App value that handle a set of routes for the application.
 func NewApp(shutdown chan os.Signal, tracer trace.Tracer, mw ...Middleware) *App {
-	return &App{
+	app := &App{
 		Engine:   gin.New(),
 		shutdown: shutdown,
 		mw:       mw,
 		tracer:   tracer,
 	}
+
+	// Configure CORS
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	return app
 }
 
 // SignalShutdown is used to gracefully shut down the app when an integrity

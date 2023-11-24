@@ -294,3 +294,34 @@ func toAppTripDetails(tripDetails trip.TripDetails) AppTripDetails {
 		PassengerDetails:     toAppPassengerDetails(tripDetails.PassengerDetails),
 	}
 }
+
+// =============================================================================
+type AppNewRating struct {
+	TripID  string `json:"trip_id" binding:"required"`
+	Rating  int    `json:"rating" binding:"required"`
+	Comment string `json:"comment"`
+}
+
+func toAppRating(rating trip.Rating) AppNewRating {
+
+	return AppNewRating{
+		TripID:  rating.TripID.String(),
+		Rating:  rating.Rating,
+		Comment: rating.Comment,
+	}
+}
+
+func toCoreNewRating(app AppNewRating) (trip.NewRating, error) {
+	uuTripID, err := uuid.Parse(app.TripID)
+	if err != nil {
+		return trip.NewRating{}, err
+	}
+
+	rating := trip.NewRating{
+		TripID:  uuTripID,
+		Rating:  app.Rating,
+		Comment: app.Comment,
+	}
+
+	return rating, nil
+}
