@@ -1,6 +1,7 @@
 package userdb
 
 import (
+	"database/sql"
 	"net/mail"
 	"time"
 
@@ -11,15 +12,15 @@ import (
 // dbUser represent the structure we need for moving data
 // between the app and the database.
 type dbUser struct {
-	ID                 uuid.UUID `db:"id"`
-	Name               string    `db:"name"`
-	Email              string    `db:"email"`
-	ImageURL           string    `db:"image_url"`
-	Bio                string    `db:"bio"`
-	AcceptNotification bool      `db:"accept_notification"`
-	Sub                string    `db:"sub"`
-	CreatedAt          time.Time `db:"created_at"`
-	UpdatedAt          time.Time `db:"updated_at"`
+	ID                 uuid.UUID      `db:"id"`
+	Name               string         `db:"name"`
+	Email              string         `db:"email"`
+	ImageURL           string         `db:"image_url"`
+	Bio                string         `db:"bio"`
+	AcceptNotification bool           `db:"accept_notification"`
+	Sub                sql.NullString `db:"sub"`
+	CreatedAt          time.Time      `db:"created_at"`
+	UpdatedAt          time.Time      `db:"updated_at"`
 }
 
 func toDBUser(usr user.User) dbUser {
@@ -30,7 +31,7 @@ func toDBUser(usr user.User) dbUser {
 		ImageURL:           usr.ImageURL,
 		Bio:                usr.Bio,
 		AcceptNotification: usr.AcceptNotification,
-		Sub:                usr.Sub,
+		Sub:                sql.NullString{String: usr.Sub, Valid: usr.Sub != ""},
 		CreatedAt:          usr.CreatedAt.UTC(),
 		UpdatedAt:          usr.UpdatedAt.UTC(),
 	}

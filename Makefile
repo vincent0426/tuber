@@ -171,6 +171,7 @@ create-local:
 	}'
 
 # how to use: make update-local id=1
+# add -H "Origin: http://localhost:5173" to test CORS
 update-local:
 	@NAME=$$(awk 'BEGIN { srand(); print "Name_" int(rand()*10000) }'); \
 	EMAIL=$$(awk 'BEGIN { srand(); print "user" int(rand()*10000) "@example.com" }'); \

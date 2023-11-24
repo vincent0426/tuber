@@ -206,3 +206,23 @@ func toCoreTripDetails(tripDetails trip.TripDetails) trip.TripDetails {
 
 	return trip
 }
+
+type dbRating struct {
+	ID          uuid.UUID `db:"id"`
+	TripID      uuid.UUID `db:"trip_id"`
+	CommenterID uuid.UUID `db:"commenter_id"`
+	Comment     string    `db:"comment"`
+	Rating      int       `db:"rating"`
+	CreatedAt   time.Time `db:"created_at"`
+}
+
+func toDBRating(rating trip.Rating) dbRating {
+	return dbRating{
+		ID:          rating.ID,
+		TripID:      rating.TripID,
+		CommenterID: rating.CommenterID,
+		Comment:     rating.Comment,
+		Rating:      rating.Rating,
+		CreatedAt:   rating.CreatedAt.UTC(),
+	}
+}

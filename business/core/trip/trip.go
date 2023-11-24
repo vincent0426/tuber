@@ -42,6 +42,8 @@ type Storer interface {
 	Join(ctx context.Context, tripPassenger TripPassenger) error
 
 	QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetails, error)
+
+	CreateRating(ctx context.Context, rating Rating) error
 }
 
 // Core manages the set of APIs for user access.
@@ -203,4 +205,24 @@ func (c *Core) QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetai
 	}
 
 	return tripDetails, nil
+}
+
+// CreateRating inserts a new rating into the database.
+func (c *Core) CreateRating(ctx context.Context, nr NewRating) (Rating, error) {
+	now := time.Now()
+
+	rating := Rating{
+		ID:          uuid.New(),
+		TripID:      nr.TripID,
+		CommenterID: nr.CommenterID,
+		Comment:     nr.Comment,
+		Rating:      nr.Rating,
+		CreatedAt:   now,
+	}
+
+	if err := c.storer.CreateRating(ctx, rating); err != nil {
+		return Rating{}, fmt.Errorf("create: %w", err)
+	}
+
+	return rating, nil
 }

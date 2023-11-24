@@ -419,3 +419,25 @@ func (s *Store) QueryPassengers(ctx context.Context, tripID uuid.UUID) (trip.Tri
 
 	return toCoreTripDetails(ttrip), nil
 }
+
+func (s *Store) CreateRating(ctx context.Context, rating trip.Rating) error {
+	dbRating := toDBRating(rating)
+
+	sql, args, err := sq.
+		Insert("rating").
+		Columns("id", "trip_id", "commenter_id", "comment", "rating", "created_at").
+		Values(dbRating.ID, dbRating.TripID, dbRating.CommenterID, dbRating.Comment, dbRating.Rating, dbRating.CreatedAt).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("tosql: %w", err)
+	}
+
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
+		return fmt.Errorf("execcontext: %w", err)
+	}
+
+	return nil
+}
