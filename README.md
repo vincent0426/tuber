@@ -9,6 +9,10 @@ https://www.conventionalcommits.org/en/v1.0.0/
 
 # Not Complete
 ## Setup
+get docker image for postgres
+```
+docker pull vincent0426/tuber-postgres
+```
 1. create k8s cluster with Kind
 ```sh
 make dev-up
