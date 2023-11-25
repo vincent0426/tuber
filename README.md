@@ -9,7 +9,14 @@ https://www.conventionalcommits.org/en/v1.0.0/
 
 # Not Complete
 ## Setup
-get docker image for postgres
+
+We need **postgis** for our postgres. 
+
+If not using Apple M1 chip, please run the following command
+```sh
+make service-db
+```
+else if using Apple M1 chip own get docker image for postgres
 ```
 docker pull vincent0426/tuber-postgres
 ```
@@ -17,15 +24,15 @@ docker pull vincent0426/tuber-postgres
 ```sh
 make dev-up
 ```
-2. create docker image for main server named `tuber/tuber-api`
+1. create docker image for main server named `tuber/tuber-api`
 ```sh
 make service
 ```
-3. load tuber/tuber-api to kind container
+1. load tuber/tuber-api to kind container
 ```sh
 make dev-load
 ```
-4. 
+1. 
 ```sh
 make dev-apply
 ```
