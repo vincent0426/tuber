@@ -1,36 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tuber
+  name: tuber-chat
   namespace: tuber-system
 spec:
   selector:
     matchLabels:
-      app: tuber
+      app: tuber-chat
   replicas: 1
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: tuber
+        app: tuber-chat
     spec:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       containers:
-        - name:
-            tuber-api
-            # APP ENV
+        - name: tuber-chat-container
           env:
             - name: API_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: tuber-config
+                  name: tuber-chat-config
                   key: API_HOST
             - name: DEBUG_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: tuber-config
+                  name: tuber-chat-config
                   key: DEBUG_HOST
           # resources:
           #   requests:

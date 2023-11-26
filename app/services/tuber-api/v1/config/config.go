@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/spf13/viper"
@@ -85,5 +86,12 @@ func New() (config, error) {
 	if err := vConfig.Unmarshal(conf); err != nil {
 		return *conf, err
 	}
+
+	// test API_HOST, get from env
+	fmt.Println("API_HOST: ", vConfig.GetString("API_HOST"))
+	fmt.Println("DEBUG_HOST: ", vConfig.GetString("DEBUG_HOST"))
+	conf.Web.APIHost = vConfig.GetString("API_HOST")
+	conf.Web.DebugHost = vConfig.GetString("DEBUG_HOST")
+
 	return *conf, nil
 }

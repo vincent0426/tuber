@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tuber-chat-api
+  namespace: tuber-system
+spec:
+  selector:
+    app: tuber-chat
+  type: ClusterIP
+  ports:
+    - name: chat-api
+      port: 3002
+      targetPort: chat-api
+    - name: chat-api-debug
+      port: 4002
+      targetPort: chat-api-debug

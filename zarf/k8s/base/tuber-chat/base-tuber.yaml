@@ -1,35 +1,30 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: tuber-system
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tuber
+  name: tuber-chat
   namespace: tuber-system
 spec:
   selector:
     matchLabels:
-      app: tuber
+      app: tuber-chat
   template:
     metadata:
       labels:
-        app: tuber
+        app: tuber-chat
     spec:
       terminationGracePeriodSeconds: 60
       containers:
-        - name: tuber-api
-          image: service-image
+        - name: tuber-chat-container
+          image: service-chat-image
           ports:
-            - name: tuber-api
-              containerPort: 3000
-            - name: tuber-api-debug
-              containerPort: 4000
+            - name: chat-api
+              containerPort: 3002
+            - name: chat-api-debug
+              containerPort: 4002
           readinessProbe: # readiness probes mark the service available to accept traffic.
             httpGet:
               path: /debug/readiness
-              port: 4000
+              port: 4002
             initialDelaySeconds: 2
             periodSeconds: 15
             timeoutSeconds: 5
@@ -69,16 +64,16 @@ spec:
             - name: API_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: tuber-config
+                  name: tuber-chat-config
                   key: API_HOST
             - name: DEBUG_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: tuber-config
+                  name: tuber-chat-config
                   key: DEBUG_HOST
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: tuber-api
+  name: tuber-chat-api
   namespace: tuber-system

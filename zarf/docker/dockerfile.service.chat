@@ -8,7 +8,7 @@ COPY . /service
 
 # Build the service binary.
 WORKDIR /service/app/services/tuber-api
-RUN go build -ldflags "-X main.routes=all"
+RUN go build -ldflags "-X main.routes=chat"
 
 
 # Run the Go Binary in Alpine.

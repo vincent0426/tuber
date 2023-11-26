@@ -9,6 +9,12 @@ nodes:
       # Tuber debug
       - containerPort: 4000
         hostPort: 4000
+      # Tuber chat
+      - containerPort: 3002
+        hostPort: 3002
+      # Tuber chat debug
+      - containerPort: 4002
+        hostPort: 4002
       # Metrics
       - containerPort: 3001
         hostPort: 3001

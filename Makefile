@@ -16,6 +16,8 @@ LOKI            := grafana/loki:3.3.1
 VERSION         := 0.0.1
 SERVICE_NAME    := tuber-api
 SERVICE_IMAGE   := $(BASE_IMAGE_NAME)/$(SERVICE_NAME):$(VERSION)
+SERVICE_CHAT_NAME    := tuber-chat
+SERVICE_CHAT_IMAGE   := $(BASE_IMAGE_NAME)/$(SERVICE_CHAT_NAME):$(VERSION)
 
 dev-brew:
 	brew update
@@ -27,12 +29,20 @@ dev-brew:
 
 # ==============================================================================
 # Building containers
-all: service
+all: service service-chat
 
 service:
 	docker build \
 	-f zarf/docker/dockerfile.service \
 	-t $(SERVICE_IMAGE) \
+	--build-arg BUILD_REF=$(VERSION) \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	.
+	
+service-chat:
+	docker build \
+	-f zarf/docker/dockerfile.service.chat \
+	-t $(SERVICE_CHAT_IMAGE) \
 	--build-arg BUILD_REF=$(VERSION) \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	.
@@ -60,6 +70,9 @@ dev-up:
 dev-load:
 	cd zarf/k8s/dev/tuber; kustomize edit set image service-image=$(SERVICE_IMAGE)
 	kind load docker-image $(SERVICE_IMAGE) --name $(KIND_CLUSTER)
+	
+	cd zarf/k8s/dev/tuber-chat; kustomize edit set image service-image=$(SERVICE_CHAT_IMAGE)
+	kind load docker-image $(SERVICE_CHAT_IMAGE) --name $(KIND_CLUSTER)
 
 dev-apply:
 	kustomize build zarf/k8s/dev/database | kubectl apply -f -
@@ -86,8 +99,11 @@ dev-apply:
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=300s --for=condition=Ready
 
+	kustomize build zarf/k8s/dev/tuber-chat | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP)-chat --timeout=300s --for=condition=Ready
+
 dev-delete:
-# helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml destroy
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/loki-helmfile.yaml destroy
 	kustomize build zarf/k8s/dev/redis | kubectl delete -f -
@@ -98,6 +114,10 @@ dev-delete:
 
 dev-logs:
 	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP) --all-containers=true -f --tail=100
+
+dev-chat-logs:
+	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP)-chat --all-containers=true -f --tail=100
+
 
 dev-status:
 	kubectl get nodes -o wide
