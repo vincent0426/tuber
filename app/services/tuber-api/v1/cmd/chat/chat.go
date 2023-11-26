@@ -20,6 +20,7 @@ type add struct{}
 func (add) Add(app *web.App, cfg v1.APIMuxConfig) {
 	healthgrp.Routes(app, healthgrp.Config{
 		Log: cfg.Log,
+		Svc: "chat",
 	})
 	wsgrp.Routes(app, wsgrp.Config{
 		Log:  cfg.Log,

@@ -1,0 +1,44 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: tuber-gateway
+  namespace: tuber-system
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: tuber-virtual-service
+  namespace: tuber-system
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - tuber-gateway
+  http:
+    - match:
+        - uri:
+            prefix: "/v1/chat"
+      route:
+        - destination:
+            host: tuber-chat-api
+            port:
+              number: 3002
+    - match:
+        - uri:
+            prefix: "/v1"
+      route:
+        - destination:
+            host: tuber-api
+            port:
+              number: 3000

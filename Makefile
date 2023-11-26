@@ -102,6 +102,15 @@ dev-apply:
 	kustomize build zarf/k8s/dev/tuber-chat | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP)-chat --timeout=300s --for=condition=Ready
 
+# install istio
+
+# helm install istio-base istio/base -n istio-system --set defaultRevision=default
+# helm install istiod istio/istiod -n istio-system --wait
+
+# install gateway under zarf/k8s/dev/gateway since we need to change loadBalancerIP to node IP
+# kustomize build zarf/k8s/dev/gateway | kubectl apply -f -
+# kubectl wait pods --namespace=$(NAMESPACE) --selector app=gateway --timeout=300s --for=condition=Ready
+
 dev-delete:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml destroy
@@ -126,6 +135,7 @@ dev-status:
 
 dev-restart:
 	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
+	kubectl rollout restart deployment $(APP)-chat --namespace=$(NAMESPACE)
 
 dev-update: all dev-load dev-restart
 
