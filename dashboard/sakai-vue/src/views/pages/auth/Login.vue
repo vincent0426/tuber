@@ -19,7 +19,7 @@ const submit = async () => {
     loading.value = true;
     try {
         await store.dispatch('login', { username: username.value, password: password.value });
-        router.push({ name: 'dashboard' });
+        router.push({ name: 'CustomerHome' });
     } catch (error) {
         // Handle login error
         console.error('Login failed:', error);
@@ -29,6 +29,9 @@ const submit = async () => {
     }
 };
 
+const register = async () => {
+    router.push({name: 'Register'});
+};
 </script>
 
 <template>
@@ -38,8 +41,8 @@ const submit = async () => {
             <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                 <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
-                        <img src="/demo/images/login/avatar.png" alt="Image" height="50" class="mb-3" />
-                        <div class="text-900 text-3xl font-medium mb-3">Welcome, Isabel!</div>
+                        <!-- <img src="/demo/images/login/avatar.png" alt="Image" height="50" class="mb-3" /> -->
+                        <div class="text-900 text-3xl font-medium mb-3">Welcome!</div>
                         <span class="text-600 font-medium">Sign in to continue</span>
                     </div>
 
@@ -57,7 +60,10 @@ const submit = async () => {
                             </div>
                             <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
                         </div>
-                        <Button label="Sign In" class="w-full p-3 text-xl" @click="submit"></Button>
+                        <div class="flex gap-5">
+                            <Button label="Sign In" class="w-full p-3 text-xl" @click="submit"></Button>
+                            <Button label="Register" class="w-full p-3 text-xl" @click="register"></Button>
+                        </div>
                     </div>
                 </div>
             </div>

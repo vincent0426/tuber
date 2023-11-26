@@ -1,6 +1,7 @@
 import { toRefs, reactive, computed } from 'vue';
 
 const layoutConfig = reactive({
+    status: 'Customer',
     ripple: false,
     darkTheme: false,
     inputStyle: 'outlined',
@@ -44,7 +45,7 @@ export function useLayout() {
             layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
         }
     };
-
+    
     const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
     const isDarkTheme = computed(() => layoutConfig.darkTheme);
