@@ -1,0 +1,1 @@
+<!-- A page for customer to check his/her own application -->

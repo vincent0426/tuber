@@ -1,0 +1,1 @@
+<!-- The page for trip detail. Notice Customer and Driver may see different layout of this page. -->
