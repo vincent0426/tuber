@@ -197,6 +197,15 @@ update-local:
 # how to use: make delete-local id=1
 delete-local:
 	@curl -iX DELETE 'http://localhost:3000/v1/users/$(id)'
+	
 # how to use: make query-local | jq
 query-local:
 	@curl 'http://localhost:3000/v1/users?page=1&rows=2&orderBy=name'
+
+# make dashboard-up
+dashboard-up:
+	docker compose -f zarf/docker/docker-compose.yml up -d
+
+# make dashboard-down
+dashboard-down:
+	docker compose -f zarf/docker/docker-compose.yml down

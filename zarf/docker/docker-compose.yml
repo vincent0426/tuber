@@ -1,0 +1,11 @@
+version: '3.7'
+
+services:
+  dashboard:
+    image: node:18
+    volumes:
+      - ../../dashboard/sakai-vue:/web
+    working_dir: /web
+    ports:
+      - 5173:5173
+    command: bash -c "yarn install && yarn serve"
