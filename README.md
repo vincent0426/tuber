@@ -24,15 +24,15 @@ docker pull vincent0426/tuber-postgres
 ```sh
 make dev-up
 ```
-1. create docker image for main server named `tuber/tuber-api`
+2. create docker image
 ```sh
-make service
+make all
 ```
-1. load tuber/tuber-api to kind container
+3. load images built in step 3 to kind
 ```sh
 make dev-load
 ```
-1. 
+4. 
 ```sh
 make dev-apply
 ```

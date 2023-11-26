@@ -106,6 +106,7 @@ dev-apply:
 
 # helm install istio-base istio/base -n istio-system --set defaultRevision=default
 # helm install istiod istio/istiod -n istio-system --wait
+# kubectl apply -f zarf/k8s/dev/istio-ingressgateway-config.yaml
 
 # install gateway under zarf/k8s/dev/gateway since we need to change loadBalancerIP to node IP
 # kustomize build zarf/k8s/dev/gateway | kubectl apply -f -
