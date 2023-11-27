@@ -15,8 +15,8 @@ spec:
       labels:
         app: tuber-chat
     spec:
-      dnsPolicy: ClusterFirstWithHostNet
-      hostNetwork: true
+      # dnsPolicy: ClusterFirstWithHostNet
+      # hostNetwork: true
       containers:
         - name: tuber-chat-container
           env:

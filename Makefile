@@ -121,6 +121,7 @@ dev-delete:
 	kustomize build zarf/k8s/dev/grafana | kubectl delete -f -
 	kustomize build zarf/k8s/dev/database | kubectl delete -f -
 	kustomize build zarf/k8s/dev/tuber | kubectl delete -f -
+	kustomize build zarf/k8s/dev/tuber-chat | kubectl delete -f -
 
 dev-logs:
 	kubectl logs --namespace=$(NAMESPACE) -l app=$(APP) --all-containers=true -f --tail=100
@@ -148,6 +149,12 @@ dev-docker-pull:
 
 dev-down:
 	kind delete cluster --name $(KIND_CLUSTER)
+
+dev-port-forward:
+	kubectl port-forward --namespace=$(NAMESPACE) svc/$(APP)-api 3000:3000
+
+dev-chat-port-forward:
+	kubectl port-forward --namespace=$(NAMESPACE) svc/$(APP)-chat-api 3002:3002
 
 tidy:
 	go mod tidy

@@ -4,5 +4,5 @@ metadata:
   name: tuber-chat-config
   namespace: tuber-system
 data:
-  API_HOST: ":3002"
-  DEBUG_HOST: ":4002"
+  API_HOST: ":3000"
+  DEBUG_HOST: ":4000"

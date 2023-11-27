@@ -81,17 +81,19 @@ func New() (config, error) {
 
 	// Enable environment variable overriding for all.
 	vConfig.AutomaticEnv()
+
+	// test API_HOST, get from env
+	fmt.Println("API_HOST: ", vConfig.GetString("API_HOST"))
+	fmt.Println("DEBUG_HOST: ", vConfig.GetString("DEBUG_HOST"))
+	// since our config is nested, we need to set the defaults for the nested structs
+	vConfig.BindEnv("Web.APIHost", "API_HOST")
+	vConfig.BindEnv("Web.DebugHost", "DEBUG_HOST")
+
 	conf := &config{}
 	// Unmarshal the config into the conf struct.
 	if err := vConfig.Unmarshal(conf); err != nil {
 		return *conf, err
 	}
-
-	// test API_HOST, get from env
-	fmt.Println("API_HOST: ", vConfig.GetString("API_HOST"))
-	fmt.Println("DEBUG_HOST: ", vConfig.GetString("DEBUG_HOST"))
-	conf.Web.APIHost = vConfig.GetString("API_HOST")
-	conf.Web.DebugHost = vConfig.GetString("DEBUG_HOST")
 
 	return *conf, nil
 }

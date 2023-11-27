@@ -37,6 +37,23 @@ make dev-load
 make dev-apply
 ```
 
+5. port forward
+
+for main service
+```sh
+make dev-port-forward
+
+curl localhost:3000/v1/ping
+```
+
+for chat service
+```sh
+make dev-chat-port-forward
+
+curl localhost:3002/v1/chat/ping
+```
+
+## Update
 if update code only
 ```sh
 make dev-update
