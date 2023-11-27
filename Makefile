@@ -13,7 +13,7 @@ TEMPO           := grafana/tempo:2.2.0
 LOKI            := grafana/loki:3.3.1
 
 # VERSION         := dev
-VERSION         := 0.0.1
+VERSION         := 0.0.2
 SERVICE_NAME    := tuber-api
 SERVICE_IMAGE   := $(BASE_IMAGE_NAME)/$(SERVICE_NAME):$(VERSION)
 SERVICE_CHAT_NAME    := tuber-chat
@@ -36,7 +36,7 @@ service:
 	-f zarf/docker/dockerfile.service \
 	-t $(SERVICE_IMAGE) \
 	--build-arg BUILD_REF=$(VERSION) \
-	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M｀%SZ"` \
 	.
 	
 service-chat:
@@ -96,6 +96,12 @@ dev-apply:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/redis/redis-helmfile.yaml sync
 	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=redis --namespace $(NAMESPACE) --timeout=300s
 	
+# create rabbitmq secret
+	kustomize build zarf/k8s/dev/rabbitmq | kubectl apply -f -
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/rabbitmq/rabbitmq-helmfile.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=rabbitmq --namespace $(NAMESPACE) --timeout=300s
+
+# create tuber deployment
 	kustomize build zarf/k8s/dev/tuber | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP) --timeout=300s --for=condition=Ready
 

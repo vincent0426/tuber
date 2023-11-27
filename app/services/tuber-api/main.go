@@ -12,6 +12,7 @@ import (
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/cmd"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/cmd/all"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/cmd/chat"
+	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/cmd/locationserver"
 )
 
 /*
@@ -32,7 +33,10 @@ func main() {
 		if err := cmd.Main(build, chat.Routes()); err != nil {
 			os.Exit(1)
 		}
-
+	case "locationserver":
+		if err := cmd.Main(build, locationserver.Routes()); err != nil {
+			os.Exit(1)
+		}
 		// case "reporting":
 		// 	if err := cmd.Main(build, reporting.Routes()); err != nil {
 		// 		os.Exit(1)

@@ -11,8 +11,11 @@ import (
 	"time"
 
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/config"
+	"github.com/TSMC-Uber/server/business/core/locationws"
 	"github.com/TSMC-Uber/server/business/sys/cachedb"
 	"github.com/TSMC-Uber/server/business/sys/database"
+	"github.com/TSMC-Uber/server/business/sys/mail"
+	"github.com/TSMC-Uber/server/business/sys/mq"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/debug"
@@ -74,6 +77,32 @@ func run(ctx context.Context, log *logger.Logger, build string, routeAdder v1.Ro
 
 	log.Info(ctx, "starting service", "version", build)
 	defer log.Info(ctx, "shutdown complete")
+
+	// -------------------------------------------------------------------------
+	// RabbitMQ Support
+
+	log.Info(ctx, "startup", "status", "initializing rabbitmq support", "host", cfg.RabbitMQ.Host)
+
+	_, err = mq.ConnectToRabbitMQ(mq.Config{
+		Host:              cfg.RabbitMQ.Host,
+		DelayQueueName:    cfg.RabbitMQ.DelayQueueName,
+		DelayExchangeName: cfg.RabbitMQ.DelayExchangeName,
+		DelayRoutingKey:   cfg.RabbitMQ.DelayRoutingKey,
+	})
+	if err != nil {
+		return fmt.Errorf("connecting to rabbitmq: %w", err)
+	}
+
+	go mail.StartSendEmailWorker()
+
+	defer func() {
+		log.Info(ctx, "shutdown", "status", "stopping rabbitmq support", "host", cfg.RabbitMQ.Host)
+		mq.Close()
+	}()
+
+	// -------------------------------------------------------------------------
+	// Room Dispatcher
+	locationws.NewRoomsDispatcher()
 
 	// -------------------------------------------------------------------------
 	// Database Support
