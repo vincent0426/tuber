@@ -57,6 +57,17 @@ make dev-chat-port-forward
 curl localhost:3002/v1/chat/ping
 ```
 
+### Google Login
+1. Create a gcp project and create a OAuth 2.0 credentials, then update the `AUTH_AUDIENCE` (your oauth cliend id, something like....apps.googleusercontent.com) in `zarf/k8s/dev/tuber/dev-tuber-patch-deploy.yaml`
+
+2. go to https://developers.google.com/oauthplayground/ and click the gear icon on the top right corner, check the box `Use your own OAuth credentials` and fill in the `OAuth Client ID` and `OAuth Client secret` from step 1, then click `Close`
+
+3. click `Step 1: Select & authorize APIs` and select `Google OAuth2 API v2`, and check the box `profile` and `email`, then click `Authorize APIs`
+
+4. click `Step 2: Exchange authorization code for tokens` and click `Exchange authorization code for tokens`, then you will get the `id_token`
+
+5. use the `id_token` as header (id_token=<your_id_token>) to  `POST /v1/auth/login` endpoint, you will be set with cookie automatically and you can access the protected endpoint now
+
 ## Update
 ### code only
 ```sh
