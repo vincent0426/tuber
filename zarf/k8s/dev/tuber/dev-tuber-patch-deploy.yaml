@@ -32,6 +32,11 @@ spec:
                 configMapKeyRef:
                   name: tuber-config
                   key: DEBUG_HOST
+            - name: AUTH_AUDIENCE
+              valueFrom:
+                configMapKeyRef:
+                  name: tuber-config
+                  key: AUTH_AUDIENCE
           # resources:
           #   requests:
           #     cpu: "1500m"
