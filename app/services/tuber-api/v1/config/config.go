@@ -77,23 +77,26 @@ func New() (config, error) {
 	vConfig.SetDefault("Tempo.Probability", 1)
 
 	// Set Auth defaults.
-	vConfig.SetDefault("Auth.Audience", "808161745758-73upckm7gpah36uejvar457fhn6qtsd4.apps.googleusercontent.com")
+	vConfig.SetDefault("Auth.Audience", "")
 
 	// Enable environment variable overriding for all.
 	vConfig.AutomaticEnv()
 
-	// test API_HOST, get from env
-	fmt.Println("API_HOST: ", vConfig.GetString("API_HOST"))
-	fmt.Println("DEBUG_HOST: ", vConfig.GetString("DEBUG_HOST"))
 	// since our config is nested, we need to set the defaults for the nested structs
 	vConfig.BindEnv("Web.APIHost", "API_HOST")
 	vConfig.BindEnv("Web.DebugHost", "DEBUG_HOST")
+	vConfig.BindEnv("Auth.Audience", "AUTH_AUDIENCE")
 
 	conf := &config{}
 	// Unmarshal the config into the conf struct.
 	if err := vConfig.Unmarshal(conf); err != nil {
 		return *conf, err
 	}
+
+	// test API_HOST, get from env
+	fmt.Println("API_HOST: ", vConfig.GetString("API_HOST"))
+	fmt.Println("DEBUG_HOST: ", vConfig.GetString("DEBUG_HOST"))
+	fmt.Println("AUTH_AUDIENCE: ", vConfig.GetString("AUTH_AUDIENCE"))
 
 	return *conf, nil
 }
