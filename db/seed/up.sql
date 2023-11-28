@@ -102,7 +102,7 @@ SELECT (
   ),
   'Hello, I am your driver.';
 -- Insert data into 'rating'
-INSERT INTO rating (trip_id, rate, commenter_id, comment)
+INSERT INTO rating (trip_id, rating, commenter_id, comment)
 SELECT (
     SELECT id
     FROM trip
