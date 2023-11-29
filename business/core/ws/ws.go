@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/sys/cachedb"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/redis/go-redis/v9"
 )
@@ -48,7 +48,7 @@ func (c *Core) SendChatHistory(ctx context.Context, streamName string, channelNa
 	return nil
 }
 
-func (c *Core) ReceiveChatMessages(ctx context.Context, userID uuid.UUID, streamName string, channelName string, conn *websocket.Conn, ch <-chan *redis.Message) error {
+func (c *Core) ReceiveChatMessages(ctx context.Context, user user.User, streamName string, channelName string, conn *websocket.Conn, ch <-chan *redis.Message) error {
 	for {
 		_, message, err := conn.ReadMessage()
 		if err != nil {
@@ -56,8 +56,10 @@ func (c *Core) ReceiveChatMessages(ctx context.Context, userID uuid.UUID, stream
 		}
 
 		chatMessage := ChatMessage{
-			UserID:  userID.String(),
-			Message: string(message),
+			UserID:   user.ID,
+			Username: user.Name,
+			ImageURL: user.ImageURL,
+			Message:  string(message),
 		}
 
 		jsonMessage, err := json.Marshal(chatMessage)
