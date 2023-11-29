@@ -1,6 +1,10 @@
 package ws
 
+import "github.com/google/uuid"
+
 type ChatMessage struct {
-	UserID  string
-	Message string
+	UserID   uuid.UUID
+	Username string
+	ImageURL string
+	Message  string
 }

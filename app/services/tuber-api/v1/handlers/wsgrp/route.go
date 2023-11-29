@@ -3,6 +3,8 @@ package wsgrp
 import (
 	"net/http"
 
+	"github.com/TSMC-Uber/server/business/core/user"
+	"github.com/TSMC-Uber/server/business/core/user/stores/userdb"
 	"github.com/TSMC-Uber/server/business/core/ws"
 	"github.com/TSMC-Uber/server/business/core/ws/stores/wsdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
@@ -27,12 +29,12 @@ func Routes(app *web.App, cfg Config) {
 	const version = "v1"
 
 	// envCore := event.NewCore(cfg.Log)
-	// usrCore := user.NewCore(cfg.Log, envCore, usercache.NewStore(cfg.Log, userdb.NewStore(cfg.Log, cfg.DB)))
 
 	wsCore := ws.NewCore(wsdb.NewStore(cfg.Log, cfg.DB))
+	usrCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
 
 	// authen := mid.Authenticate(cfg.Auth)
 
-	hdl := New(wsCore)
+	hdl := New(wsCore, usrCore)
 	app.Handle(http.MethodGet, version, "/ws", hdl.Connect)
 }
