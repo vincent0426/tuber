@@ -14,7 +14,9 @@
         "primeicons": "^6.0.1",
         "primevue": "3.39.0",
         "vue": "^3.2.41",
+        "vue-google-oauth2": "^1.5.10",
         "vue-router": "^4.1.5",
+        "vue3-google-login": "^2.0.25",
         "vuex": "^4.1.0"
     },
     "devDependencies": {

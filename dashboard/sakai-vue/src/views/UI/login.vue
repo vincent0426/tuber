@@ -25,39 +25,62 @@
       <span class="divider-text">or</span>
     </div>
         
-    <button type="button" class="login-with-google-btn" @click="onSignIn" >
+    <!--
+    <button type="button" class="login-with-google-btn" @click="callback" >
         Sign in with Google
     </button>
+    -->
+    <GoogleLogin :callback="callback" prompt  />
+
 
   </template>
 
   <script>
+import { googleSdkLoaded , decodeCredential} from "vue3-google-login";
+import axios from "axios";
+  
+
   export default {
     data() {
       return {
             phone: null,
+            userDetails: null,
+            callback: (response) => {
+                console.log(response)
+                console.log(decodeCredential(response.credential))
+            }
         }
     },
     methods: {
-        onSignIn() {
-            const auth2 = gapi.auth2.getAuthInstance();
-            auth2.signIn().then(googleUser => {
-            // Handle the successful sign-in
-            const profile = googleUser.getBasicProfile();
-            console.log('ID: ' + profile.getId());
-            console.log('Full Name: ' + profile.getName());
-            console.log('Given Name: ' + profile.getGivenName());
-            console.log('Family Name: ' + profile.getFamilyName());
-            console.log('Image URL: ' + profile.getImageUrl());
-            console.log('Email: ' + profile.getEmail());
+        login() {
+            googleSdkLoaded(google => {
+                google.accounts.oauth2
+                .initCodeClient({
+                    client_id:
+                    "127171133807-4qm2bj37o4tkk7h868j5kmptgq4l878e.apps.googleusercontent.com",
+                    scope: "email profile openid",
+                    redirect_uri: "http://localhost:4000/auth/callback",
+                    callback: "callback",
+                })
+                .requestCode();
             });
         },
-        onSignInFailure() {
-            // Handle sign-in errors
-        },
-        goNext() {
-            console.log("Hello ", this.phone);
-        },
+        async sendCodeToBackend(code) {
+            try {
+                const headers = {
+                Authorization: code
+                };
+                const response = await axios.post("http://localhost:4000/auth", null, { headers });
+                const userDetails = response.data;
+                console.log("User Details:", userDetails);
+                this.userDetails = userDetails;
+
+                // Redirect to the homepage ("/")
+                //this.$router.push("/rex");
+            } catch (error) {
+                console.error("Failed to send authorization code:", error);
+            }
+            }
     },
     name: 'GoogleSignIn',
     mounted() {
@@ -71,6 +94,7 @@
   </script>
   
   <style>
+
   p{
     text-align: left;
   }

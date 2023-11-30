@@ -209,4 +209,8 @@ app.component('TreeTable', TreeTable);
 app.component('TriStateCheckbox', TriStateCheckbox);
 app.component('VirtualScroller', VirtualScroller);
 
+import vue3GoogleLogin from "vue3-google-login";
+app.use(vue3GoogleLogin, {clientId:"127171133807-4qm2bj37o4tkk7h868j5kmptgq4l878e.apps.googleusercontent.com",
+})
+
 app.mount('#app');
