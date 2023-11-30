@@ -18,13 +18,13 @@ spec:
           image: service-chat-image
           ports:
             - name: chat-api
-              containerPort: 3000
+              containerPort: 3002
             - name: chat-api-debug
-              containerPort: 4000
+              containerPort: 4002
           readinessProbe: # readiness probes mark the service available to accept traffic.
             httpGet:
               path: /debug/readiness
-              port: 4000
+              port: 4002
             initialDelaySeconds: 2
             periodSeconds: 15
             timeoutSeconds: 5

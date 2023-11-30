@@ -58,7 +58,7 @@ func New() (config, error) {
 	// Set DB defaults.
 	vConfig.SetDefault("DB.User", "postgres")
 	vConfig.SetDefault("DB.Password", "postgres")
-	vConfig.SetDefault("DB.Host", "localhost:5432")
+	vConfig.SetDefault("DB.Host", "database-service.tuber-system.svc.cluster.local:5432")
 	vConfig.SetDefault("DB.Name", "postgres")
 	vConfig.SetDefault("DB.Schema", "public")
 	vConfig.SetDefault("DB.MaxIdleConns", 10)
@@ -96,7 +96,6 @@ func New() (config, error) {
 	// test API_HOST, get from env
 	fmt.Println("API_HOST: ", vConfig.GetString("API_HOST"))
 	fmt.Println("DEBUG_HOST: ", vConfig.GetString("DEBUG_HOST"))
-	fmt.Println("AUTH_AUDIENCE: ", vConfig.GetString("AUTH_AUDIENCE"))
 
 	return *conf, nil
 }
