@@ -17,7 +17,7 @@ const router = createRouter({
                 {
                     path: '/passenger/history',
                     name: 'PassengerHistory',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/passenger/PassengerHistory.vue')
                 },
                 {
                     path: '/passenger/search', // /search?q=yourSearchQuery
@@ -47,7 +47,7 @@ const router = createRouter({
                 {
                     path: '/driver/history',
                     name: 'DriverHistory',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/driver/DriverHistory.vue')
                 },
                 {
                     path: '/driver/create',
@@ -68,7 +68,7 @@ const router = createRouter({
                     path: '/driver/applylist',
                     name: 'ApplyList',
                     component: () => import('@/views/pages/driver/ApplyList.vue')
-                },
+                }
             ]
         },
         {
@@ -100,24 +100,28 @@ const router = createRouter({
             path: '/TripDetail/:tripId',
             name: 'TripDetail',
             component: () => import('@/views/pages/utils/TripDetail.vue')
+        },
+        {
+            path: '/auth/chatList',
+            name: 'ChatList',
+            component: () => import('@/views/pages/auth/ChatList.vue')
         }
-    ],
+    ]
 });
-
 
 // Navigation guard to check authentication before each navigation
 router.beforeEach(async (to, from, next) => {
     if (to.name !== 'login' && !store.getters.login) {
         try {
             console.log('check login');
-            await store.dispatch("checkLogin");
+            await store.dispatch('checkLogin');
             next();
         } catch {
-            next({ name: "login" });
+            next({ name: 'login' });
         }
     } else {
-    console.log('have login');
-      next(); // Continue with the navigation
+        console.log('have login');
+        next(); // Continue with the navigation
     }
 });
 

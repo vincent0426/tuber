@@ -30,7 +30,7 @@ const submit = async () => {
 };
 
 const register = async () => {
-    router.push({name: 'Register'});
+    router.push({ name: 'Register' });
 };
 </script>
 
