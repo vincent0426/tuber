@@ -12,6 +12,7 @@ const model = ref([
             { label: 'My trip', icon: 'pi pi-fw pi-car', to: '/customer/mytrip'},
             { label: 'History', icon: 'pi pi-fw pi-book', to: '/customer/history'},
             { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/customer/setting'},
+            { label: 'Favorite', icon: 'pi pi-fw pi-heart', to: '/customer/favorite'},
         ]
     },
     {

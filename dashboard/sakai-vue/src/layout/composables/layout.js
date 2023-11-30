@@ -1,7 +1,6 @@
 import { toRefs, reactive, computed } from 'vue';
 
 const layoutConfig = reactive({
-    status: 'Customer',
     ripple: false,
     darkTheme: false,
     inputStyle: 'outlined',
