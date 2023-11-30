@@ -12,6 +12,7 @@ export class LoginService {
         });
     }
 
+    // Should check Login. Need changes.
     checkLogin() {
         return request({
             method: "get",

@@ -10,7 +10,7 @@ const loginService = new LoginService();
 
 export default createStore({
   state: {
-    user: {},
+    user: "customer",
     login: false,
   },
   getters: {
@@ -35,7 +35,7 @@ export default createStore({
     async checkLogin({ dispatch }) {
       try {
         const user = await loginService.checkLogin();
-        dispatch("setUser", user);
+        // dispatch("setUser", 'customer');
         dispatch("setLogin", true);
       } catch (e) {
         dispatch("setLogin", false);
@@ -46,7 +46,8 @@ export default createStore({
     async login({ dispatch }, { username, password }) {
       try {
         const user = await loginService.postLogin(username, password);
-        dispatch("setUser", user);
+        // When login, initialize as customer
+        dispatch("setUser", 'customer');
         dispatch("setLogin", true);
       } catch (e) {
         dispatch("setLogin", false);

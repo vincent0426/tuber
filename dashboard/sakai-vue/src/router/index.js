@@ -28,7 +28,7 @@ const router = createRouter({
                 {
                     path: '/customer/setting',
                     name: 'CutomerSetting',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/customer/CustomerSetting.vue')
                 },
                 {
                     path: '/customer/mytrip',
@@ -50,7 +50,7 @@ const router = createRouter({
                 {
                     path: '/driver/home',
                     name: 'DriverHome',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/driver/DriverHome.vue')
                 },
                 {
                     path: '/driver/history',
