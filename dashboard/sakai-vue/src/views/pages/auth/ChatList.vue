@@ -1,7 +1,7 @@
 import Rating from 'primevue/rating';
 <template>
     <div>
-        <h3 style="text-align: center">Driver History</h3>
+        <h3 style="text-align: center">ChatList</h3>
         <div class="ride-container">
             <Card v-for="(ride, index) in rideHistory" :key="index" class="ride-card">
                 <template #header>

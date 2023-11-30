@@ -44,7 +44,7 @@ export function useLayout() {
             layoutState.staticMenuMobileActive = !layoutState.staticMenuMobileActive;
         }
     };
-    
+
     const isSidebarActive = computed(() => layoutState.overlayMenuActive || layoutState.staticMenuMobileActive);
 
     const isDarkTheme = computed(() => layoutConfig.darkTheme);

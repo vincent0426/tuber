@@ -1,5 +1,5 @@
-import { createStore } from "vuex";
-import { LoginService } from "@/service";
+import { createStore } from 'vuex';
+import { LoginService } from '@/service';
 
 /**
  * Centralized state management for the application.
@@ -7,87 +7,83 @@ import { LoginService } from "@/service";
 
 const loginService = new LoginService();
 
-
 export default createStore({
-  state: {
-    user: {},
-    role: 'passenger',
-    login: false,
-  },
-  getters: {
-    user: (state) => state.user,
-    role: (state) => state.role,
-    login: (state) => state.login,
-  },
-  mutations: {
-    setRole(state, role) {
-      state.role = role;
+    state: {
+        user: {},
+        role: 'passenger',
+        login: false
     },
-    setUser(state, user) {
-      state.user = user;
+    getters: {
+        user: (state) => state.user,
+        role: (state) => state.role,
+        login: (state) => state.login
     },
-    setLogin(state, login) {
-      state.login = login;
-    },
-  },
-  actions: {
-    setLogin({ commit }, login) {
-      commit("setLogin", login);
-    },
-    setUser({ commit }, user) {
-      commit("setUser", user);
-    },
-    setRole({ commit }, role) {
-      commit("setRole", role);
-    },
-
-    async checkLogin({ dispatch }) {
-      try {
-        const user = await loginService.checkLogin();
-        dispatch("setUser", user);
-        dispatch("setLogin", true);
-      } catch (e) {
-        dispatch("setLogin", false);
-        dispatch("setUser", null);
-        throw "Not logged in";
-      }
-    },
-
-    async login({ dispatch }, { username, password }) {
-      try {
-        const user = await loginService.postLogin(username, password);
-        dispatch("setUser", user);
-        dispatch("setRole", 'passenger');
-        dispatch("setLogin", true);
-      } catch (e) {
-        dispatch("setLogin", false);
-        throw "Login failed";
-      }
-    },
-
-    async logout({ dispatch }) {
-      try {
-        await loginService.delLogin();
-        dispatch("setUser", null);
-        dispatch("setLogin", false);
-      } catch (e) {
-        dispatch("setUser", null),
-        dispatch("setLogin", false);
-      }
-    },
-
-    async swapRole({ dispatch }) {
-      try {
-        if (this.getters.role === 'passenger'){
-          dispatch("setRole", 'driver');
+    mutations: {
+        setRole(state, role) {
+            state.role = role;
+        },
+        setUser(state, user) {
+            state.user = user;
+        },
+        setLogin(state, login) {
+            state.login = login;
         }
-        else{
-          dispatch("setRole", 'passenger');
+    },
+    actions: {
+        setLogin({ commit }, login) {
+            commit('setLogin', login);
+        },
+        setUser({ commit }, user) {
+            commit('setUser', user);
+        },
+        setRole({ commit }, role) {
+            commit('setRole', role);
+        },
+
+        async checkLogin({ dispatch }) {
+            try {
+                const user = await loginService.checkLogin();
+                dispatch('setUser', user);
+                dispatch('setLogin', true);
+            } catch (e) {
+                dispatch('setLogin', false);
+                dispatch('setUser', null);
+                throw 'Not logged in';
+            }
+        },
+
+        async login({ dispatch }, { username, password }) {
+            try {
+                const user = await loginService.postLogin(username, password);
+                dispatch('setUser', user);
+                dispatch('setRole', 'passenger');
+                dispatch('setLogin', true);
+            } catch (e) {
+                dispatch('setLogin', false);
+                throw 'Login failed';
+            }
+        },
+
+        async logout({ dispatch }) {
+            try {
+                await loginService.delLogin();
+                dispatch('setUser', null);
+                dispatch('setLogin', false);
+            } catch (e) {
+                dispatch('setUser', null), dispatch('setLogin', false);
+            }
+        },
+
+        async swapRole({ dispatch }) {
+            try {
+                if (this.getters.role === 'passenger') {
+                    dispatch('setRole', 'driver');
+                } else {
+                    dispatch('setRole', 'passenger');
+                }
+            } catch (e) {
+                throw 'Role Change Error';
+            }
         }
-      } catch (e){
-        throw "Role Change Error";
-      }
     }
-  },
 });
-
