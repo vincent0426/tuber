@@ -11,7 +11,7 @@ const loginService = new LoginService();
 export default createStore({
   state: {
     user: {},
-    role: 'customer',
+    role: 'passenger',
     login: false,
   },
   getters: {
@@ -57,7 +57,7 @@ export default createStore({
       try {
         const user = await loginService.postLogin(username, password);
         dispatch("setUser", user);
-        dispatch("setRole", 'customer');
+        dispatch("setRole", 'passenger');
         dispatch("setLogin", true);
       } catch (e) {
         dispatch("setLogin", false);
@@ -75,6 +75,19 @@ export default createStore({
         dispatch("setLogin", false);
       }
     },
+
+    async swapRole({ dispatch }) {
+      try {
+        if (this.getters.role === 'passenger'){
+          dispatch("setRole", 'driver');
+        }
+        else{
+          dispatch("setRole", 'passenger');
+        }
+      } catch (e){
+        throw "Role Change Error";
+      }
+    }
   },
 });
 

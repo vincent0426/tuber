@@ -19,7 +19,7 @@ const submit = async () => {
     loading.value = true;
     try {
         await store.dispatch('login', { username: username.value, password: password.value });
-        router.push({ name: 'CustomerHome' });
+        router.push({ name: 'PassengerHome' });
     } catch (error) {
         // Handle login error
         console.error('Login failed:', error);

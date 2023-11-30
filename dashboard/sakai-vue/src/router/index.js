@@ -1,52 +1,44 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import AppLayout_Customer from '@/layout/AppLayout_Customer.vue';
-import AppLayout_Driver from '@/layout/AppLayout_Driver.vue';
+import AppLayout from '@/layout/AppLayout.vue';
 import store from '@/store';
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
         {
-            path: '/customer',
+            path: '/',
             // With sidebar & topbar
-            component: AppLayout_Customer,
+            component: AppLayout,
             children: [
                 {
-                    path: '/customer/home',
-                    name: 'CustomerHome',
-                    component: () => import('@/views/pages/customer/CustomerHome.vue')
+                    path: '/passenger/home',
+                    name: 'PassengerHome',
+                    component: () => import('@/views/pages/passenger/PassengerHome.vue')
                 },
                 {
-                    path: '/customer/history',
-                    name: 'CustomerHistory',
+                    path: '/passenger/history',
+                    name: 'PassengerHistory',
                     component: () => import('@/views/pages/Empty.vue')
                 },
                 {
-                    path: '/customer/search', // /search?q=yourSearchQuery
-                    name: 'CustomerSearch',
+                    path: '/passenger/search', // /search?q=yourSearchQuery
+                    name: 'PassengerSearch',
                     component: () => import('@/views/pages/Empty.vue')
                 },
                 {
-                    path: '/customer/setting',
+                    path: '/passenger/setting',
                     name: 'CutomerSetting',
-                    component: () => import('@/views/pages/customer/CustomerSetting.vue')
+                    component: () => import('@/views/pages/passenger/PassengerSetting.vue')
                 },
                 {
-                    path: '/customer/mytrip',
+                    path: '/passenger/mytrip',
                     name: 'MyTrip',
-                    component: () => import('@/views/pages/customer/MyTrip.vue')
+                    component: () => import('@/views/pages/passenger/MyTrip.vue')
                 },
                 {
-                    path: '/customer/favorite',
+                    path: '/passenger/favorite',
                     name: 'Favorite',
-                    component: () => import('@/views/pages/customer/Favorite.vue')
-                }
-            ]
-        },
-        {
-            path: '/driver',
-            // With sidebar & topbar
-            component: AppLayout_Driver,
-            children: [
+                    component: () => import('@/views/pages/passenger/Favorite.vue')
+                },
                 {
                     path: '/driver/home',
                     name: 'DriverHome',

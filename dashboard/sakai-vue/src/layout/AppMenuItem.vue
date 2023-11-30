@@ -2,6 +2,7 @@
 import { ref, onBeforeMount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useLayout } from '@/layout/composables/layout';
+import store from '../store/index.js';
 
 const route = useRoute();
 
@@ -57,6 +58,11 @@ const itemClick = (event, item) => {
 
     if (item.command) {
         item.command({ originalEvent: event, item: item });
+    }
+
+    if(item.label === 'Switch to Driver' || item.label === 'Switch to Passenger'){
+        store.dispatch('swapRole');
+        console.log("Swap role")
     }
 
     const foundItemKey = item.items ? (isActiveMenu.value ? props.parentItemKey : itemKey) : itemKey.value;
