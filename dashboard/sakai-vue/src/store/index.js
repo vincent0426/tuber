@@ -10,14 +10,19 @@ const loginService = new LoginService();
 
 export default createStore({
   state: {
-    user: "customer",
+    user: {},
+    role: 'customer',
     login: false,
   },
   getters: {
     user: (state) => state.user,
+    role: (state) => state.role,
     login: (state) => state.login,
   },
   mutations: {
+    setRole(state, role) {
+      state.role = role;
+    },
     setUser(state, user) {
       state.user = user;
     },
@@ -32,13 +37,18 @@ export default createStore({
     setUser({ commit }, user) {
       commit("setUser", user);
     },
+    setRole({ commit }, role) {
+      commit("setRole", role);
+    },
+
     async checkLogin({ dispatch }) {
       try {
         const user = await loginService.checkLogin();
-        // dispatch("setUser", 'customer');
+        dispatch("setUser", user);
         dispatch("setLogin", true);
       } catch (e) {
         dispatch("setLogin", false);
+        dispatch("setUser", null);
         throw "Not logged in";
       }
     },
@@ -46,8 +56,8 @@ export default createStore({
     async login({ dispatch }, { username, password }) {
       try {
         const user = await loginService.postLogin(username, password);
-        // When login, initialize as customer
-        dispatch("setUser", 'customer');
+        dispatch("setUser", user);
+        dispatch("setRole", 'customer');
         dispatch("setLogin", true);
       } catch (e) {
         dispatch("setLogin", false);
@@ -61,6 +71,7 @@ export default createStore({
         dispatch("setUser", null);
         dispatch("setLogin", false);
       } catch (e) {
+        dispatch("setUser", null),
         dispatch("setLogin", false);
       }
     },
