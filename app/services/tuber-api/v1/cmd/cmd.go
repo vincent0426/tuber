@@ -97,6 +97,11 @@ func run(ctx context.Context, log *logger.Logger, build string, routeAdder v1.Ro
 		db.Close()
 	}()
 
+	// check status of database
+	if err := database.StatusCheck(ctx, db); err != nil {
+		return fmt.Errorf("database status check: %w", err)
+	}
+
 	cachedb, err := cachedb.Open(cachedb.Config{
 		MasterHost:      cfg.Redis.Host.Master,
 		MasterPassword:  cfg.Redis.Password,

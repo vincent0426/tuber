@@ -61,7 +61,7 @@ func (h *Handlers) Login(ctx context.Context, c *gin.Context) error {
 	}
 	// set cookie
 	c.SetCookie("token", sessionToken.Plaintext, 3600, "/", "localhost", false, true)
-	return web.Respond(ctx, c.Writer, fmt.Sprintf("Welcome %s", usr.Name), http.StatusOK)
+	return web.Respond(ctx, c.Writer, toAppUser(usr), http.StatusCreated)
 }
 
 // Logout updates a user in the system.
