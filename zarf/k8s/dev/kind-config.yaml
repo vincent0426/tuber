@@ -10,10 +10,10 @@ nodes:
       - containerPort: 4000
         hostPort: 4000
       # Tuber chat
-      - containerPort: 3002
+      - containerPort: 3000
         hostPort: 3002
       # Tuber chat debug
-      - containerPort: 4002
+      - containerPort: 4000
         hostPort: 4002
       # Metrics
       - containerPort: 3001
@@ -39,3 +39,8 @@ nodes:
       # Redis
       - containerPort: 6379
         hostPort: 6379
+      # kind
+      - containerPort: 30080
+        hostPort: 30080
+      - containerPort: 30443
+        hostPort: 30443

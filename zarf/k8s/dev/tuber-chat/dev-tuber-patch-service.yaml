@@ -10,7 +10,7 @@ spec:
   ports:
     - name: chat-api
       port: 3002
-      targetPort: chat-api
+      targetPort: 3000
     - name: chat-api-debug
       port: 4002
-      targetPort: chat-api-debug
+      targetPort: 4000
