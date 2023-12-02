@@ -1,0 +1,905 @@
+basePath: /v1
+definitions:
+  authgrp.AppUser:
+    properties:
+      acceptNotification:
+        type: boolean
+      bio:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      imageURL:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  drivergrp.AppDriver:
+    properties:
+      brand:
+        type: string
+      color:
+        type: string
+      created_at:
+        type: string
+      license:
+        type: string
+      model:
+        type: string
+      plate:
+        type: string
+      user_id:
+        type: string
+      verified:
+        type: boolean
+    type: object
+  drivergrp.AppNewDriver:
+    properties:
+      brand:
+        type: string
+      color:
+        type: string
+      license:
+        type: string
+      model:
+        type: string
+      plate:
+        type: string
+    required:
+    - brand
+    - color
+    - license
+    - model
+    - plate
+    type: object
+  locationgrp.AppLocation:
+    properties:
+      id:
+        type: string
+      lat:
+        type: number
+      lon:
+        type: number
+      name:
+        type: string
+      place_id:
+        type: string
+    type: object
+  locationgrp.AppNewLocation:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+      name:
+        type: string
+      place_id:
+        type: string
+    required:
+    - lat
+    - lon
+    - name
+    - place_id
+    type: object
+  tripgrp.AppNewRating:
+    properties:
+      comment:
+        type: string
+      rating:
+        type: integer
+    required:
+    - rating
+    type: object
+  tripgrp.AppNewTrip:
+    properties:
+      destination:
+        $ref: '#/definitions/tripgrp.AppNewTripLocation'
+      mid:
+        items:
+          $ref: '#/definitions/tripgrp.AppNewTripLocation'
+        type: array
+      passenger_limit:
+        type: integer
+      source:
+        $ref: '#/definitions/tripgrp.AppNewTripLocation'
+      start_time:
+        type: string
+    required:
+    - start_time
+    type: object
+  tripgrp.AppNewTripLocation:
+    properties:
+      lat:
+        type: number
+      lon:
+        type: number
+      name:
+        type: string
+      place_id:
+        type: string
+    required:
+    - lat
+    - lon
+    - name
+    - place_id
+    type: object
+  tripgrp.AppPassengerDetails:
+    properties:
+      destination_latitude:
+        type: number
+      destination_longitude:
+        type: number
+      destination_name:
+        type: string
+      destination_place_id:
+        type: string
+      passenger_id:
+        type: string
+      source_latitude:
+        type: number
+      source_longitude:
+        type: number
+      source_name:
+        type: string
+      source_place_id:
+        type: string
+    type: object
+  tripgrp.AppRating:
+    properties:
+      comment:
+        type: string
+      commenter_id:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      rating:
+        type: integer
+      trip_id:
+        type: string
+    type: object
+  tripgrp.AppTrip:
+    properties:
+      createdAt:
+        type: string
+      destination_id:
+        type: string
+      driver_id:
+        type: string
+      id:
+        type: string
+      passenger_limit:
+        type: integer
+      source_id:
+        type: string
+      start_time:
+        type: string
+      status:
+        type: string
+    type: object
+  tripgrp.AppTripDetails:
+    properties:
+      destination_latitude:
+        type: number
+      destination_longitude:
+        type: number
+      destination_name:
+        type: string
+      destination_place_id:
+        type: string
+      driver_details:
+        $ref: '#/definitions/tripgrp.AppTripDriverDetails'
+      passenger_details:
+        items:
+          $ref: '#/definitions/tripgrp.AppPassengerDetails'
+        type: array
+      source_latitude:
+        type: number
+      source_longitude:
+        type: number
+      source_name:
+        type: string
+      source_place_id:
+        type: string
+      trip_id:
+        type: string
+    type: object
+  tripgrp.AppTripDriverDetails:
+    properties:
+      driver_brand:
+        type: string
+      driver_color:
+        type: string
+      driver_id:
+        type: string
+      driver_image_url:
+        type: string
+      driver_model:
+        type: string
+      driver_name:
+        type: string
+      driver_plate:
+        type: string
+    type: object
+  tripgrp.AppUpdateTrip:
+    properties:
+      passenger_limit:
+        type: integer
+      status:
+        type: string
+    type: object
+  usergrp.AppNewUser:
+    properties:
+      acceptNotification:
+        type: boolean
+      bio:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  usergrp.AppUpdateUser:
+    properties:
+      acceptNotification:
+        type: boolean
+      bio:
+        type: string
+      email:
+        type: string
+      imageURL:
+        type: string
+      name:
+        type: string
+    type: object
+  usergrp.AppUser:
+    properties:
+      acceptNotification:
+        type: boolean
+      bio:
+        type: string
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      imageURL:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: This is the API for the TUber application.
+  title: TUber API
+  version: develop
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login will add a user if they do not exist or update them if they
+        do.
+      parameters:
+      - description: ID Token
+        in: header
+        name: id_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User successfully logged in
+          schema:
+            $ref: '#/definitions/authgrp.AppUser'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: login
+      tags:
+      - auth
+  /drivers:
+    get:
+      consumes:
+      - application/json
+      description: QueryAll will query drivers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Drivers successfully queried
+          schema:
+            $ref: '#/definitions/drivergrp.AppDriver'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get all drivers
+      tags:
+      - driver
+    post:
+      consumes:
+      - application/json
+      description: Create will add a driver if they do not exist or update them if
+        they do.
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: New Driver
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/drivergrp.AppNewDriver'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Driver successfully created
+          schema:
+            $ref: '#/definitions/drivergrp.AppDriver'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: create a new driver
+      tags:
+      - driver
+  /drivers/{id}:
+    get:
+      consumes:
+      - application/json
+      description: QueryByID will query drivers by id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Drivers successfully queried
+          schema:
+            $ref: '#/definitions/drivergrp.AppDriver'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get drivers by id
+      tags:
+      - driver
+  /favorite-drivers:
+    get:
+      consumes:
+      - application/json
+      description: QueryFavorite will query favorite drivers
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Drivers successfully queried
+          schema:
+            $ref: '#/definitions/drivergrp.AppDriver'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get favorite drivers
+      tags:
+      - driver
+  /favorite-drivers/{id}:
+    post:
+      consumes:
+      - application/json
+      description: AddFavorite will add a driver to favorite
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Drivers successfully queried
+          schema:
+            $ref: '#/definitions/drivergrp.AppDriver'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: add a driver to favorite
+      tags:
+      - driver
+  /locations:
+    get:
+      consumes:
+      - application/json
+      description: Query will query locations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Locations successfully queried
+          schema:
+            $ref: '#/definitions/locationgrp.AppLocation'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get all locations
+      tags:
+      - location
+    post:
+      consumes:
+      - application/json
+      description: Create will add a location
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: New Location
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/locationgrp.AppNewLocation'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Location successfully created
+          schema:
+            $ref: '#/definitions/locationgrp.AppLocation'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: create a new location
+      tags:
+      - location
+  /locations/{id}:
+    get:
+      consumes:
+      - application/json
+      description: QueryByID will query locations by id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query locations
+          schema:
+            $ref: '#/definitions/locationgrp.AppLocation'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get locations by id
+      tags:
+      - location
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: pong
+          schema:
+            type: string
+      summary: ping
+      tags:
+      - health
+  /trips:
+    get:
+      consumes:
+      - application/json
+      description: Query will query trips
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query trips
+          schema:
+            $ref: '#/definitions/tripgrp.AppTrip'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get all trips
+      tags:
+      - trip
+    post:
+      consumes:
+      - application/json
+      description: Create will add a trip
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: New Trip
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/tripgrp.AppNewTrip'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Trip successfully created
+          schema:
+            $ref: '#/definitions/tripgrp.AppTrip'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: create a new trip
+      tags:
+      - trip
+  /trips/{id}:
+    get:
+      consumes:
+      - application/json
+      description: QueryByID will query trips by id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query trips
+          schema:
+            $ref: '#/definitions/tripgrp.AppTrip'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get trips by id
+      tags:
+      - trip
+    put:
+      consumes:
+      - application/json
+      description: Update will update a trip
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update Trip
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/tripgrp.AppUpdateTrip'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Trip successfully updated
+          schema:
+            $ref: '#/definitions/tripgrp.AppTrip'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: update a trip
+      tags:
+      - trip
+  /trips/{id}/join:
+    post:
+      consumes:
+      - application/json
+      description: Join will join a trip
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Trip successfully joined
+          schema:
+            $ref: '#/definitions/tripgrp.AppTrip'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: join a trip
+      tags:
+      - trip
+  /trips/{id}/passengers:
+    get:
+      consumes:
+      - application/json
+      description: QueryPassengers will query passengers of a trip
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query passengers of a trip
+          schema:
+            $ref: '#/definitions/tripgrp.AppTripDetails'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get all passengers of a trip
+      tags:
+      - trip
+  /trips/{id}/rating:
+    post:
+      consumes:
+      - application/json
+      description: Create will add a rating
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: New Rating
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/tripgrp.AppNewRating'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Rating successfully created
+          schema:
+            $ref: '#/definitions/tripgrp.AppRating'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: create a new rating for a trip
+      tags:
+      - trip
+  /trips/my:
+    get:
+      consumes:
+      - application/json
+      description: QueryMyTrip will query trips by user
+      parameters:
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: Status
+        in: query
+        name: status
+        type: string
+      - description: Is Driver
+        in: query
+        name: is_driver
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query trips
+          schema:
+            $ref: '#/definitions/tripgrp.AppTrip'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get my trips
+      tags:
+      - trip
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Query will query users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query users
+          schema:
+            $ref: '#/definitions/usergrp.AppUser'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get all users
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Create will add a user if they do not exist or update them if they
+        do.
+      parameters:
+      - description: New User
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/usergrp.AppNewUser'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User successfully created
+          schema:
+            $ref: '#/definitions/usergrp.AppUser'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: create a new user
+      tags:
+      - user
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete will delete a user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: delete a user
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: QueryByID will query users by id
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: query users
+          schema:
+            $ref: '#/definitions/usergrp.AppUser'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: get users by id
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: Update will update a user
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update User
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/usergrp.AppUpdateUser'
+      - description: Token
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User successfully updated
+          schema:
+            $ref: '#/definitions/usergrp.AppUser'
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: update a user
+      tags:
+      - user
+schemes:
+- http
+- https
+- ws
+- wss
+swagger: "2.0"

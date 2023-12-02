@@ -85,6 +85,15 @@ func Get(ctx context.Context, key string) (string, error) {
 	return val, nil
 }
 
+func Remove(ctx context.Context, key string) error {
+	err := cachedb.Master.Del(ctx, key).Err()
+	if err != nil {
+		return fmt.Errorf("remove session token: %w", err)
+	}
+
+	return nil
+}
+
 func XRange(ctx context.Context, streamName string, start string, stop string) ([]redis.XMessage, error) {
 	val, err := cachedb.Replica.XRange(ctx, streamName, start, stop).Result()
 	if err != nil {

@@ -97,6 +97,14 @@ func (c *Core) SetSessionToken(ctx context.Context, sessionToken SessionToken, u
 	return nil
 }
 
+func (c *Core) RemoveSessionToken(ctx context.Context, sessionToken string) error {
+	if err := cachedb.Remove(ctx, sessionToken); err != nil {
+		return fmt.Errorf("remove session token: %w", err)
+	}
+
+	return nil
+}
+
 func (c *Core) GetSessionToken(ctx context.Context, sessionToken string) (uuid.UUID, error) {
 	userInfo, err := cachedb.Get(ctx, sessionToken)
 	if err != nil {

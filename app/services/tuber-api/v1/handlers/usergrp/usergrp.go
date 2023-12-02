@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/core/user"
-	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/TSMC-Uber/server/business/web/v1/paging"
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
@@ -28,7 +27,17 @@ func New(user *user.Core) *Handlers {
 	}
 }
 
-// Create adds a new user to the system.
+// @Summary create a new user
+// @Schemes
+// @Description Create will add a user if they do not exist or update them if they do.
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param body body AppNewUser true "New User"
+// @Success 201 {object} AppUser "User successfully created"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /users [post]
 func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	var app AppNewUser
 	// Validate the request.
@@ -52,7 +61,19 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppUser(usr), http.StatusCreated)
 }
 
-// Update updates a user in the system.
+// @Summary update a user
+// @Schemes
+// @Description Update will update a user
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Param body body AppUpdateUser true "Update User"
+// @Param token header string true "Token"
+// @Success 200 {object} AppUser "User successfully updated"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /users/{id} [put]
 func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
 	var app AppUpdateUser
 	if err := web.Decode(c, &app); err != nil {
@@ -86,7 +107,18 @@ func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppUser(usr), http.StatusOK)
 }
 
-// Delete removes a user from the system.
+// @Summary delete a user
+// @Schemes
+// @Description Delete will delete a user
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Param token header string true "Token"
+// @Success 204 "No Content"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /users/{id} [delete]
 func (h *Handlers) Delete(ctx context.Context, c *gin.Context) error {
 	// userID := auth.GetUserID(ctx)
 	userID := uuid.Must(uuid.Parse(c.Param("id")))
@@ -108,7 +140,16 @@ func (h *Handlers) Delete(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, nil, http.StatusNoContent)
 }
 
-// Query returns a list of users with paging.
+// @Summary get all users
+// @Schemes
+// @Description Query will query users
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} AppUser "query users"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /users [get]
 func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
@@ -143,9 +184,19 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// QueryByID returns a user by its ID.
+// @Summary get users by id
+// @Schemes
+// @Description QueryByID will query users by id
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} AppUser "query users"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /users/{id} [get]
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
-	id := auth.GetUserID(ctx)
+	id := uuid.Must(uuid.Parse(c.Param("id")))
 
 	usr, err := h.user.QueryByID(ctx, id)
 	if err != nil {

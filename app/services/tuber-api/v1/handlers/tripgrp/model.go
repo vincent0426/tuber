@@ -134,16 +134,11 @@ func toAppTripPassenger(tripPassenger trip.TripPassenger) AppTripPassenger {
 
 // =============================================================================
 type AppNewTripPassenger struct {
-	TripID        string `json:"trip_id" binding:"required"`
 	SourceID      string `json:"source_id" binding:"required"`
 	DestinationID string `json:"destination_id" binding:"required"`
 }
 
 func toCoreNewTripPassenger(app AppNewTripPassenger) (trip.NewTripPassenger, error) {
-	uuTripID, err := uuid.Parse(app.TripID)
-	if err != nil {
-		return trip.NewTripPassenger{}, err
-	}
 	uuSourceID, err := uuid.Parse(app.SourceID)
 	if err != nil {
 		return trip.NewTripPassenger{}, err
@@ -154,7 +149,6 @@ func toCoreNewTripPassenger(app AppNewTripPassenger) (trip.NewTripPassenger, err
 	}
 
 	tripPassenger := trip.NewTripPassenger{
-		TripID:        uuTripID,
 		SourceID:      uuSourceID,
 		DestinationID: uuDestinationID,
 	}
@@ -296,29 +290,34 @@ func toAppTripDetails(tripDetails trip.TripDetails) AppTripDetails {
 }
 
 // =============================================================================
+type AppRating struct {
+	ID          string `json:"id"`
+	TripID      string `json:"trip_id"`
+	CommenterID string `json:"commenter_id"`
+	Comment     string `json:"comment"`
+	Rating      int    `json:"rating"`
+	CreatedAt   string `json:"createdAt"`
+}
+
+func toAppRating(rating trip.Rating) AppRating {
+
+	return AppRating{
+		ID:          rating.ID.String(),
+		TripID:      rating.TripID.String(),
+		CommenterID: rating.CommenterID.String(),
+		Comment:     rating.Comment,
+		Rating:      rating.Rating,
+		CreatedAt:   rating.CreatedAt.Format(time.RFC3339),
+	}
+}
+
 type AppNewRating struct {
-	TripID  string `json:"trip_id" binding:"required"`
 	Rating  int    `json:"rating" binding:"required"`
 	Comment string `json:"comment"`
 }
 
-func toAppRating(rating trip.Rating) AppNewRating {
-
-	return AppNewRating{
-		TripID:  rating.TripID.String(),
-		Rating:  rating.Rating,
-		Comment: rating.Comment,
-	}
-}
-
 func toCoreNewRating(app AppNewRating) (trip.NewRating, error) {
-	uuTripID, err := uuid.Parse(app.TripID)
-	if err != nil {
-		return trip.NewRating{}, err
-	}
-
 	rating := trip.NewRating{
-		TripID:  uuTripID,
 		Rating:  app.Rating,
 		Comment: app.Comment,
 	}

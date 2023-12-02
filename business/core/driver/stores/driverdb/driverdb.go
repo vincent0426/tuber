@@ -53,8 +53,7 @@ func (s *Store) Create(ctx context.Context, driver driver.Driver) error {
 	return nil
 }
 
-// QueryAll retrieves a list of existing drivers from the database.
-func (s *Store) QueryAll(ctx context.Context, filter driver.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]driver.Driver, error) {
+func (s *Store) Query(ctx context.Context, filter driver.QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]driver.Driver, error) {
 	builder := sq.Select(
 		"id", // user_id
 		"name",

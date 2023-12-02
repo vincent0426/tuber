@@ -46,14 +46,18 @@ make dev-apply
 for main service
 ```sh
 make dev-port-forward
+```
 
+```sh
 curl localhost:3000/v1/ping
 ```
 
 for chat service
 ```sh
 make dev-chat-port-forward
+```
 
+```sh
 curl localhost:3002/v1/chat/ping
 ```
 
@@ -93,6 +97,12 @@ make db-seed-up
 
 make db-seed-down
 ```
+
+### Swagger
+[Caution!]
+routes with header token can not be tested in swagger, you need to use postman or curl and set the cookie to `token=<your_token>` to test those routes, this feature is not supported by swagger yet.
+
+after you port-forward, go to `http://localhost:3000/v1/docs/index.html` to check swagger
 
 ## Other commands
 ```sh

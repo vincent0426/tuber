@@ -26,7 +26,18 @@ func New(location *location.Core) *Handlers {
 	}
 }
 
-// Create adds a new trip to the system.
+// @Summary create a new location
+// @Schemes
+// @Description Create will add a location
+// @Tags location
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param body body AppNewLocation true "New Location"
+// @Success 201 {object} AppLocation "Location successfully created"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /locations [post]
 func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	var app AppNewLocation
 	// Validate the request.
@@ -47,7 +58,16 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppLocation(location), http.StatusCreated)
 }
 
-// Query returns a list of locations with paging.
+// @Summary get all locations
+// @Schemes
+// @Description Query will query locations
+// @Tags location
+// @Accept json
+// @Produce json
+// @Success 200 {object} AppLocation "Locations successfully queried"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /locations [get]
 func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
@@ -82,7 +102,17 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// QueryByID returns a trip by its ID.
+// @Summary get locations by id
+// @Schemes
+// @Description QueryByID will query locations by id
+// @Tags location
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} AppLocation "query locations"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /locations/{id} [get]
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	id := c.Param("id")
 

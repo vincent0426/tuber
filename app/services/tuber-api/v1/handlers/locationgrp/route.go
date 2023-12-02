@@ -36,10 +36,6 @@ func Routes(app *web.App, cfg Config) {
 
 	hdl := New(locationCore)
 	app.Handle(http.MethodGet, version, "/locations", hdl.Query)
-	// app.Handle(http.MethodGet, version, "/trips", hdl.QueryByUserID, authen)
 	app.Handle(http.MethodGet, version, "/locations/:id", hdl.QueryByID)
 	app.Handle(http.MethodPost, version, "/locations", hdl.Create, authen)
-	// app.Handle(http.MethodPost, version, "/trips/join", hdl.Join)
-	// app.Handle(http.MethodPut, version, "/users/:id", hdl.Update)
-	// app.Handle(http.MethodDelete, version, "/users/:id", hdl.Delete)
 }

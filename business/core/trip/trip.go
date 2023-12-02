@@ -178,11 +178,11 @@ func (c *Core) QueryByID(ctx context.Context, tripID uuid.UUID) (TripView, error
 }
 
 // CreateTripPassenger inserts a new trip into the database.
-func (c *Core) Join(ctx context.Context, ntp NewTripPassenger) (TripPassenger, error) {
+func (c *Core) Join(ctx context.Context, tripID uuid.UUID, ntp NewTripPassenger) (TripPassenger, error) {
 	now := time.Now()
 
 	tripPassenger := TripPassenger{
-		TripID:        ntp.TripID,
+		TripID:        tripID,
 		PassengerID:   ntp.PassengerID,
 		SourceID:      ntp.SourceID,
 		DestinationID: ntp.DestinationID,
@@ -208,12 +208,12 @@ func (c *Core) QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetai
 }
 
 // CreateRating inserts a new rating into the database.
-func (c *Core) CreateRating(ctx context.Context, nr NewRating) (Rating, error) {
+func (c *Core) CreateRating(ctx context.Context, tripID string, nr NewRating) (Rating, error) {
 	now := time.Now()
 
 	rating := Rating{
 		ID:          uuid.New(),
-		TripID:      nr.TripID,
+		TripID:      uuid.Must(uuid.Parse(tripID)),
 		CommenterID: nr.CommenterID,
 		Comment:     nr.Comment,
 		Rating:      nr.Rating,
