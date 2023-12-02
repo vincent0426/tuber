@@ -29,7 +29,18 @@ func New(trip *trip.Core) *Handlers {
 	}
 }
 
-// Create adds a new trip to the system.
+// @Summary create a new trip
+// @Schemes
+// @Description Create will add a trip
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param body body AppNewTrip true "New Trip"
+// @Success 201 {object} AppTrip "Trip successfully created"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips [post]
 func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	userID := auth.GetUserID(ctx)
 	var app AppNewTrip
@@ -52,7 +63,19 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)
 }
 
-// Update updates a trip in the system.
+// @Summary update a trip
+// @Schemes
+// @Description Update will update a trip
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param id path string true "Trip ID"
+// @Param body body AppUpdateTrip true "Update Trip"
+// @Success 200 {object} AppTrip "Trip successfully updated"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips/{id} [put]
 func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
 	userID := auth.GetUserID(ctx)
 
@@ -91,7 +114,16 @@ func (h *Handlers) Update(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusOK)
 }
 
-// Query returns a list of users with paging.
+// @Summary get all trips
+// @Schemes
+// @Description Query will query trips
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Success 200 {object} AppTrip "query trips"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips [get]
 func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
@@ -126,7 +158,19 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// QueryMyTrip returns a trip that the user is in.
+// @Summary get my trips
+// @Schemes
+// @Description QueryMyTrip will query trips by user
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param status query string false "Status"
+// @Param is_driver query bool false "Is Driver"
+// @Success 200 {object} AppTrip "query trips"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips/my [get]
 func (h *Handlers) QueryMyTrip(ctx context.Context, c *gin.Context) error {
 	id := auth.GetUserID(ctx)
 
@@ -158,7 +202,17 @@ func (h *Handlers) QueryMyTrip(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(qtrip, len(qtrip), page.Number, page.RowsPerPage), http.StatusOK)
 }
 
-// QueryByID returns a trip by its ID.
+// @Summary get trips by id
+// @Schemes
+// @Description QueryByID will query trips by id
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} AppTrip "query trips"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips/{id} [get]
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	id := c.Param("id")
 
@@ -175,7 +229,20 @@ func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTripView(qtrip), http.StatusOK)
 }
 
+// @Summary join a trip
+// @Schemes
+// @Description Join will join a trip
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param id path string true "Trip ID"
+// @Success 200 {object} AppTrip "Trip successfully joined"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips/{id}/join [post]
 func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
+	tripID := uuid.Must(uuid.Parse(c.Param("id")))
 	userID := auth.GetUserID(ctx)
 	var app AppNewTripPassenger
 	// Validate the request.
@@ -189,7 +256,7 @@ func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
 	}
 	ntp.PassengerID = userID
 
-	tripPassenger, err := h.trip.Join(ctx, ntp)
+	tripPassenger, err := h.trip.Join(ctx, tripID, ntp)
 	if err != nil {
 		if errors.Is(err, user.ErrUniqueEmail) {
 			return response.NewError(err, http.StatusConflict)
@@ -200,6 +267,18 @@ func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTripPassenger(tripPassenger), http.StatusCreated)
 }
 
+// @Summary get all passengers of a trip
+// @Schemes
+// @Description QueryPassengers will query passengers of a trip
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param id path string true "Trip ID"
+// @Param token header string true "Token"
+// @Success 200 {object} AppTripDetails "query passengers of a trip"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips/{id}/passengers [get]
 func (h *Handlers) QueryPassengers(ctx context.Context, c *gin.Context) error {
 	tripID := c.Param("id")
 
@@ -216,7 +295,20 @@ func (h *Handlers) QueryPassengers(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTripDetails(tripDetails), http.StatusOK)
 }
 
+// @Summary create a new rating for a trip
+// @Schemes
+// @Description Create will add a rating
+// @Tags trip
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param body body AppNewRating true "New Rating"
+// @Success 201 {object} AppRating "Rating successfully created"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /trips/{id}/rating [post]
 func (h *Handlers) CreateRating(ctx context.Context, c *gin.Context) error {
+	tripID := c.Param("id")
 	userID := auth.GetUserID(ctx)
 	var app AppNewRating
 	// Validate the request.
@@ -230,7 +322,7 @@ func (h *Handlers) CreateRating(ctx context.Context, c *gin.Context) error {
 	}
 	nr.CommenterID = userID
 
-	rating, err := h.trip.CreateRating(ctx, nr)
+	rating, err := h.trip.CreateRating(ctx, tripID, nr)
 	if err != nil {
 		return fmt.Errorf("create: rating[%+v]: %w", rating, err)
 	}

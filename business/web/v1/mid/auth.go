@@ -25,6 +25,7 @@ func Authenticate(a *auth.Auth) web.Middleware {
 			}
 
 			ctx = auth.SetUserID(ctx, userID)
+			ctx = auth.SetSessionToken(ctx, token)
 
 			return handler(ctx, c)
 		}

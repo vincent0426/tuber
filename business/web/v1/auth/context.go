@@ -17,7 +17,9 @@ const userKey ctxKey = 1
 
 const idTokenKey ctxKey = 2
 
-const audienceKey ctxKey = 3
+const sessionTokenKey ctxKey = 3
+
+const audienceKey ctxKey = 4
 
 // =============================================================================
 
@@ -41,6 +43,18 @@ func SetIDToken(ctx context.Context, idToken string) context.Context {
 
 func GetIDToken(ctx context.Context) string {
 	v, ok := ctx.Value(idTokenKey).(string)
+	if !ok {
+		return ""
+	}
+	return v
+}
+
+func SetSessionToken(ctx context.Context, sessionToken string) context.Context {
+	return context.WithValue(ctx, sessionTokenKey, sessionToken)
+}
+
+func GetSessionToken(ctx context.Context) string {
+	v, ok := ctx.Value(sessionTokenKey).(string)
 	if !ok {
 		return ""
 	}

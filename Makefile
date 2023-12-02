@@ -104,13 +104,12 @@ dev-apply:
 
 # install istio
 
-# helm install istio-base istio/base -n istio-system --set defaultRevision=default
+# helm install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace --wait
 # helm install istiod istio/istiod -n istio-system --wait
 # kubectl apply -f zarf/k8s/dev/istio-ingressgateway-config.yaml
 
 # install gateway under zarf/k8s/dev/gateway since we need to change loadBalancerIP to node IP
 # kustomize build zarf/k8s/dev/gateway | kubectl apply -f -
-# kubectl wait pods --namespace=$(NAMESPACE) --selector app=gateway --timeout=300s --for=condition=Ready
 
 dev-delete:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
@@ -139,9 +138,12 @@ dev-restart:
 	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
 	kubectl rollout restart deployment $(APP)-chat --namespace=$(NAMESPACE)
 
-dev-update: all dev-load dev-restart
+dev-update: dev-swagger all dev-load dev-restart
 
 dev-update-apply: all dev-load dev-apply
+
+dev-swagger:
+	swag init -d ./app/services/tuber-api -o ./app/services/tuber-api/v1/docs
 
 dev-docker-pull:
 	docker pull $(KIND)

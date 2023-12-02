@@ -25,7 +25,7 @@ var (
 // retrieve data.
 type Storer interface {
 	Create(ctx context.Context, driver Driver) error
-	QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Driver, error)
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Driver, error)
 	QueryByID(ctx context.Context, driverID string) (Driver, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 
@@ -104,9 +104,9 @@ func (c *Core) Create(ctx context.Context, nu NewDriver) (Driver, error) {
 // 	return nil
 // }
 
-// QueryQueryAll retrieves a list of existing trips from the database.
-func (c *Core) QueryAll(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Driver, error) {
-	drivers, err := c.storer.QueryAll(ctx, filter, orderBy, pageNumber, rowsPerPage)
+// Query retrieves a list of existing trips from the database.
+func (c *Core) Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Driver, error) {
+	drivers, err := c.storer.Query(ctx, filter, orderBy, pageNumber, rowsPerPage)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}

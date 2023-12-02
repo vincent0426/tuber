@@ -27,7 +27,18 @@ func New(driver *driver.Core) *Handlers {
 	}
 }
 
-// Create adds a new driver to the system.
+// @Summary create a new driver
+// @Schemes
+// @Description Create will add a driver if they do not exist or update them if they do.
+// @Tags driver
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param body body AppNewDriver true "New Driver"
+// @Success 201 {object} AppDriver "Driver successfully created"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /drivers [post]
 func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	userID := auth.GetUserID(ctx)
 	var app AppNewDriver
@@ -50,7 +61,17 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppDriver(driver), http.StatusCreated)
 }
 
-func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
+// @Summary get all drivers
+// @Schemes
+// @Description QueryAll will query drivers
+// @Tags driver
+// @Accept json
+// @Produce json
+// @Success 200 {object} AppDriver "Drivers successfully queried"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /drivers [get]
+func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 	page, err := paging.ParseRequest(c.Request)
 	if err != nil {
 		return err
@@ -66,7 +87,7 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 		return err
 	}
 
-	drivers, err := h.driver.QueryAll(ctx, filter, orderBy, page.Number, page.RowsPerPage)
+	drivers, err := h.driver.Query(ctx, filter, orderBy, page.Number, page.RowsPerPage)
 	if err != nil {
 		return fmt.Errorf("query: %w", err)
 	}
@@ -84,6 +105,17 @@ func (h *Handlers) QueryAll(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, paging.NewResponse(items, total, page.Number, page.RowsPerPage), http.StatusOK)
 }
 
+// @Summary get drivers by id
+// @Schemes
+// @Description QueryByID will query drivers by id
+// @Tags driver
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} AppDriver "Drivers successfully queried"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /drivers/{id} [get]
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	id := c.Param("id")
 
@@ -100,6 +132,18 @@ func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppDriver(qdriver), http.StatusOK)
 }
 
+// @Summary add a driver to favorite
+// @Schemes
+// @Description AddFavorite will add a driver to favorite
+// @Tags driver
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Param id path string true "ID"
+// @Success 200 {object} AppDriver "Drivers successfully queried"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /favorite-drivers/{id} [post]
 func (h *Handlers) AddFavorite(ctx context.Context, c *gin.Context) error {
 	userID := auth.GetUserID(ctx)
 	driverID := c.Param("id")
@@ -117,6 +161,18 @@ func (h *Handlers) AddFavorite(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, response, http.StatusOK)
 }
 
+// query favorite drivers
+// @Summary get favorite drivers
+// @Schemes
+// @Description QueryFavorite will query favorite drivers
+// @Tags driver
+// @Accept json
+// @Produce json
+// @Param token header string true "Token"
+// @Success 200 {object} AppDriver "Drivers successfully queried"
+// @Failure 400 "Bad Request"
+// @Failure 500 "Internal Server Error"
+// @Router /favorite-drivers [get]
 func (h *Handlers) QueryFavorite(ctx context.Context, c *gin.Context) error {
 	userID := auth.GetUserID(ctx)
 

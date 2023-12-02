@@ -1,3 +1,9 @@
+// @title TUber API
+// @description This is the API for the TUber application.
+// @version develop
+// @host localhost:3000
+// @BasePath /v1
+// @schemes http https ws wss
 package main
 
 import (
