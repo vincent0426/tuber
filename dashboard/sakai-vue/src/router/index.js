@@ -137,13 +137,7 @@ const router = createRouter({
 // Navigation guard to check authentication before each navigation
 router.beforeEach(async (to, from, next) => {
     if (to.name !== 'login' && !store.getters.login) {
-        try {
-            console.log('check login');
-            await store.dispatch('checkLogin');
-            next();
-        } catch {
-            next({ name: 'login' });
-        }
+        next({ name: 'login' });
     } else {
         console.log('have login');
         next(); // Continue with the navigation

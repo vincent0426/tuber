@@ -1,6 +1,6 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import { ref, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
 import store from '@/store';
 import router from '@/router';
@@ -10,15 +10,36 @@ const loading = ref(false);
 const username = ref('');
 const password = ref('');
 const checked = ref(false);
+const googleLoginBtnRef = ref(null);
 
 const logoUrl = computed(() => {
     return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
 });
 
-const submit = async () => {
+
+onMounted(async () => {
+    const gClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    try {
+        window.google.accounts.id.initialize({
+        client_id: gClientId,
+        callback: handleCredentialResponse,
+        auto_select: true
+        });
+
+        window.google.accounts.id.renderButton(
+        googleLoginBtnRef.value,
+        { text: 'signin_with', size: 'large', width: '366', theme: 'outline', logo_alignment: 'left' }
+        );
+    } catch (error) {
+        console.error('Google login initialization failed:', error);
+    }
+});
+
+
+const handleCredentialResponse = async (response) => {
     loading.value = true;
     try {
-        await store.dispatch('login', { username: username.value, password: password.value });
+        await store.dispatch('login', {id_token: response.credential});
         router.push({ name: 'PassengerHome' });
     } catch (error) {
         // Handle login error
@@ -29,9 +50,6 @@ const submit = async () => {
     }
 };
 
-const register = async () => {
-    router.push({ name: 'Register' });
-};
 </script>
 
 <template>
@@ -61,8 +79,7 @@ const register = async () => {
                             <a class="font-medium no-underline ml-2 text-right cursor-pointer" style="color: var(--primary-color)">Forgot password?</a>
                         </div>
                         <div class="flex gap-5">
-                            <Button label="Sign In" class="w-full p-3 text-xl" @click="submit"></Button>
-                            <Button label="Register" class="w-full p-3 text-xl" @click="register"></Button>
+                            <div ref="googleLoginBtnRef"></div>
                         </div>
                     </div>
                 </div>

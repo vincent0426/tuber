@@ -1,22 +1,14 @@
 import request from './wrapper';
 
 export class LoginService {
-    postLogin(username, password) {
+    postLogin(id_token) {
         return request({
             method: 'post',
-            url: 'demo/data/login.json',
-            data: {
-                username,
-                password
+            url: '/auth/login',
+            data: {},
+            headers: {
+                'id_token': id_token
             }
-        });
-    }
-
-    // Should check Login. Need changes.
-    checkLogin() {
-        return request({
-            method: 'get',
-            url: 'demo/data/whoami.json'
         });
     }
 

@@ -17,6 +17,7 @@
         "vue-google-oauth2": "^1.5.10",
         "vue-router": "^4.1.5",
         "vue3-google-login": "^2.0.25",
+        "vue3-google-oauth2": "^1.0.7",
         "vuex": "^4.1.0"
     },
     "devDependencies": {

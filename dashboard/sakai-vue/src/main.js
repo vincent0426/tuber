@@ -99,12 +99,11 @@ import TreeSelect from 'primevue/treeselect';
 import TreeTable from 'primevue/treetable';
 import TriStateCheckbox from 'primevue/tristatecheckbox';
 import VirtualScroller from 'primevue/virtualscroller';
-
 import BlockViewer from '@/components/BlockViewer.vue';
 
 import '@/assets/styles.scss';
 
-const app = createApp(App);
+const app = createApp(App)
 
 app.use(router);
 app.use(PrimeVue, { ripple: true });
