@@ -10,13 +10,16 @@ const loginService = new LoginService();
 // 尝试从 localStorage 中恢复状态
 const initialState = () => {
     const savedState = localStorage.getItem('vuex-state');
-    if (savedState) {
+    const savedStateExpiry = localStorage.getItem('vuex-state-expiry');
+    const now = new Date();
+    if (savedState && (now.getTime() < savedStateExpiry)){
         return JSON.parse(savedState);
     }
     return {
         user: {},
         role: '',
-        login: false
+        login: false,
+        expiry: 0
     };
 };
 
@@ -25,7 +28,8 @@ export default createStore({
     getters: {
         user: (state) => state.user,
         role: (state) => state.role,
-        login: (state) => state.login
+        login: (state) => state.login,
+        expiry: (state) => state.expiry
     },
     mutations: {
         setRole(state, role) {
@@ -38,7 +42,9 @@ export default createStore({
             state.login = login;
         },
         saveState(state) {
+            const now = new Date();
             localStorage.setItem('vuex-state', JSON.stringify(state));
+            localStorage.setItem('vuex-state-expiry', now.getTime() + 3600000);
         }
     },
     actions: {
@@ -58,6 +64,7 @@ export default createStore({
         async login({ dispatch }, {id_token}) {
             try {
                 const user = await loginService.postLogin(id_token);
+                const now = new Date();
                 console.log(user);
                 dispatch('setUser', user);
                 dispatch('setRole', "passenger");
