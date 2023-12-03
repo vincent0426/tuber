@@ -17,3 +17,9 @@ const logoUrl = computed(() => {
     </div>
 </template>
 <style lang="scss" scoped></style>
+
+<style>
+    .layout-footer{
+        visibility: hidden;
+    }
+</style>

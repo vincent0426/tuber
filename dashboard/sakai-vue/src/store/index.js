@@ -7,12 +7,21 @@ import { LoginService } from '@/service';
 
 const loginService = new LoginService();
 
-export default createStore({
-    state: {
+// 尝试从 localStorage 中恢复状态
+const initialState = () => {
+    const savedState = localStorage.getItem('vuex-state');
+    if (savedState) {
+        return JSON.parse(savedState);
+    }
+    return {
         user: {},
-        role: 'passenger',
+        role: '',
         login: false
-    },
+    };
+};
+
+export default createStore({
+    state: initialState(),
     getters: {
         user: (state) => state.user,
         role: (state) => state.role,
@@ -27,6 +36,9 @@ export default createStore({
         },
         setLogin(state, login) {
             state.login = login;
+        },
+        saveState(state) {
+            localStorage.setItem('vuex-state', JSON.stringify(state));
         }
     },
     actions: {
@@ -39,25 +51,18 @@ export default createStore({
         setRole({ commit }, role) {
             commit('setRole', role);
         },
-
-        async checkLogin({ dispatch }) {
-            try {
-                const user = await loginService.checkLogin();
-                dispatch('setUser', user);
-                dispatch('setLogin', true);
-            } catch (e) {
-                dispatch('setLogin', false);
-                dispatch('setUser', null);
-                throw 'Not logged in';
-            }
+        saveState({ commit }, state) {
+            commit('saveState', state);
         },
 
-        async login({ dispatch }, { username, password }) {
+        async login({ dispatch }, {id_token}) {
             try {
-                const user = await loginService.postLogin(username, password);
+                const user = await loginService.postLogin(id_token);
+                console.log(user);
                 dispatch('setUser', user);
-                dispatch('setRole', 'passenger');
+                dispatch('setRole', "passenger");
                 dispatch('setLogin', true);
+                dispatch('saveState',this.state);
             } catch (e) {
                 dispatch('setLogin', false);
                 throw 'Login failed';
@@ -69,6 +74,7 @@ export default createStore({
                 await loginService.delLogin();
                 dispatch('setUser', null);
                 dispatch('setLogin', false);
+                dispatch('saveState',this.state);
             } catch (e) {
                 dispatch('setUser', null), dispatch('setLogin', false);
             }
@@ -81,6 +87,7 @@ export default createStore({
                 } else {
                     dispatch('setRole', 'passenger');
                 }
+                dispatch('saveState',this.state);
             } catch (e) {
                 throw 'Role Change Error';
             }

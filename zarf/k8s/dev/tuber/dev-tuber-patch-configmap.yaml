@@ -6,4 +6,4 @@ metadata:
 data:
   API_HOST: ":3000"
   DEBUG_HOST: ":4000"
-  AUTH_AUDIENCE: "808161745758-73upckm7gpah36uejvar457fhn6qtsd4.apps.googleusercontent.com"
+  AUTH_AUDIENCE: "543946190000-hh3tm35fnbv2jfl3qmu7q5oqmo9qepfi.apps.googleusercontent.com"

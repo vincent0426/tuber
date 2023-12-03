@@ -8,6 +8,16 @@ const model_passenger = ref([
     {
         label: 'Uber',
         items: [
+            { label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' },
+            { label: 'logo', icon: 'pi pi-fw pi-home', to: '/logo'},
+            { label: 'register', icon: 'pi pi-fw pi-home', to: '/register'},
+            { label: 'login', icon: 'pi pi-fw pi-home', to: '/login'},
+            { label: 'set profile', icon: 'pi pi-fw pi-home', to: '/profile'},
+        ]
+    },
+    {
+        label: 'UI Components',
+        items: [
             { label: 'Home', icon: 'pi pi-fw pi-home', to: '/passenger/home' },
             { label: 'Search', icon: 'pi pi-fw pi-search', to: '/passenger/search'},
             { label: 'My trip', icon: 'pi pi-fw pi-car', to: '/passenger/mytrip'},

@@ -14,7 +14,10 @@
         "primeicons": "^6.0.1",
         "primevue": "3.39.0",
         "vue": "^3.2.41",
+        "vue-google-oauth2": "^1.5.10",
         "vue-router": "^4.1.5",
+        "vue3-google-login": "^2.0.25",
+        "vue3-google-oauth2": "^1.0.7",
         "vuex": "^4.1.0"
     },
     "devDependencies": {
@@ -26,6 +29,6 @@
         "eslint-plugin-vue": "^9.3.0",
         "prettier": "^2.7.1",
         "sass": "^1.55.0",
-        "vite": "^4.2.1"
+        "vite": "^4.5.0"
     }
 }
