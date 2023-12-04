@@ -25,11 +25,6 @@ const router = createRouter({
                     component: () => import('@/views/UI/logo.vue')
                 },
                 {
-                    path: '/register',
-                    name: 'register',
-                    component: () => import('@/views/UI/register.vue')
-                },
-                {
                     path: '/login',
                     name: 'UIlogin',
                     component: () => import('@/views/UI/login.vue')
@@ -109,7 +104,7 @@ const router = createRouter({
         {
             path: '/auth/register',
             name: 'Register',
-            component: () => import('@/views/pages/auth/Access.vue')
+            component: () => import('@/views/pages/auth/Register.vue')
         },
         {
             path: '/chat/:userId',
