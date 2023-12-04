@@ -14,6 +14,12 @@ export class TripService {
             url: '/trips'
         });
     }
+    getThePageTrip(PageNumber){
+        return request({
+            method: 'get',
+            url: '/trips?page=' + PageNumber
+        });
+    }
     getTrip(id){
         return request({
             method: 'get',
