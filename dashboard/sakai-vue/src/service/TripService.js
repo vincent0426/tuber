@@ -32,4 +32,10 @@ export class TripService {
             url: '/trips/'+id+'/join'
         });
     }
+    getPassenger(id){
+        return request({
+            method: 'get',
+            url: '/trips/'+id +'/passengers'
+        });
+    }
 }

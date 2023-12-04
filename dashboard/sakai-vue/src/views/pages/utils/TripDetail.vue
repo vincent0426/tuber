@@ -16,6 +16,7 @@ const driverName = ref(null);
 const driver_image_url = ref(null);
 const driver_plate = ref(null);
 const start_time = ref(null);
+const customer1 = ref(null);
 var tripData;
 
 onMounted(() => {
@@ -27,6 +28,9 @@ onMounted(() => {
         driver_plate.value = data.driver_plate;
         start_time.value = data.start_time;
         console.log(data);
+    });
+    tripService.getPassenger(tripID).then((data) => {
+        customer1.value = data.passenger_details;
     });
 });
 
@@ -204,7 +208,7 @@ onMounted(() => {
                 </div>
             </div>
         </div>
-        <!-- <div class="card col-12">
+        <div class="card col-12">
                 <h5>Other Passengers</h5>
                 <DataTable
                     :value="customer1"
@@ -218,57 +222,29 @@ onMounted(() => {
                     :loading="loading1"
                     :filters="filters1"
                     responsiveLayout="scroll"
-                    :globalFilterFields="['name', 'status']"
+                    :globalFilterFields="['passenger_id', 'status']"
                 >
                     
                     <template #empty> No customers found. </template>
                     <template #loading> Loading customers data. Please wait. </template>
-                    <Column field="name" header="Name" style="min-width: 12rem">
+                    <Column field="passenger_id" header="ID" style="min-width: 12rem">
                         <template #body="{ data }">
-                            {{ data.name }}
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <InputText type="text" v-model="filterModel.value" class="p-column-filter" placeholder="Search by name" />
+                            {{ data.passenger_id }}
                         </template>
                     </Column>
-                    <Column field="status" header="Status" :filterMenuStyle="{ width: '14rem' }" style="min-width: 12rem">
+                    <Column field="source_name" header="Source" style="min-width: 12rem">
                         <template #body="{ data }">
-                            <span :class="'customer-badge status-' + data.status">{{ data.status }}</span>
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <Dropdown v-model="filterModel.value" :options="statuses" placeholder="Any" class="p-column-filter" :showClear="true">
-                                <template #value="slotProps">
-                                    <span :class="'customer-badge status-' + slotProps.value" v-if="slotProps.value">{{ slotProps.value }}</span>
-                                    <span v-else>{{ slotProps.placeholder }}</span>
-                                </template>
-                                <template #option="slotProps">
-                                    <span :class="'customer-badge status-' + slotProps.option">{{ slotProps.option }}</span>
-                                </template>
-                            </Dropdown>
+                            {{ data.source_name }}
                         </template>
                     </Column>
-                    <Column field="PickUpAt" header="Pick Up At" :showFilterMatchModes="false" style="min-width: 12rem">
+                    <Column field="destination_name" header="Destination" style="min-width: 12rem">
                         <template #body="{ data }">
-                            <ProgressBar :value="data.activity" :showValue="false" style="height: 0.5rem"></ProgressBar>
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <Slider v-model="filterModel.value" :range="true" class="m-3"></Slider>
-                            <div class="flex align-items-center justify-content-between px-2">
-                                <span>{{ filterModel.value ? filterModel.value[0] : 0 }}</span>
-                                <span>{{ filterModel.value ? filterModel.value[1] : 100 }}</span>
-                            </div>
+                            {{ data.destination_name }}
                         </template>
                     </Column>
-                    <Column field="DropAt" header="Drop At" dataType="boolean" bodyClass="text-center" style="min-width: 8rem">
-                        <template #body="{ data }">
-                            <i class="pi" :class="{ 'text-green-500 pi-check-circle': data.verified, 'text-pink-500 pi-times-circle': !data.verified }"></i>
-                        </template>
-                        <template #filter="{ filterModel }">
-                            <TriStateCheckbox v-model="filterModel.value" />
-                        </template>
-                    </Column>
+                    
                 </DataTable>
-            </div> -->
+            </div> 
         <div class="col-12 card">
             <div class="grid grid-nogutter">
                 <div class="col-4 text-left">
