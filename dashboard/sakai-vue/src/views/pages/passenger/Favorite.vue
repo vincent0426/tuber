@@ -1,40 +1,3 @@
-<template>
-    <div>
-        <h3 style="text-align: center">Favorite Driver</h3>
-        <div class="ride-container">
-            <div v-for="(ride, index) in AppFavoriteDriver" :key="index" class="ride-card">
-                <div class="driver-info">
-                    <div class="avatar-container">
-                        <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
-                    </div>
-                    <div class="driver-text">
-                        <div class="name-rating">
-                            <div style="font-weight: bold; font-size: 16px">{{ ride.driver_name }}</div>
-                            <div class="rating-container">
-                                <div>{{ ride.driver_rating }}</div>
-                                <i class="pi pi-star-fill" style="color: black"></i>
-                            </div>
-                        </div>
-
-                        <p style="font-size: 13px; font-style: italic; padding-top: 4px">{{ ride.driver_plate }}</p>
-                    </div>
-                    <img alt="user header" src="../../../assets/images/modelS.jpg" style="width: 130px; height: 100px; object-fit: cover; object-position: center" />
-                </div>
-                <div class="custom-content">
-                    <div style="width: 270px; height: min-content; margin-right: 10px">
-                        <div style="m-0; word-wrap: break-word;">Comment: {{ ride.comment }}</div>
-                        <div style="font-weight: 600; padding-top: 10px">Collaboration time: {{ ride.collaboration_time }}</div>
-                    </div>
-
-                    <div style="align-self: center; border-radius: 50%; background-color: rgba(0, 0, 0, 0.7); width: 55px; height: 55px; display: flex; align-items: center; justify-content: center">
-                        <i class="pi pi-pencil" style="color: bisque"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <style scoped>
 .name-rating {
     display: flex;
@@ -106,7 +69,6 @@
     border: 2px solid #070707; /* 添加2px的邊框 */
 }
 </style>
-
 <script setup>
 import { ref } from 'vue';
 
@@ -115,109 +77,104 @@ import 'primeicons/primeicons.css';
 const value = ref(null);
 </script>
 <script>
+import { DriverService } from '@/service';
+const driverService = new DriverService();
 export default {
     data() {
         return {
-            AppFavoriteDriver: [
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    driver_rating: 4.7,
-                    collaboration_time: 2,
-                    comment: 'A good driver, we often share the same route.'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: 'John Doe',
-                    driver_brand: 'Tesla',
-                    driver_model: 'Camry',
-                    driver_plate: 'UDC-256',
-                    driver_rating: 3.3,
-                    collaboration_time: 5,
-                    comment: 'A crazzzzzzzxychxycxychizhvhishvifhivhsivhfihvifsadfasdfafdsfsfafdafdsasdfadfafdasfasdfasdfsadfsdafdhvhsdivhdfihvidhadfasdffafsafdafasfafsfdasidfhvishfhishivhdfi.'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    driver_rating: 4.7,
-                    collaboration_time: 2,
-                    comment: 'A good driver, we often share the same route.'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    driver_rating: 4.7,
-                    collaboration_time: 2,
-                    comment: 'A good driver, we often share the same route.'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    driver_rating: 4.7,
-                    collaboration_time: 2,
-                    comment: 'A good driver, we often share the same route.'
-                }
-            ]
+            FavoriteDriver: []
         };
+    },
+    mounted() {
+        this.fetchFavorite();
+    },
+    methods: {
+        generateRandomComment() {
+            const comments = ['good driver, YEAH', 'A good driver, we often share the same route.', 'cool driver, drives fast'];
+            return comments[Math.floor(Math.random() * comments.length)];
+        },
+        generateRandomRating() {
+            const ratings = [2.4, 4.8, 5.0];
+            return ratings[Math.floor(Math.random() * ratings.length)];
+        },
+        generateRandomCollborationTime() {
+            const col_times = [2, 5, 14, 31, 50];
+            return col_times[Math.floor(Math.random() * col_times.length)];
+        },
+        generateRandomData() {
+            // 为每个驾驶员生成随机评论和评分
+            this.responseData.items.forEach((item) => {
+                console.log(item);
+                item.comment = this.generateRandomComment();
+                item.driver_rating = this.generateRandomRating();
+                item.collaboration_time = this.generateRandomCollborationTime();
+            });
+        },
+        async fetchFavorite() {
+            // try {
+            //     //加入假資料id
+            //     const response = await driverService.postFavorite('9a82ce5f-b2b6-40e7-beb8-00217075e318');
+            //     console.log(response);
+            // } catch (e) {
+            //     console.error('Error posting fav driver:', error);
+            // }
+            try {
+                const response = await driverService.getFavorite();
+                console.log(response);
+                this.responseData = response;
+                // 生成随机评论和评分
+                this.generateRandomData();
+                console.log(response);
+                this.FavoriteDriver = response.items;
+            } catch (e) {
+                console.error('Error fetching fav drivers:', error);
+            }
+        }
     }
 };
 </script>
 
-// { "driver_id": "fe22e8fa-04d2-49b5-8bac-1535153b687e", "driver_name": "John Doe", "driver_brand": "Toyota", "driver_model": "Camry", "driver_plate": "ABC123", "source_name": "Location 1", "destination_name": "Location 2", "cost":"5", "start_time":
-// "2023-01-01T08:00:00Z", }
-
-<!-- type AppFavoriteDriver struct {
-ID              string json:"id"
-DriverID        string json:"driver_id"
-DriverName      string json:"driver_name"
-DriverImageURL  string json:"driver_image_url"
-DriverBrand     string json:"driver_brand"
-DriverModel     string json:"driver_model"
-DriverColor     string json:"driver_color"
-DriverPlate     string json:"driver_plate"
-DriverCreatedAt string json:"driver_created_at"
-}  -->
 <!-- <template>
-  <div>
-      <h1>Favorite List</h1>
-      <div v-for="trip in trips" :key="trip.id">
-          <h2>{{ trip.driver_name }}</h2>
-      </div>
-  </div>
-</template>
+    <div>
+        <h1>Favorite List</h1>
+        <div v-for="trip in trips" :key="trip.id">
+            <h2>{{ trip.driver_name }}</h2>
+        </div>
+    </div>
+</template> -->
+<template>
+    <div>
+        <h3 style="text-align: center">Favorite Driver</h3>
+        <div class="ride-container">
+            <div v-for="(ride, index) in FavoriteDriver" :key="index" class="ride-card">
+                <div class="driver-info">
+                    <div class="avatar-container">
+                        <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
+                    </div>
+                    <div class="driver-text">
+                        <div class="name-rating">
+                            <div style="font-weight: bold; font-size: 16px">{{ ride.driver_name }}</div>
+                            <div class="rating-container">
+                                <div>{{ ride.driver_rating }}</div>
+                                <i class="pi pi-star-fill" style="color: black"></i>
+                            </div>
+                        </div>
 
-<script>
-import axios from 'axios';
-export default {
-  data() {
-      return {
-          trips: []
-      };
-  },
-  mounted() {
-      this.fetchTrips();
-  },
-  methods: {
-      async fetchTrips() {
-          try {
-              const response = await axios.get('http://localhost:3000/v1/trips');
-              this.trips = response.data.items;
-          } catch (error) {
-              console.error('Error fetching trips:', error);
-          }
-      }
-  }
-};
-</script> -->
+                        <p style="font-size: 13px; font-style: italic; padding-top: 4px">{{ ride.driver_plate }}</p>
+                    </div>
+                    <img alt="user header" src="../../../assets/images/modelS.jpg" style="width: 130px; height: 100px; object-fit: cover; object-position: center" />
+                </div>
+                <div class="custom-content">
+                    <div style="width: 270px; height: min-content; margin-right: 10px">
+                        <div style="m-0; word-wrap: break-word;">Comment: {{ ride.comment }}</div>
+                        <div style="font-weight: 600; padding-top: 10px">Collaboration time: {{ ride.collaboration_time }}</div>
+                    </div>
+
+                    <div style="align-self: center; border-radius: 50%; background-color: rgba(0, 0, 0, 0.7); width: 55px; height: 55px; display: flex; align-items: center; justify-content: center">
+                        <i class="pi pi-pencil" style="color: bisque"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

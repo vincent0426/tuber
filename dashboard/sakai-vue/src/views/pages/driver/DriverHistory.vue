@@ -1,4 +1,74 @@
 import Rating from 'primevue/rating';
+<script setup>
+import { ref } from 'vue';
+
+const value = ref(null);
+</script>
+
+<script>
+export default {
+    data() {
+        return {
+            rideHistory: [
+                {
+                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
+                    driver_name: '爆肝人',
+                    driver_brand: 'Toyota',
+                    driver_model: 'Camry',
+                    driver_plate: 'ABC123',
+                    source_name: '桃園',
+                    destination_name: '新竹',
+                    received_revenue: '20',
+                    customers: [
+                        {
+                            customer_img: '../../../assets/images/Sandy.jpg',
+                            customer_name: 'Sandy',
+                            customer_source_name: '北車',
+                            customer_destination_name: '公館',
+                            collaboration_time: 2
+                        },
+                        {
+                            customer_img: '../../../assets/images/Patrick.svg',
+                            customer_name: 'Patrick',
+                            customer_source_name: '太平洋',
+                            customer_destination_name: '大西洋',
+                            collaboration_time: 8
+                        }
+                    ],
+                    start_time: '2023-01-01T08:00:00Z'
+                },
+                {
+                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
+                    driver_name: '爆肝人',
+                    driver_brand: 'Toyota',
+                    driver_model: 'Camry',
+                    driver_plate: 'ABC123',
+                    source_name: '台北',
+                    destination_name: '墾丁',
+                    received_revenue: '200',
+                    customers: [
+                        {
+                            customer_img: '../../../assets/images/Sandy.jpg',
+                            customer_name: 'Sandy',
+                            customer_source_name: '北車',
+                            customer_destination_name: '墾丁',
+                            collaboration_time: 2
+                        },
+                        {
+                            customer_img: '../../../assets/images/Patrick.jpg',
+                            customer_name: 'Patrick',
+                            customer_source_name: '太平洋',
+                            customer_destination_name: '大西洋',
+                            collaboration_time: 8
+                        }
+                    ],
+                    start_time: '2023-01-01T08:00:00Z'
+                }
+            ]
+        };
+    }
+};
+</script>
 <template>
     <div>
         <h3 style="text-align: center">Driver History</h3>
@@ -62,7 +132,6 @@ import Rating from 'primevue/rating';
         </div>
     </div>
 </template>
-
 <style scoped>
 .location-content {
     display: flex;
@@ -129,75 +198,6 @@ import Rating from 'primevue/rating';
     border: 2px solid #070707; /* 添加2px的邊框 */
 }
 </style>
-<script setup>
-import { ref } from 'vue';
-
-const value = ref(null);
-</script>
-<script>
-export default {
-    data() {
-        return {
-            rideHistory: [
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    source_name: '桃園',
-                    destination_name: '新竹',
-                    received_revenue: '20',
-                    customers: [
-                        {
-                            customer_img: '../../../assets/images/Sandy.jpg',
-                            customer_name: 'Sandy',
-                            customer_source_name: '北車',
-                            customer_destination_name: '公館',
-                            collaboration_time: 2
-                        },
-                        {
-                            customer_img: '../../../assets/images/Patrick.svg',
-                            customer_name: 'Patrick',
-                            customer_source_name: '太平洋',
-                            customer_destination_name: '大西洋',
-                            collaboration_time: 8
-                        }
-                    ],
-                    start_time: '2023-01-01T08:00:00Z'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    source_name: '台北',
-                    destination_name: '墾丁',
-                    received_revenue: '200',
-                    customers: [
-                        {
-                            customer_img: '../../../assets/images/Sandy.jpg',
-                            customer_name: 'Sandy',
-                            customer_source_name: '北車',
-                            customer_destination_name: '墾丁',
-                            collaboration_time: 2
-                        },
-                        {
-                            customer_img: '../../../assets/images/Patrick.jpg',
-                            customer_name: 'Patrick',
-                            customer_source_name: '太平洋',
-                            customer_destination_name: '大西洋',
-                            collaboration_time: 8
-                        }
-                    ],
-                    start_time: '2023-01-01T08:00:00Z'
-                }
-            ]
-        };
-    }
-};
-</script>
 
 // { "driver_id": "fe22e8fa-04d2-49b5-8bac-1535153b687e", "driver_name": "John Doe", "driver_brand": "Toyota", "driver_model": "Camry", "driver_plate": "ABC123", "source_name": "Location 1", "destination_name": "Location 2", "cost":"5", "start_time":
 // "2023-01-01T08:00:00Z", }
