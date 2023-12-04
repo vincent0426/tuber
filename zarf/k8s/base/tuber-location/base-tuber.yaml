@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tuber-location
+  namespace: tuber-system
+spec:
+  selector:
+    matchLabels:
+      app: tuber-location
+  template:
+    metadata:
+      labels:
+        app: tuber-location
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: tuber-location-container
+          image: service-location-image
+          ports:
+            - name: location-api
+              containerPort: 3000
+            - name: loca-api-debug
+              containerPort: 4000
+          readinessProbe: # readiness probes mark the service available to accept traffic.
+            httpGet:
+              path: /debug/readiness
+              port: 4000
+            initialDelaySeconds: 2
+            periodSeconds: 15
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          livenessProbe: # liveness probes mark the service alive or dead (to be restarted).
+            httpGet:
+              path: /debug/liveness
+              port: 4000
+            initialDelaySeconds: 2
+            periodSeconds: 30
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 2
+          env:
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: KUBERNETES_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: KUBERNETES_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBERNETES_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBERNETES_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: API_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: tuber-location-config
+                  key: API_HOST
+            - name: DEBUG_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: tuber-location-config
+                  key: DEBUG_HOST
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tuber-location-api
+  namespace: tuber-system

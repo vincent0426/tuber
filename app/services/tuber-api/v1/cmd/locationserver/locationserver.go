@@ -1,7 +1,6 @@
 package locationserver
 
 import (
-	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/authgrp"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/healthgrp"
 	"github.com/TSMC-Uber/server/app/services/tuber-api/v1/handlers/taskgrp"
 	v1 "github.com/TSMC-Uber/server/business/web/v1"
@@ -20,11 +19,6 @@ type add struct{}
 func (add) Add(app *web.App, cfg v1.APIMuxConfig) {
 	healthgrp.Routes(app, healthgrp.Config{
 		Log: cfg.Log,
-	})
-	authgrp.Routes(app, authgrp.Config{
-		Log:  cfg.Log,
-		Auth: cfg.Auth,
-		DB:   cfg.DB,
 	})
 	taskgrp.Routes(app, taskgrp.Config{
 		Log:  cfg.Log,

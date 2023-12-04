@@ -12,4 +12,4 @@ images:
   newTag: 0.0.1
 - name: service-image
   newName: tuber/tuber-chat
-  newTag: 0.0.1
+  newTag: 0.0.2

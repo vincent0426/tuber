@@ -18,6 +18,8 @@ SERVICE_NAME    := tuber-api
 SERVICE_IMAGE   := $(BASE_IMAGE_NAME)/$(SERVICE_NAME):$(VERSION)
 SERVICE_CHAT_NAME    := tuber-chat
 SERVICE_CHAT_IMAGE   := $(BASE_IMAGE_NAME)/$(SERVICE_CHAT_NAME):$(VERSION)
+SERVICE_LOCATION_NAME    := tuber-location
+SERVICE_LOCATION_IMAGE := $(BASE_IMAGE_NAME)/$(SERVICE_LOCATION_NAME):$(VERSION)
 
 dev-brew:
 	brew update
@@ -29,7 +31,7 @@ dev-brew:
 
 # ==============================================================================
 # Building containers
-all: service service-chat
+all: service service-chat service-location
 
 service:
 	docker build \
@@ -43,6 +45,14 @@ service-chat:
 	docker build \
 	-f zarf/docker/dockerfile.service.chat \
 	-t $(SERVICE_CHAT_IMAGE) \
+	--build-arg BUILD_REF=$(VERSION) \
+	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+	.
+
+service-location:
+	docker build \
+	-f zarf/docker/dockerfile.service.location \
+	-t $(SERVICE_LOCATION_IMAGE) \
 	--build-arg BUILD_REF=$(VERSION) \
 	--build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
 	.
@@ -73,6 +83,9 @@ dev-load:
 	
 	cd zarf/k8s/dev/tuber-chat; kustomize edit set image service-image=$(SERVICE_CHAT_IMAGE)
 	kind load docker-image $(SERVICE_CHAT_IMAGE) --name $(KIND_CLUSTER)
+
+	cd zarf/k8s/dev/tuber-location; kustomize edit set image service-image=$(SERVICE_LOCATION_IMAGE)
+	kind load docker-image $(SERVICE_LOCATION_IMAGE) --name $(KIND_CLUSTER)
 
 dev-apply:
 	kustomize build zarf/k8s/dev/database | kubectl apply -f -
@@ -108,14 +121,17 @@ dev-apply:
 	kustomize build zarf/k8s/dev/tuber-chat | kubectl apply -f -
 	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP)-chat --timeout=300s --for=condition=Ready
 
-# install istio
+	kustomize build zarf/k8s/dev/tuber-location | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=$(APP)-location --timeout=300s --for=condition=Ready
 
-# helm install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace --wait
-# helm install istiod istio/istiod -n istio-system --wait
-# kubectl apply -f zarf/k8s/dev/istio-ingressgateway-config.yaml
+# install istio
+# -
+	helm install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace --wait
+	helm install istiod istio/istiod -n istio-system --wait
+	kubectl apply -f zarf/k8s/dev/istio-ingressgateway-config.yaml
 
 # install gateway under zarf/k8s/dev/gateway since we need to change loadBalancerIP to node IP
-# kustomize build zarf/k8s/dev/gateway | kubectl apply -f -
+	kustomize build zarf/k8s/dev/gateway | kubectl apply -f 
 
 dev-delete:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
@@ -163,6 +179,9 @@ dev-port-forward:
 
 dev-chat-port-forward:
 	kubectl port-forward --namespace=$(NAMESPACE) svc/$(APP)-chat-api 3002:3002
+
+dev-location-port-forward:
+	kubectl port-forward --namespace=$(NAMESPACE) svc/$(APP)-location-api 3003:3003
 
 tidy:
 	go mod tidy
