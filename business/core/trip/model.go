@@ -72,6 +72,8 @@ type UserTrip struct {
 	StartTime       time.Time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
+	Comment         string
+	Rating          int
 }
 
 type TripView struct {
