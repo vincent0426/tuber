@@ -257,9 +257,12 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 		"trip.start_time",
 		"trip.created_at AS trip_created_at",
 		"trip.updated_at AS trip_updated_at",
+		"rating.rating AS trip_rating",
+		"rating.comment AS trip_comment",
 	).
 		From("trip_passenger").
 		Join("trip ON trip_passenger.trip_id = trip.id").
+		LeftJoin("rating ON trip.id = rating.trip_id").
 		Where(sq.Eq{"trip_passenger.passenger_id": userID}).
 		OrderBy("trip.start_time DESC")
 
@@ -272,7 +275,7 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 	if err != nil {
 		return nil, fmt.Errorf("tosql: %w, sql: %s", err, sql)
 	}
-
+	fmt.Println("sql: ", sql)
 	var dbTrips []dbUserTrip
 	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)

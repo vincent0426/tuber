@@ -1,6 +1,7 @@
 package tripdb
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/TSMC-Uber/server/business/core/trip"
@@ -35,22 +36,33 @@ func toDBTrip(trip trip.Trip) dbTrip {
 
 // ------------------------------------------------------------
 type dbUserTrip struct {
-	TripID          uuid.UUID `db:"trip_id"`
-	PassengerID     uuid.UUID `db:"passenger_id"`
-	MySourceID      uuid.UUID `db:"my_source_id"`
-	MyDestinationID uuid.UUID `db:"my_destination_id"`
-	MyStatus        string    `db:"my_status"`
-	DriverID        uuid.UUID `db:"driver_id"`
-	PassengerLimit  int       `db:"passenger_limit"`
-	SourceID        uuid.UUID `db:"source_id"`
-	DestinationID   uuid.UUID `db:"destination_id"`
-	TripStatus      string    `db:"trip_status"`
-	StartTime       time.Time `db:"start_time"`
-	CreatedAt       time.Time `db:"trip_created_at"`
-	UpdatedAt       time.Time `db:"trip_updated_at"`
+	TripID          uuid.UUID      `db:"trip_id"`
+	PassengerID     uuid.UUID      `db:"passenger_id"`
+	MySourceID      uuid.UUID      `db:"my_source_id"`
+	MyDestinationID uuid.UUID      `db:"my_destination_id"`
+	MyStatus        string         `db:"my_status"`
+	DriverID        uuid.UUID      `db:"driver_id"`
+	PassengerLimit  int            `db:"passenger_limit"`
+	SourceID        uuid.UUID      `db:"source_id"`
+	DestinationID   uuid.UUID      `db:"destination_id"`
+	TripStatus      string         `db:"trip_status"`
+	StartTime       time.Time      `db:"start_time"`
+	CreatedAt       time.Time      `db:"trip_created_at"`
+	UpdatedAt       time.Time      `db:"trip_updated_at"`
+	Comment         sql.NullString `db:"trip_comment"`
+	Rating          sql.NullInt64  `db:"trip_rating"`
 }
 
 func toCoreUserTrip(dbUserTrip dbUserTrip) trip.UserTrip {
+	comment := ""
+	if dbUserTrip.Comment.Valid {
+		comment = dbUserTrip.Comment.String
+	}
+
+	rating := -1
+	if dbUserTrip.Rating.Valid {
+		rating = int(dbUserTrip.Rating.Int64)
+	}
 
 	trip := trip.UserTrip{
 		TripID:          dbUserTrip.TripID,
@@ -66,6 +78,8 @@ func toCoreUserTrip(dbUserTrip dbUserTrip) trip.UserTrip {
 		StartTime:       dbUserTrip.StartTime.In(time.Local),
 		CreatedAt:       dbUserTrip.CreatedAt.In(time.Local),
 		UpdatedAt:       dbUserTrip.UpdatedAt.In(time.Local),
+		Comment:         comment,
+		Rating:          rating,
 	}
 
 	return trip
