@@ -139,9 +139,20 @@ type dbTripView struct {
 	StartTime            time.Time `db:"start_time"`
 	CreatedAt            time.Time `db:"created_at"`
 	UpdatedAt            time.Time `db:"updated_at"`
+	Mid                  []dbLocation
 }
 
 func toCoreTripView(dbTripView dbTripView) trip.TripView {
+	// build mid locations
+	mid := make([]trip.TripLocation, len(dbTripView.Mid))
+	for i, dbMid := range dbTripView.Mid {
+		mid[i] = trip.TripLocation{
+			Name:    dbMid.Name,
+			PlaceID: dbMid.PlaceID,
+			Lat:     dbMid.Lat,
+			Lon:     dbMid.Lon,
+		}
+	}
 
 	trip := trip.TripView{
 		ID:                   dbTripView.ID,
@@ -167,6 +178,7 @@ func toCoreTripView(dbTripView dbTripView) trip.TripView {
 		StartTime:            dbTripView.StartTime.In(time.Local),
 		CreatedAt:            dbTripView.CreatedAt.In(time.Local),
 		UpdatedAt:            dbTripView.UpdatedAt.In(time.Local),
+		Mid:                  mid,
 	}
 
 	return trip

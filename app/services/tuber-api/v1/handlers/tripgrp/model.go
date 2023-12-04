@@ -157,32 +157,50 @@ func toCoreNewTripPassenger(app AppNewTripPassenger) (trip.NewTripPassenger, err
 }
 
 type AppTripView struct {
-	ID                   string  `json:"id"`
-	DriverID             string  `json:"driver_id"`
-	DriverName           string  `json:"driver_name"`
-	DriverImageURL       string  `json:"driver_image_url"`
-	DriverBrand          string  `json:"driver_brand"`
-	DriverModel          string  `json:"driver_model"`
-	DriverColor          string  `json:"driver_color"`
-	DriverPlate          string  `json:"driver_plate"`
-	SourceID             string  `json:"source_id"`
-	SourceName           string  `json:"source_name"`
-	SourcePlaceID        string  `json:"source_place_id"`
-	SourceLatitude       float64 `json:"source_latitude"`
-	SourceLongitude      float64 `json:"source_longitude"`
-	DestinationID        string  `json:"destination_id"`
-	DestinationName      string  `json:"destination_name"`
-	DestinationPlaceID   string  `json:"destination_place_id"`
-	DestinationLatitude  float64 `json:"destination_latitude"`
-	DestinationLongitude float64 `json:"destination_longitude"`
-	PassengerLimit       int     `json:"passenger_limit"`
-	Status               string  `json:"status"`
-	StartTime            string  `json:"start_time"`
-	CreatedAt            string  `json:"createdAt"`
-	UpdatedAt            string  `json:"updatedAt"`
+	ID                   string            `json:"id"`
+	DriverID             string            `json:"driver_id"`
+	DriverName           string            `json:"driver_name"`
+	DriverImageURL       string            `json:"driver_image_url"`
+	DriverBrand          string            `json:"driver_brand"`
+	DriverModel          string            `json:"driver_model"`
+	DriverColor          string            `json:"driver_color"`
+	DriverPlate          string            `json:"driver_plate"`
+	SourceID             string            `json:"source_id"`
+	SourceName           string            `json:"source_name"`
+	SourcePlaceID        string            `json:"source_place_id"`
+	SourceLatitude       float64           `json:"source_latitude"`
+	SourceLongitude      float64           `json:"source_longitude"`
+	DestinationID        string            `json:"destination_id"`
+	DestinationName      string            `json:"destination_name"`
+	DestinationPlaceID   string            `json:"destination_place_id"`
+	DestinationLatitude  float64           `json:"destination_latitude"`
+	DestinationLongitude float64           `json:"destination_longitude"`
+	PassengerLimit       int               `json:"passenger_limit"`
+	Status               string            `json:"status"`
+	StartTime            string            `json:"start_time"`
+	CreatedAt            string            `json:"createdAt"`
+	UpdatedAt            string            `json:"updatedAt"`
+	Mid                  []AppTripLocation `json:"mid"`
+}
+
+type AppTripLocation struct {
+	Name    string
+	PlaceID string
+	Lat     float64
+	Lon     float64
 }
 
 func toAppTripView(tripView trip.TripView) AppTripView {
+	// convert mid to AppTripLocation
+	mid := []AppTripLocation{}
+	for _, tripLocation := range tripView.Mid {
+		mid = append(mid, AppTripLocation{
+			Name:    tripLocation.Name,
+			PlaceID: tripLocation.PlaceID,
+			Lat:     tripLocation.Lat,
+			Lon:     tripLocation.Lon,
+		})
+	}
 
 	return AppTripView{
 		ID:                   tripView.ID.String(),
@@ -208,6 +226,7 @@ func toAppTripView(tripView trip.TripView) AppTripView {
 		StartTime:            tripView.StartTime.Format(time.RFC3339),
 		CreatedAt:            tripView.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:            tripView.UpdatedAt.Format(time.RFC3339),
+		Mid:                  mid,
 	}
 }
 
