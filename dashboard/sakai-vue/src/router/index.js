@@ -22,17 +22,17 @@ const router = createRouter({
                 {
                     path: '/logo',
                     name: 'logo',
-                    component: () => import('@/views/UI/logo.vue')
+                    component: () => import('@/views/pages/logo.vue')
                 },
                 {
                     path: '/login',
                     name: 'UIlogin',
-                    component: () => import('@/views/UI/login.vue')
+                    component: () => import('@/views/pages/login.vue')
                 },
                 {
                     path: '/profile',
                     name: 'profile',
-                    component: () => import('@/views/UI/profile.vue')
+                    component: () => import('@/views/pages/profile.vue')
                 },
                 {
                     path: '/uikit/formlayout',
