@@ -137,6 +137,7 @@ const passengernumberValue = ref(null);
             // 在其他地方使用你的 Service
             const tripService = new TripService();
             const newTripData = tripData();
+            console.log(newTripData);
             tripService.createTrip(newTripData)
                 .then(response => {
                     // 處理成功回傳的資料
@@ -301,17 +302,17 @@ const passengernumberValue = ref(null);
                     <label for="licenseplatenumber">License Plate Number</label>
                 </span> -->
                 <h5>Passenger Number</h5>
-                <InputText id="passengernumber" placeholder="passengernumber" v-model="floatValue" />
+                <InputText id="passengernumber" placeholder="passengernumber"/>
                 <h5>Start</h5>
-                <InputText class="search-location" placeholder="Search" id="Start" type="text" v-model="floatValue" />
+                <InputText class="search-location" placeholder="Search" id="Start" type="text"  />
                 <h5>End</h5>
-                <InputText class="search-location" placeholder="Search" id="End" type="text" v-model="floatValue" />
+                <InputText class="search-location" placeholder="Search" id="End" type="text" />
                 <br><br>
                 <div id="map" style="width: 100%; height: 30vh"></div>
                 <br>
                 <Button label="CheckPath" class="mr-2 mb-2" id="checkPath"></Button>
                 <h5>Stations along the way</h5>
-                <InputText class="search-location" placeholder="Search" id="Stop" type="text" v-model="floatValue" />
+                <InputText class="search-location" placeholder="Search" id="Stop" type="text" />
                 <Textarea id="Stops" type="text" rows="20" cols="80" readonly />
                 <br>
                 <Button label="Save Stop" class="mr-2 mb-2" id="addStop"></Button>
