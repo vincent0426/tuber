@@ -3,20 +3,61 @@ import { ref, onMounted } from 'vue';
 import { TripService } from '@/service/TripService';
 
 const tripService = new TripService();
+const dataviewValue = ref([]);
+// onMounted(() => {
+//     tripService.getAllTrip().then((data) => {
+//         //console.log(data); // 在控制台輸出數據的形式
+//         dataviewValue.value = data.items; // 將數據賦值給 dataviewValue
+        
+//     });
+// });
+onMounted(async () => {
+  let currentPage = 1; // 設置當前頁數
+  const pageSize = 10; // 設置每頁顯示的行程數量
 
-onMounted(() => {
-    tripService.getAllTrip().then((data) => {
-        console.log(data.items); // 在控制台輸出數據的形式
-        dataviewValue.value = data.items; // 將數據賦值給 dataviewValue
-        //console.log(1);
-    });
+  try {
+    while (true) {
+      if(currentPage == 1){
+        const response = await tripService.getAllTrip();
+        //console.log(response);
+        const { items, total } = response; // 假設後端返回的數據中有 items 和 totalPages 屬性
+        dataviewValue.value = items;
+        // 如果當前頁已達到總頁數，則跳出循環
+        if (currentPage*pageSize >= total) {
+            console.log("break");
+            break;
+        }
 
-    //productService.getProductsSmall().then((data) => (dataviewValue.value = data));
+        currentPage++; // 頁數加一，繼續獲取下一頁的數據
+      }
+      else{
+        const response = await tripService.getThePageTrip(currentPage);
+        //console.log(response);
+        const { items, total } = response; // 假設後端返回的數據中有 items 和 totalPages 屬性
+        console.log("1");
+        console.log(dataviewValue.value);
+        console.log("1");
+        
+        console.log(items);
+        for(var i = 0;i < items.length;i++){
+            dataviewValue.value.push(items[i]);
+        }
+        // 如果當前頁已達到總頁數，則跳出循環
+        if (currentPage*pageSize >= total) {
+            console.log("break");
+            break;
+        }
+
+        currentPage++; // 頁數加一，繼續獲取下一頁的數據
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching trips:', error);
+  }
 });
 
 
 const datetime24h = ref(null);
-const dataviewValue = ref(null);
 const StartStaion = ref(null);
 const EndStaion = ref(null);
 const layout = ref('list');
