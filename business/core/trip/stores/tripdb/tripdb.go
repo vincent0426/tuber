@@ -369,6 +369,30 @@ func (s *Store) QueryByID(ctx context.Context, tripID uuid.UUID) (trip.TripView,
 		return trip.TripView{}, fmt.Errorf("namedquerystruct: %w", err)
 	}
 
+	// get mid locations
+	sql, args, err = sq.Select(
+		"locations.name",
+		"locations.place_id",
+		"ST_Y(locations.lat_lon::geometry) AS lat",
+		"ST_X(locations.lat_lon::geometry) AS lon",
+	).From("trip_location").
+		Join("locations ON trip_location.location_id = locations.id").
+		Where(sq.Eq{"trip_location.trip_id": tripID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return trip.TripView{}, fmt.Errorf("tosql: %w", err)
+	}
+
+	var dbLocations []dbLocation
+	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbLocations); err != nil {
+		return trip.TripView{}, fmt.Errorf("namedqueryslice: %w", err)
+	}
+
+	// add mid locations to trip
+	dbTrip.Mid = dbLocations
+
 	return toCoreTripView(dbTrip), nil
 }
 

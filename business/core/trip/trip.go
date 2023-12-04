@@ -12,7 +12,7 @@ import (
 
 // Set of error variables for CRUD operations.
 var (
-	ErrNotFound              = errors.New("user not found")
+	ErrNotFound              = errors.New("trip not found")
 	ErrUniqueEmail           = errors.New("email is not unique")
 	ErrAuthenticationFailure = errors.New("authentication failed")
 )

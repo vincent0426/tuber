@@ -100,6 +100,7 @@ type TripView struct {
 	StartTime            time.Time
 	CreatedAt            time.Time
 	UpdatedAt            time.Time
+	Mid                  []TripLocation
 }
 
 type PassengerDetails struct {
