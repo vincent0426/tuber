@@ -36,5 +36,5 @@ func Routes(app *web.App, cfg Config) {
 	// authen := mid.Authenticate(cfg.Auth)
 
 	hdl := New(wsCore, usrCore)
-	app.Handle(http.MethodGet, version, "/ws", hdl.Connect)
+	app.Handle(http.MethodGet, version, "/chat/ws", hdl.Connect)
 }

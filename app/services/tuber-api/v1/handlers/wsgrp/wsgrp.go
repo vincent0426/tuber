@@ -73,6 +73,8 @@ func (h *Handlers) Connect(ctx context.Context, c *gin.Context) error {
 	defer pubsub.Close()
 	ch := pubsub.Channel()
 
+	// you can create this user object if you want to temp close auth
+	// user := user.User{}
 	// Receive messages from WebSocket, send to Redis Stream, and publish to Redis channel
 	go h.ws.ReceiveChatMessages(ctx, user, streamName, channelName, conn, ch)
 
