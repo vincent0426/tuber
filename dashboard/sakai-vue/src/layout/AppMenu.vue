@@ -17,7 +17,7 @@ const model_passenger = ref([
             { label: 'Search', icon: 'pi pi-fw pi-search', to: '/passenger/search'},
             { label: 'My trip', icon: 'pi pi-fw pi-car', to: '/passenger/mytrip'},
             { label: 'History', icon: 'pi pi-fw pi-book', to: '/passenger/history'},
-            { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/passenger/setting'},
+            { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/setting'},
             { label: 'Favorite', icon: 'pi pi-fw pi-heart', to: '/passenger/favorite'},
         ]
     },
@@ -59,7 +59,7 @@ const model_driver = ref([
             { label: 'Home', icon: 'pi pi-fw pi-home', to: '/driver/home' },
             { label: 'Create', icon: 'pi pi-fw pi-plus', to: '/driver/create'},
             { label: 'History', icon: 'pi pi-fw pi-book', to: '/driver/history'},
-            { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/driver/setting'},
+            { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/setting'},
         ]
     },
     {

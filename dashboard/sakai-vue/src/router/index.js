@@ -45,9 +45,9 @@ const router = createRouter({
                     component: () => import('@/views/pages/Empty.vue')
                 },
                 {
-                    path: '/passenger/setting',
-                    name: 'CutomerSetting',
-                    component: () => import('@/views/pages/passenger/PassengerSetting.vue')
+                    path: '/setting',
+                    name: 'PassengerSetting',
+                    component: () => import('@/views/pages/utils/Setting.vue')
                 },
                 {
                     path: '/passenger/mytrip',
@@ -75,9 +75,9 @@ const router = createRouter({
                     component: () => import('@/views/pages/Empty.vue')
                 },
                 {
-                    path: '/driver/setting',
+                    path: '/setting',
                     name: 'DriverSetting',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/utils/Setting.vue')
                 },
                 {
                     path: '/driver/profile',
