@@ -2,6 +2,7 @@ package locationws
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/TSMC-Uber/server/business/sys/cachedb"
@@ -85,6 +86,7 @@ func (r *BroadcastRoom) run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case message, ok := <-redisChannel:
+			fmt.Println("message: ", message.Payload)
 			if !ok {
 				return
 			}

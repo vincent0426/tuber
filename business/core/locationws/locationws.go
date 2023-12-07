@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -69,13 +70,31 @@ func ServeClient(
 		return nil, err
 	}
 
-	go client.sendLoop()
-
 	if isDriver {
 		go client.receiveLoop()
 	}
 
-	return client, nil
+	// go client.sendLoop()
+	for {
+		select {
+		case <-client.pingTicker.C:
+			client.updateWriteDeadline()
+			err := client.WriteMessage(websocket.PingMessage, nil)
+			if err != nil {
+				fmt.Printf("failed to write ping message to the client %v", err)
+				// return
+			}
+		case msg := <-client.messageToSend:
+			client.updateWriteDeadline()
+			err := client.WriteMessage(websocket.TextMessage, []byte(msg))
+			if err != nil {
+				fmt.Printf("failed to write message to the client %v", err)
+				// return
+			}
+		}
+	}
+
+	// return client, nil
 }
 
 func SendMessage(c *Client, msg string) error {

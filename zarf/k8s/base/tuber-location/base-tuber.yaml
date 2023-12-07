@@ -17,9 +17,9 @@ spec:
         - name: tuber-location-container
           image: service-location-image
           ports:
-            - name: location-api
+            - name: loc-api
               containerPort: 3000
-            - name: loca-api-debug
+            - name: loc-api-debug
               containerPort: 4000
           readinessProbe: # readiness probes mark the service available to accept traffic.
             httpGet:

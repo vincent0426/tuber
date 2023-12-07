@@ -8,9 +8,9 @@ spec:
     app: tuber-location
   type: ClusterIP
   ports:
-    - name: location-api
+    - name: loc-api
       port: 3003
       targetPort: 3000
-    - name: location-api-debug
+    - name: loc-api-debug
       port: 4003
       targetPort: 4000

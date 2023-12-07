@@ -6,9 +6,7 @@ import (
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/core/locationws"
-	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -31,17 +29,17 @@ var upgrader = websocket.Upgrader{
 }
 
 func (h *Handlers) DriverWebSocketHandler(ctx context.Context, c *gin.Context) error {
-	userID := auth.GetUserID(c)
+	// userID := auth.GetUserID(c)
 	// temp fix for testing, will remove later when auth is implemented
 	// we need to implement a middleware to get user info from DB
-	if userID == uuid.Nil {
-		id, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
-		if err != nil {
-			return fmt.Errorf("parse uuid: %w", err)
-		}
+	// if userID == uuid.Nil {
+	// 	id, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
+	// 	if err != nil {
+	// 		return fmt.Errorf("parse uuid: %w", err)
+	// 	}
 
-		userID = id
-	}
+	// 	userID = id
+	// }
 
 	// upgrade get request to websocket protocol
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -66,22 +64,21 @@ func (h *Handlers) DriverWebSocketHandler(ctx context.Context, c *gin.Context) e
 	if err != nil {
 		return fmt.Errorf("serve client: %w", err)
 	}
-
 	return nil
 }
 
 func (h *Handlers) PassengerWebSocketHandler(ctx context.Context, c *gin.Context) error {
-	userID := auth.GetUserID(c)
+	// userID := auth.GetUserID(c)
 	// temp fix for testing, will remove later when auth is implemented
 	// we need to implement a middleware to get user info from DB
-	if userID == uuid.Nil {
-		id, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
-		if err != nil {
-			return fmt.Errorf("parse uuid: %w", err)
-		}
+	// if userID == uuid.Nil {
+	// 	id, err := uuid.Parse("00000000-0000-0000-0000-000000000000")
+	// 	if err != nil {
+	// 		return fmt.Errorf("parse uuid: %w", err)
+	// 	}
 
-		userID = id
-	}
+	// 	userID = id
+	// }
 
 	// upgrade get request to websocket protocol
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)

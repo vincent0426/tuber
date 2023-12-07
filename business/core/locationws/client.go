@@ -2,6 +2,7 @@ package locationws
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -20,6 +21,7 @@ func (c *Client) sendLoop() {
 	defer c.Close()
 
 	for {
+		fmt.Println("sendLoop")
 		select {
 		case <-c.pingTicker.C:
 			c.updateWriteDeadline()
@@ -29,6 +31,7 @@ func (c *Client) sendLoop() {
 				return
 			}
 		case msg := <-c.messageToSend:
+			fmt.Println("receive msg from messageToSend")
 			c.updateWriteDeadline()
 			err := c.WriteMessage(websocket.TextMessage, []byte(msg))
 			if err != nil {
@@ -43,11 +46,15 @@ func (c *Client) receiveLoop() {
 	defer c.Close()
 
 	for {
+		fmt.Println("receiveLoop")
 		msgType, msg, err := c.ReadMessage()
+		fmt.Println("msg:", string(msg))
 		if err != nil {
+			fmt.Println("err:", err)
 			return // Usually caused by a normal client disconnection
 		}
 
+		fmt.Println("57")
 		c.updateReadDeadline()
 
 		if msgType == websocket.TextMessage { // only handle text message
@@ -111,6 +118,7 @@ func (c *Client) leaveRoom() error {
 func (c *Client) doJoin(
 	tripID string,
 ) error {
+	fmt.Println("doJoin")
 	if c.broadcastRoom != nil {
 		err := c.leaveRoom()
 		if err != nil {
@@ -122,7 +130,7 @@ func (c *Client) doJoin(
 	defer timer.Stop()
 
 	broadcastRoom := AcquireBroadcastRoom(tripID)
-
+	fmt.Println("AcquireBroadcastRoom Success")
 	select {
 	case broadcastRoom.channel.Joining <- c:
 		c.broadcastRoom = broadcastRoom

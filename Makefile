@@ -159,6 +159,7 @@ dev-status:
 dev-restart:
 	kubectl rollout restart deployment $(APP) --namespace=$(NAMESPACE)
 	kubectl rollout restart deployment $(APP)-chat --namespace=$(NAMESPACE)
+	kubectl rollout restart deployment $(APP)-location --namespace=$(NAMESPACE)
 
 dev-update: dev-swagger all dev-load dev-restart
 
