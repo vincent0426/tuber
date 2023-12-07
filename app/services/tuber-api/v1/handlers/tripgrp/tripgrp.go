@@ -20,12 +20,14 @@ import (
 // Handlers manages the set of user endpoints.
 type Handlers struct {
 	trip *trip.Core
+	user *user.Core
 }
 
 // New constructs a handlers for route access.
-func New(trip *trip.Core) *Handlers {
+func New(trip *trip.Core, user *user.Core) *Handlers {
 	return &Handlers{
 		trip: trip,
+		user: user,
 	}
 }
 
@@ -58,6 +60,22 @@ func (h *Handlers) Create(ctx context.Context, c *gin.Context) error {
 	trip, err := h.trip.Create(ctx, nc)
 	if err != nil {
 		return fmt.Errorf("create: trip[%+v]: %w", trip, err)
+	}
+
+	// get driver's email
+	qdriver, err := h.user.QueryByID(ctx, trip.DriverID)
+	if err != nil {
+		switch {
+		case errors.Is(err, user.ErrNotFound):
+			return response.NewError(err, http.StatusNotFound)
+		default:
+			return fmt.Errorf("querybyid: driverID[%s]: %w", trip.DriverID, err)
+		}
+	}
+
+	err = h.trip.PubEventToMQ(ctx, nc.StartTime, qdriver.Email.Address)
+	if err != nil {
+		return fmt.Errorf("pub event to mq: %w", err)
 	}
 
 	return web.Respond(ctx, c.Writer, toAppTrip(trip), http.StatusCreated)

@@ -2,6 +2,7 @@ package taskgrp
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/TSMC-Uber/server/business/core/task"
@@ -29,7 +30,10 @@ func (h *Handlers) PublishSendEmailTask(ctx context.Context, c *gin.Context) err
 	if err := web.Decode(c, &app); err != nil {
 		return response.NewError(err, http.StatusBadRequest)
 	}
-
+	fmt.Println("------------------")
+	fmt.Println(app.DelayTime)
+	fmt.Println(app.Email)
+	fmt.Println("------------------")
 	mq.SendDelayMsg([]byte(app.Email), app.DelayTime)
 
 	return web.Respond(ctx, c.Writer, app, http.StatusOK)

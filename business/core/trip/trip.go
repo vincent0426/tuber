@@ -1,9 +1,12 @@
 package trip
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/TSMC-Uber/server/business/data/order"
@@ -56,6 +59,51 @@ func NewCore(storer Storer) *Core {
 	return &Core{
 		storer: storer,
 	}
+}
+
+type LocationRequest struct {
+	Email     string `json:"email"`
+	DelayTime int    `json:"delayTime"`
+}
+
+func (c *Core) PubEventToMQ(ctx context.Context, startTime time.Time, email string) error {
+	// calculate the delay time
+	delayTime := int(time.Until(startTime).Milliseconds())
+
+	if delayTime < 0 {
+		delayTime = 0
+	}
+
+	// send an http request post to svc tuber-location-api 3003
+	// to create a new location
+	locationRequest := LocationRequest{
+		Email:     email,
+		DelayTime: delayTime,
+	}
+
+	jsonData, err := json.Marshal(locationRequest)
+	if err != nil {
+		return fmt.Errorf("failed to marshal location request: %w", err)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://tuber-location-api:3003/v1/tasks", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("creating request failed: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("http request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// Handle non-OK response
+		return fmt.Errorf("received non-OK response from location service: %s", resp.Status)
+	}
+
+	return nil
 }
 
 // Create inserts a new trip into the database.
