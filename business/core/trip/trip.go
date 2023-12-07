@@ -68,17 +68,21 @@ type LocationRequest struct {
 
 func (c *Core) PubEventToMQ(ctx context.Context, startTime time.Time, email string) error {
 	// calculate the delay time
-	// delayTime := int(nt.StartTime.Sub(now).Seconds() * 1000)
+	delayTime := int(time.Until(startTime).Milliseconds())
 
-	// if delayTime < 0 {
-	// 	delayTime = 0
-	// }
+	if delayTime < 0 {
+		delayTime = 0
+	}
 
 	// send an http request post to svc tuber-location-api 3003
 	// to create a new location
 	locationRequest := LocationRequest{
 		Email:     email,
+<<<<<<< HEAD
 		DelayTime: 5000,
+=======
+		DelayTime: delayTime,
+>>>>>>> dev
 	}
 
 	jsonData, err := json.Marshal(locationRequest)
