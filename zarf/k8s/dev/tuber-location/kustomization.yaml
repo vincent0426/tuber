@@ -7,9 +7,6 @@ patches:
 - path: ./dev-tuber-patch-service.yaml
 - path: ./dev-tuber-patch-configmap.yaml
 images:
-- name: service-image
-  newName: tuber/tuber-location
-  newTag: 0.0.2
 - name: service-location-image
   newName: tuber/tuber-location
   newTag: 0.0.2
