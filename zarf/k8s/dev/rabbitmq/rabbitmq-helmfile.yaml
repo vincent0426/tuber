@@ -1,0 +1,8 @@
+# Add the rabbitmq release
+releases:
+  - name: rabbitmq
+    namespace: tuber-system
+    chart: oci://registry-1.docker.io/bitnamicharts/rabbitmq
+    version: 12.5.4
+    values:
+      - rabbitmq-values.yaml

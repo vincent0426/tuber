@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-secret
+  namespace: tuber-system
+type: Opaque
+# echo -n "<password>" | base64
+data:
+  rabbitmq-password: cmFiYml0bXE=

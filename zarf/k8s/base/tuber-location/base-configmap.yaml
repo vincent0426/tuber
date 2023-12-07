@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tuber-location-config
+  namespace: tuber-system
+data:
+  API_HOST: ":3000"
+  DEBUG_HOST: ":4000"

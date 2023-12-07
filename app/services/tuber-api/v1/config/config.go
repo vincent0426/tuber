@@ -34,6 +34,12 @@ type config struct {
 		Password string
 		DB       int
 	}
+	RabbitMQ struct {
+		Host              string
+		DelayQueueName    string
+		DelayExchangeName string
+		DelayRoutingKey   string
+	}
 	Tempo struct {
 		ReporterURI string
 		ServiceName string
@@ -70,6 +76,12 @@ func New() (config, error) {
 	vConfig.SetDefault("Redis.Host.Replica", "redis-replicas.tuber-system.svc.cluster.local:6379")
 	vConfig.SetDefault("Redis.Password", "redis")
 	vConfig.SetDefault("Redis.DB", 0)
+
+	// Set Rabbitmq defaults.
+	vConfig.SetDefault("Rabbitmq.Host", "amqp://rabbitmq:rabbitmq@rabbitmq.tuber-system.svc.cluster.local:5672")
+	vConfig.SetDefault("Rabbitmq.DelayQueruName", "delay_queue")
+	vConfig.SetDefault("Rabbitmq.DelayExchangeName", "delay_exchange")
+	vConfig.SetDefault("Rabbitmq.DelayRoutingKey", "delay_routing_key")
 
 	// Set Tempo defaults.
 	vConfig.SetDefault("Tempo.ReporterURI", "tempo.tuber-system.svc.cluster.local:4317")

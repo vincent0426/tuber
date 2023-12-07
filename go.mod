@@ -16,6 +16,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/spf13/viper v1.17.0
+	github.com/streadway/amqp v1.1.0
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
