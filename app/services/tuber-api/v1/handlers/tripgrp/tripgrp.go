@@ -326,7 +326,7 @@ func (h *Handlers) QueryPassengers(ctx context.Context, c *gin.Context) error {
 // @Failure 500 "Internal Server Error"
 // @Router /trips/{id}/rating [post]
 func (h *Handlers) CreateRating(ctx context.Context, c *gin.Context) error {
-	tripID := c.Param("id")
+	tripID := uuid.Must(uuid.Parse(c.Param("id")))
 	userID := auth.GetUserID(ctx)
 	var app AppNewRating
 	// Validate the request.

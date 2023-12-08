@@ -78,11 +78,7 @@ func (c *Core) PubEventToMQ(ctx context.Context, startTime time.Time, email stri
 	// to create a new location
 	locationRequest := LocationRequest{
 		Email:     email,
-<<<<<<< HEAD
-		DelayTime: 5000,
-=======
 		DelayTime: delayTime,
->>>>>>> dev
 	}
 
 	jsonData, err := json.Marshal(locationRequest)
