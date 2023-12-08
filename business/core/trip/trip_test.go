@@ -394,3 +394,177 @@ func TestQueryMyTrip(t *testing.T) {
 	}
 	mockStorer.AssertExpectations(t)
 }
+
+func TestQueryMyTripError(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	userID := uuid.New()
+	filter := QueryFilterByUser{} // Set appropriate filter
+	orderBy := order.By{}         // Set appropriate order
+	pageNumber := 1
+	rowsPerPage := 10
+
+	mockStorer.On("QueryMyTrip", mock.Anything, userID, filter, orderBy, pageNumber, rowsPerPage).Return([]UserTrip{}, errors.New("query my trip error"))
+
+	_, err := core.QueryMyTrip(context.Background(), userID, filter, orderBy, pageNumber, rowsPerPage)
+	assert.Error(t, err)
+	fmt.Println(err.Error())
+	assert.Contains(t, err.Error(), "query my trip error")
+	mockStorer.AssertExpectations(t)
+}
+
+func TestCreateRating(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	newRating := NewRating{
+		TripID:  uuid.New(),
+		Rating:  5.0,
+		Comment: "some comment",
+	}
+
+	mockStorer.On("CreateRating", mock.Anything, mock.AnythingOfType("Rating")).Return(nil)
+
+	rating, err := core.CreateRating(context.Background(), newRating.TripID, newRating)
+
+	assert.NoError(t, err)
+	assert.Equal(t, newRating.TripID, rating.TripID)
+	assert.Equal(t, newRating.Rating, rating.Rating)
+	assert.Equal(t, newRating.Comment, rating.Comment)
+	mockStorer.AssertExpectations(t)
+}
+
+func TestCreateRatingError(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	newRating := NewRating{
+		TripID:  uuid.New(),
+		Rating:  5.0,
+		Comment: "some comment",
+	}
+
+	mockStorer.On("CreateRating", mock.Anything, mock.AnythingOfType("Rating")).Return(errors.New("create rating error"))
+
+	_, err := core.CreateRating(context.Background(), newRating.TripID, newRating)
+	assert.Error(t, err)
+	fmt.Println(err.Error())
+	assert.Contains(t, err.Error(), "create rating error")
+	mockStorer.AssertExpectations(t)
+}
+
+func TestCreateTripPassenger(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	newTripPassenger := NewTripPassenger{
+		PassengerID:   uuid.New(),
+		SourceID:      uuid.New(),
+		DestinationID: uuid.New(),
+	}
+
+	expectedTripPassenger := TripPassenger{
+		TripID:        uuid.New(),
+		PassengerID:   newTripPassenger.PassengerID,
+		SourceID:      newTripPassenger.SourceID,
+		DestinationID: newTripPassenger.DestinationID,
+		Status:        StatusPending,
+		CreatedAt:     time.Now(),
+	}
+
+	mockStorer.On("Join", mock.Anything, mock.AnythingOfType("TripPassenger")).Return(nil)
+
+	tripPassenger, err := core.Join(context.Background(), expectedTripPassenger.TripID, newTripPassenger)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTripPassenger.TripID, tripPassenger.TripID)
+	assert.Equal(t, expectedTripPassenger.PassengerID, tripPassenger.PassengerID)
+	assert.Equal(t, expectedTripPassenger.SourceID, tripPassenger.SourceID)
+	assert.Equal(t, expectedTripPassenger.DestinationID, tripPassenger.DestinationID)
+	assert.Equal(t, expectedTripPassenger.Status, tripPassenger.Status)
+	mockStorer.AssertExpectations(t)
+}
+
+func TestCreateTripPassengerError(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	newTripPassenger := NewTripPassenger{
+		PassengerID:   uuid.New(),
+		SourceID:      uuid.New(),
+		DestinationID: uuid.New(),
+	}
+
+	mockStorer.On("Join", mock.Anything, mock.AnythingOfType("TripPassenger")).Return(errors.New("create trip passenger error"))
+
+	_, err := core.Join(context.Background(), uuid.New(), newTripPassenger)
+	assert.Error(t, err)
+	fmt.Println(err.Error())
+	assert.Contains(t, err.Error(), "create trip passenger error")
+	mockStorer.AssertExpectations(t)
+}
+
+func TestQueryPassengers(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	tripID := uuid.New()
+
+	expectedTripDetails := TripDetails{
+		TripID:               tripID,
+		DriverID:             uuid.New(),
+		DriverName:           "Test Driver",
+		DriverImageURL:       "https://www.google.com",
+		DriverBrand:          "Toyota",
+		DriverModel:          "Camry",
+		DriverColor:          "White",
+		DriverPlate:          "ABC1234",
+		SourceName:           "Test Location",
+		SourcePlaceID:        "Place123",
+		SourceLatitude:       10.0,
+		SourceLongitude:      20.0,
+		DestinationName:      "Test Location",
+		DestinationPlaceID:   "Place123",
+		DestinationLatitude:  10.0,
+		DestinationLongitude: 20.0,
+	}
+
+	mockStorer.On("QueryPassengers", mock.Anything, tripID).Return(expectedTripDetails, nil)
+
+	tripDetails, err := core.QueryPassengers(context.Background(), tripID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTripDetails.TripID, tripDetails.TripID)
+	assert.Equal(t, expectedTripDetails.DriverID, tripDetails.DriverID)
+	assert.Equal(t, expectedTripDetails.DriverName, tripDetails.DriverName)
+	assert.Equal(t, expectedTripDetails.DriverImageURL, tripDetails.DriverImageURL)
+	assert.Equal(t, expectedTripDetails.DriverBrand, tripDetails.DriverBrand)
+	assert.Equal(t, expectedTripDetails.DriverModel, tripDetails.DriverModel)
+	assert.Equal(t, expectedTripDetails.DriverColor, tripDetails.DriverColor)
+	assert.Equal(t, expectedTripDetails.DriverPlate, tripDetails.DriverPlate)
+	assert.Equal(t, expectedTripDetails.SourceName, tripDetails.SourceName)
+	assert.Equal(t, expectedTripDetails.SourcePlaceID, tripDetails.SourcePlaceID)
+	assert.Equal(t, expectedTripDetails.SourceLatitude, tripDetails.SourceLatitude)
+	assert.Equal(t, expectedTripDetails.SourceLongitude, tripDetails.SourceLongitude)
+	assert.Equal(t, expectedTripDetails.DestinationName, tripDetails.DestinationName)
+	assert.Equal(t, expectedTripDetails.DestinationPlaceID, tripDetails.DestinationPlaceID)
+	assert.Equal(t, expectedTripDetails.DestinationLatitude, tripDetails.DestinationLatitude)
+	assert.Equal(t, expectedTripDetails.DestinationLongitude, tripDetails.DestinationLongitude)
+	mockStorer.AssertExpectations(t)
+}
+
+func TestQueryPassengersError(t *testing.T) {
+	mockStorer := new(MockStorer)
+	core := NewCore(mockStorer)
+
+	tripID := uuid.New()
+
+	mockStorer.On("QueryPassengers", mock.Anything, tripID).Return(TripDetails{}, errors.New("query passengers error"))
+
+	_, err := core.QueryPassengers(context.Background(), tripID)
+	assert.Error(t, err)
+	fmt.Println(err.Error())
+	assert.Contains(t, err.Error(), "query passengers error")
+	mockStorer.AssertExpectations(t)
+}

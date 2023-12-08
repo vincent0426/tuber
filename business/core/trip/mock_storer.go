@@ -2,6 +2,7 @@ package trip
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/TSMC-Uber/server/business/data/order"
 	"github.com/google/uuid"
@@ -48,6 +49,7 @@ func (m *MockStorer) Join(ctx context.Context, tripPassenger TripPassenger) erro
 }
 
 func (m *MockStorer) QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetails, error) {
+	fmt.Println("MockStorer.QueryPassengers", tripID)
 	args := m.Called(ctx, tripID)
 	return args.Get(0).(TripDetails), args.Error(1)
 }

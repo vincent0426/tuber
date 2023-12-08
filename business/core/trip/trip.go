@@ -260,12 +260,12 @@ func (c *Core) QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetai
 }
 
 // CreateRating inserts a new rating into the database.
-func (c *Core) CreateRating(ctx context.Context, tripID string, nr NewRating) (Rating, error) {
+func (c *Core) CreateRating(ctx context.Context, tripID uuid.UUID, nr NewRating) (Rating, error) {
 	now := time.Now()
 
 	rating := Rating{
 		ID:          uuid.New(),
-		TripID:      uuid.Must(uuid.Parse(tripID)),
+		TripID:      tripID,
 		CommenterID: nr.CommenterID,
 		Comment:     nr.Comment,
 		Rating:      nr.Rating,
