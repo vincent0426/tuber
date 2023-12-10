@@ -254,6 +254,14 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 		"trip.passenger_limit",
 		"trip.source_id",
 		"trip.destination_id",
+		"source.name AS source_name",
+		"source.place_id AS source_place_id",
+		"ST_Y(source.lat_lon::geometry) AS source_latitude",
+		"ST_X(source.lat_lon::geometry) AS source_longitude",
+		"destination.name AS destination_name",
+		"destination.place_id AS destination_place_id",
+		"ST_Y(destination.lat_lon::geometry) AS destination_latitude",
+		"ST_X(destination.lat_lon::geometry) AS destination_longitude",
 		"trip.status AS trip_status",
 		"trip.start_time",
 		"trip.created_at AS trip_created_at",
@@ -264,6 +272,8 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 		From("trip_passenger").
 		Join("trip ON trip_passenger.trip_id = trip.id").
 		Join("users AS driver ON trip.driver_id = driver.id").
+		Join("locations AS source ON trip.source_id = source.id").
+		Join("locations AS destination ON trip.destination_id = destination.id").
 		LeftJoin("rating ON trip.id = rating.trip_id").
 		Where(sq.Eq{"trip_passenger.passenger_id": userID}).
 		OrderBy("trip.start_time DESC")
@@ -277,7 +287,7 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 	if err != nil {
 		return nil, fmt.Errorf("tosql: %w, sql: %s", err, sql)
 	}
-	fmt.Println("sql: ", sql)
+
 	var dbTrips []dbUserTrip
 	if err := database.QueryContext(ctx, s.log, s.db, sql, args, &dbTrips); err != nil {
 		return nil, fmt.Errorf("namedqueryslice: %w", err)

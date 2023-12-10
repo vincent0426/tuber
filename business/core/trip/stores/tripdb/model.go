@@ -45,7 +45,15 @@ type dbUserTrip struct {
 	DriverName      string         `db:"driver_name"`
 	PassengerLimit  int            `db:"passenger_limit"`
 	SourceID        uuid.UUID      `db:"source_id"`
+	SourceName      string         `db:"source_name"`
+	SourcePlaceID   string         `db:"source_place_id"`
+	SourceLatitude  float64        `db:"source_latitude"`
+	SourceLongitude float64        `db:"source_longitude"`
 	DestinationID   uuid.UUID      `db:"destination_id"`
+	DestinationName string         `db:"destination_name"`
+	DestinationPlaceID   string    `db:"destination_place_id"`
+	DestinationLatitude  float64   `db:"destination_latitude"`
+	DestinationLongitude float64   `db:"destination_longitude"`
 	TripStatus      string         `db:"trip_status"`
 	StartTime       time.Time      `db:"start_time"`
 	CreatedAt       time.Time      `db:"trip_created_at"`
@@ -75,7 +83,15 @@ func toCoreUserTrip(dbUserTrip dbUserTrip) trip.UserTrip {
 		DriverName:      dbUserTrip.DriverName,
 		PassengerLimit:  dbUserTrip.PassengerLimit,
 		SourceID:        dbUserTrip.SourceID,
+		SourceName:      dbUserTrip.SourceName,
+		SourcePlaceID:   dbUserTrip.SourcePlaceID,
+		SourceLatitude:  dbUserTrip.SourceLatitude,
+		SourceLongitude: dbUserTrip.SourceLongitude,
 		DestinationID:   dbUserTrip.DestinationID,
+		DestinationName: dbUserTrip.DestinationName,
+		DestinationPlaceID:   dbUserTrip.DestinationPlaceID,
+		DestinationLatitude:  dbUserTrip.DestinationLatitude,
+		DestinationLongitude: dbUserTrip.DestinationLongitude,
 		TripStatus:      dbUserTrip.TripStatus,
 		StartTime:       dbUserTrip.StartTime.In(time.Local),
 		CreatedAt:       dbUserTrip.CreatedAt.In(time.Local),

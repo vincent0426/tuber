@@ -68,7 +68,15 @@ type UserTrip struct {
 	DriverName      string
 	PassengerLimit  int
 	SourceID        uuid.UUID
+	SourceName      string
+	SourcePlaceID   string
+	SourceLatitude  float64
+	SourceLongitude float64
 	DestinationID   uuid.UUID
+	DestinationName string
+	DestinationPlaceID   string
+	DestinationLatitude  float64
+	DestinationLongitude float64
 	TripStatus      string
 	StartTime       time.Time
 	CreatedAt       time.Time
