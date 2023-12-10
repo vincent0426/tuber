@@ -354,6 +354,7 @@ func (s *Store) QueryByID(ctx context.Context, tripID uuid.UUID) (trip.TripView,
 		"trip_view.start_time",
 		"trip_view.created_at",
 		"trip_view.updated_at",
+		"trip_view.passenger_limit",
 	).From("trip_view").
 		Where(sq.Eq{"id": tripID}).
 		PlaceholderFormat(sq.Dollar).
@@ -373,6 +374,7 @@ func (s *Store) QueryByID(ctx context.Context, tripID uuid.UUID) (trip.TripView,
 
 	// get mid locations
 	sql, args, err = sq.Select(
+		"locations.id",
 		"locations.name",
 		"locations.place_id",
 		"ST_Y(locations.lat_lon::geometry) AS lat",

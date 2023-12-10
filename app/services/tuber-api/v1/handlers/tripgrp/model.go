@@ -184,6 +184,7 @@ type AppTripView struct {
 }
 
 type AppTripLocation struct {
+	ID      string
 	Name    string
 	PlaceID string
 	Lat     float64
@@ -195,6 +196,7 @@ func toAppTripView(tripView trip.TripView) AppTripView {
 	mid := []AppTripLocation{}
 	for _, tripLocation := range tripView.Mid {
 		mid = append(mid, AppTripLocation{
+			ID:      tripLocation.ID.String(),
 			Name:    tripLocation.Name,
 			PlaceID: tripLocation.PlaceID,
 			Lat:     tripLocation.Lat,

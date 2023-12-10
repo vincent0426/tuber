@@ -149,6 +149,7 @@ func toCoreTripView(dbTripView dbTripView) trip.TripView {
 	mid := make([]trip.TripLocation, len(dbTripView.Mid))
 	for i, dbMid := range dbTripView.Mid {
 		mid[i] = trip.TripLocation{
+			ID:      dbMid.ID,
 			Name:    dbMid.Name,
 			PlaceID: dbMid.PlaceID,
 			Lat:     dbMid.Lat,
@@ -196,14 +197,16 @@ func toCoreTripViewSlice(dbTripViews []dbTripView) []trip.TripView {
 
 // ------------------------------------------------------------
 type dbLocation struct {
-	Name    string  `db:"name"`
-	PlaceID string  `db:"place_id"`
-	Lat     float64 `db:"lat"`
-	Lon     float64 `db:"lon"`
+	ID      uuid.UUID `db:"id"`
+	Name    string    `db:"name"`
+	PlaceID string    `db:"place_id"`
+	Lat     float64   `db:"lat"`
+	Lon     float64   `db:"lon"`
 }
 
 func toDBLocation(location trip.TripLocation) dbLocation {
 	return dbLocation{
+		ID:      location.ID,
 		Name:    location.Name,
 		PlaceID: location.PlaceID,
 		Lat:     location.Lat,
