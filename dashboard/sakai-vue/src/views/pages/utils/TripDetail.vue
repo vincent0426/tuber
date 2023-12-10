@@ -34,13 +34,13 @@ onMounted(() => {
             Lat: data.destination_latitude,
             Lon: data.destination_longitude,
             Name: data.destination_name,
-            PlaceID: data.destination_id
+            ID: data.destination_id
         });
         mid_start.value.push({
             Lat: data.source_latitude,
             Lon: data.source_longitude,
             Name: data.source_name,
-            PlaceID: data.source_id
+            ID: data.source_id
         });
         mid_end.value = mid_start.value;
         console.log(data);
@@ -260,12 +260,12 @@ onMounted(() => {
                 
                 <div class="col-12">
                     <h5>Start</h5>
-                    <Dropdown id="StartStop" v-model="StartStaion" :options="mid_start" optionValue="PlaceID" optionLabel="Name" placeholder="Select a Start" @change="getStartStaionValue" class="w-full md:w-14rem">
+                    <Dropdown id="StartStop" v-model="StartStaion" :options="mid_start" optionValue="ID" optionLabel="Name" placeholder="Select a Start" @change="getStartStaionValue" class="w-full md:w-14rem">
                     </Dropdown>
                 </div>
                 <div class="col-12">
                     <h5>End</h5>
-                    <Dropdown id="EndStop" v-model="EndStaion" :options="mid_end" optionValue="PlaceID" optionLabel="Name" placeholder="Select a End" class="w-full md:w-14rem">
+                    <Dropdown id="EndStop" v-model="EndStaion" :options="mid_end" optionValue="ID" optionLabel="Name" placeholder="Select a End" class="w-full md:w-14rem">
                     </Dropdown>
                 </div>
                 <br><br>
