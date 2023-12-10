@@ -65,6 +65,7 @@ type UserTrip struct {
 	MyDestinationID uuid.UUID
 	MyStatus        string
 	DriverID        uuid.UUID
+	DriverName      string
 	PassengerLimit  int
 	SourceID        uuid.UUID
 	DestinationID   uuid.UUID

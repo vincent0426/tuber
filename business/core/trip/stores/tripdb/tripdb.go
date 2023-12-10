@@ -250,6 +250,7 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 		"trip_passenger.status AS my_status",
 		"trip.id AS trip_id",
 		"trip.driver_id",
+		"driver.name AS driver_name",
 		"trip.passenger_limit",
 		"trip.source_id",
 		"trip.destination_id",
@@ -262,6 +263,7 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 	).
 		From("trip_passenger").
 		Join("trip ON trip_passenger.trip_id = trip.id").
+		Join("driver ON trip.driver_id = driver.id").
 		LeftJoin("rating ON trip.id = rating.trip_id").
 		Where(sq.Eq{"trip_passenger.passenger_id": userID}).
 		OrderBy("trip.start_time DESC")

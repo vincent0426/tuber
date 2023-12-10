@@ -42,6 +42,7 @@ type dbUserTrip struct {
 	MyDestinationID uuid.UUID      `db:"my_destination_id"`
 	MyStatus        string         `db:"my_status"`
 	DriverID        uuid.UUID      `db:"driver_id"`
+	DriverName      string         `db:"driver_name"`
 	PassengerLimit  int            `db:"passenger_limit"`
 	SourceID        uuid.UUID      `db:"source_id"`
 	DestinationID   uuid.UUID      `db:"destination_id"`
@@ -71,6 +72,7 @@ func toCoreUserTrip(dbUserTrip dbUserTrip) trip.UserTrip {
 		MyDestinationID: dbUserTrip.MyDestinationID,
 		MyStatus:        dbUserTrip.MyStatus,
 		DriverID:        dbUserTrip.DriverID,
+		DriverName:      dbUserTrip.DriverName,
 		PassengerLimit:  dbUserTrip.PassengerLimit,
 		SourceID:        dbUserTrip.SourceID,
 		DestinationID:   dbUserTrip.DestinationID,
