@@ -65,51 +65,51 @@ const sortKey = ref(null);
 const sortOrder = ref(null);
 const sortField = ref(null);
 
-(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-      key: "AIzaSyCWk9OsA3BidynIgg5_ybz2dWVIBkuWpxE",
-      v: "weekly",
-      // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
-      // Add other bootstrap parameters as needed, using camel case.
-    });
+// (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+//       key: "AIzaSyCWk9OsA3BidynIgg5_ybz2dWVIBkuWpxE",
+//       v: "weekly",
+//       // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+//       // Add other bootstrap parameters as needed, using camel case.
+//     });
     
-    let currentPosition;
-    var searchInputs = document.getElementsByClassName("search-location");
+//     let currentPosition;
+//     var searchInputs = document.getElementsByClassName("search-location");
 
-async function init() {
-        // Request libraries when needed, not in the script tag.
-        const { Map } = await google.maps.importLibrary("maps");
-        const { Geometry } = await google.maps.importLibrary("geometry");
-        const { Place } = await google.maps.importLibrary("places");
+// async function init() {
+//         // Request libraries when needed, not in the script tag.
+//         const { Map } = await google.maps.importLibrary("maps");
+//         const { Geometry } = await google.maps.importLibrary("geometry");
+//         const { Place } = await google.maps.importLibrary("places");
        
         
-        var autocompletes = [];
-        navigator.geolocation.getCurrentPosition(function(position){
-          currentPosition = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          };
+//         var autocompletes = [];
+//         navigator.geolocation.getCurrentPosition(function(position){
+//           currentPosition = {
+//             lat: position.coords.latitude,
+//             lng: position.coords.longitude
+//           };
 
-          var autocompletes = [];
-          var options = {
-              bounds: {
-                east: currentPosition.lng + 0.001 ,
-                west: currentPosition.lng - 0.001,
-                south: currentPosition.lat - 0.001,
-                north: currentPosition.lat + 0.001
-              },
-              strictBounds:false,
-              types: ['establishment'],
-              componentRestrictions: { country: "tw" },
-              fields: ["formatted_address", "geometry", "icon", "name","address_components"],
-          };
-          for (var i = 0; i < searchInputs.length; i++) {
-            var autocomplete = new google.maps.places.Autocomplete(searchInputs[i], options);
-            autocompletes.push(autocomplete);
-          }
-        });
+//           var autocompletes = [];
+//           var options = {
+//               bounds: {
+//                 east: currentPosition.lng + 0.001 ,
+//                 west: currentPosition.lng - 0.001,
+//                 south: currentPosition.lat - 0.001,
+//                 north: currentPosition.lat + 0.001
+//               },
+//               strictBounds:false,
+//               types: ['establishment'],
+//               componentRestrictions: { country: "tw" },
+//               fields: ["formatted_address", "geometry", "icon", "name","address_components"],
+//           };
+//           for (var i = 0; i < searchInputs.length; i++) {
+//             var autocomplete = new google.maps.places.Autocomplete(searchInputs[i], options);
+//             autocompletes.push(autocomplete);
+//           }
+//         });
        
-    }
-init();
+//     }
+// init();
 console.log(dataviewValue);
 </script>
 
@@ -119,7 +119,7 @@ console.log(dataviewValue);
             <h3>Search Trip</h3>
             <div class="card">
                 <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="10">
-                    <template #header>
+                    <!-- <template #header>
                         <div class="grid grid-nogutter">
                             <div class="col-6 text-left">
                                 <h5>Start</h5>
@@ -138,7 +138,7 @@ console.log(dataviewValue);
                             </div>
                             
                         </div>
-                    </template>
+                    </template> -->
                     <template #list="slotProps">
                         <div class="col-12">
                             <div class="flex flex-column md:flex-row align-items-center p-3 w-full">
