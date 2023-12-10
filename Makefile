@@ -88,21 +88,21 @@ dev-load:
 	kind load docker-image $(SERVICE_LOCATION_IMAGE) --name $(KIND_CLUSTER)
 
 dev-apply:
-# kustomize build zarf/k8s/dev/database | kubectl apply -f -
-# kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=300s sts/database
+	kustomize build zarf/k8s/dev/database | kubectl apply -f -
+	kubectl rollout status --namespace=$(NAMESPACE) --watch --timeout=300s sts/database
 
-# kustomize build zarf/k8s/dev/grafana | kubectl apply -f -
-# kubectl wait pods --namespace=$(NAMESPACE) --selector app=grafana --timeout=300s --for=condition=Ready
+	kustomize build zarf/k8s/dev/grafana | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=grafana --timeout=300s --for=condition=Ready
 
-# kustomize build zarf/k8s/dev/tempo | kubectl apply -f -
-# kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=300s --for=condition=Ready
+	kustomize build zarf/k8s/dev/tempo | kubectl apply -f -
+	kubectl wait pods --namespace=$(NAMESPACE) --selector app=tempo --timeout=300s --for=condition=Ready
 
-# # helmfile is used to deploy helm charts.
-# helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml sync
-# kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=600s
+# helmfile is used to deploy helm charts.
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app.kubernetes.io/instance=kube-prometheus-stack --namespace $(NAMESPACE) --timeout=600s
 
-# helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/loki-helmfile.yaml sync
-# kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=600s
+	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/loki/loki-helmfile.yaml sync
+	kubectl wait --for=condition=ready pod --selector=app=loki --namespace $(NAMESPACE) --timeout=600s
 
 # create redis secret
 	kustomize build zarf/k8s/dev/redis | kubectl apply -f -
@@ -126,12 +126,12 @@ dev-apply:
 
 # install istio
 # -
-	helm install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace --wait
-	helm install istiod istio/istiod -n istio-system --wait
-	kubectl apply -f zarf/k8s/dev/istio-ingressgateway-config.yaml
+# helm install istio-base istio/base -n istio-system --set defaultRevision=default --create-namespace --wait
+# helm install istiod istio/istiod -n istio-system --wait
+# kubectl apply -f zarf/k8s/dev/istio-ingressgateway-config.yaml
 
 # install gateway under zarf/k8s/dev/gateway since we need to change loadBalancerIP to node IP
-	kustomize build zarf/k8s/dev/gateway | kubectl apply -f 
+# kustomize build zarf/k8s/dev/gateway | kubectl apply -f 
 
 dev-delete:
 	helmfile -n $(NAMESPACE) -f zarf/k8s/dev/prometheus/prometheus-helmfile.yaml destroy
