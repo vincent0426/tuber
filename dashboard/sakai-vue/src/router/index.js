@@ -42,7 +42,7 @@ const router = createRouter({
                 {
                     path: '/passenger/search', // /search?q=yourSearchQuery
                     name: 'PassengerSearch',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/passenger/PassengerSearch.vue')
                 },
                 {
                     path: '/setting',
@@ -72,7 +72,7 @@ const router = createRouter({
                 {
                     path: '/driver/create',
                     name: 'DriverCreate',
-                    component: () => import('@/views/pages/Empty.vue')
+                    component: () => import('@/views/pages/driver/DriverCreate.vue')
                 },
                 {
                     path: '/setting',
