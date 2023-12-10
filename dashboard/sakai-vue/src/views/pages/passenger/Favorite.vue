@@ -111,13 +111,13 @@ export default {
             });
         },
         async fetchFavorite() {
-            // try {
-            //     //加入假資料id
-            //     const response = await driverService.postFavorite('9a82ce5f-b2b6-40e7-beb8-00217075e318');
-            //     console.log(response);
-            // } catch (e) {
-            //     console.error('Error posting fav driver:', error);
-            // }
+            try {
+                //加入假資料id
+                const response = await driverService.postFavorite('3b712f77-3d5e-4763-b58d-274dd291a5ef');
+                console.log(response);
+            } catch (e) {
+                console.error('Error posting fav driver:', error);
+            }
             try {
                 const response = await driverService.getFavorite();
                 console.log(response);
@@ -134,14 +134,6 @@ export default {
 };
 </script>
 
-<!-- <template>
-    <div>
-        <h1>Favorite List</h1>
-        <div v-for="trip in trips" :key="trip.id">
-            <h2>{{ trip.driver_name }}</h2>
-        </div>
-    </div>
-</template> -->
 <template>
     <div>
         <h3 style="text-align: center">Favorite Driver</h3>

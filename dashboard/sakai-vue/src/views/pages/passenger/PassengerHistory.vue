@@ -6,62 +6,85 @@ const value = ref(null);
 </script>
 
 <script>
+import { TripService } from '@/service';
+const tripService = new TripService();
 export default {
     data() {
         return {
-            rideHistory: [
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: 'John Doe2',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    source_name: '台北',
-                    destination_name: '新竹',
-                    cost: '5',
-                    rating: 1,
-                    start_time: '2023-01-01T08:00:00Z'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: 'A',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    source_name: 'Location 1',
-                    destination_name: 'Location 2',
-                    cost: '5',
-                    rating: 5,
-                    start_time: '2023-01-01T08:00:00Z'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '我瘋子',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    source_name: '北車',
-                    destination_name: '行天宮',
-                    cost: '5',
-                    rating: 4,
-                    start_time: '2023-01-01T08:00:00Z'
-                },
-                {
-                    driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-                    driver_name: '爆肝人',
-                    driver_brand: 'Toyota',
-                    driver_model: 'Camry',
-                    driver_plate: 'ABC123',
-                    source_name: 'Location 1',
-                    destination_name: 'Location 2',
-                    cost: '5',
-                    rating: 1,
-                    start_time: '2023-01-01T08:00:00Z'
-                }
-            ]
+            rideHistory: []
         };
+    },
+    mounted() {
+        this.fetchHistory();
+    },
+    methods: {
+        async fetchHistory() {
+            try {
+                const response = await tripService.getHistory({ trip_status: 'finished', is_driver: false });
+                console.log(response);
+                this.rideHistory = response.items;
+            } catch (e) {
+                console.error('Error fetching History:', error);
+            }
+        }
     }
 };
+// export default {
+//     data() {
+//         return {
+//             rideHistory: [
+//                 {
+//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
+//                     driver_name: 'John Doe2',
+//                     driver_brand: 'Toyota',
+//                     driver_model: 'Camry',
+//                     driver_plate: 'ABC123',
+//                     source_name: '台北',
+//                     destination_name: '新竹',
+//                     cost: '5',
+//                     rating: 1,
+//                     start_time: '2023-01-01T08:00:00Z'
+//                 },
+//                 {
+//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
+//                     driver_name: 'A',
+//                     driver_brand: 'Toyota',
+//                     driver_model: 'Camry',
+//                     driver_plate: 'ABC123',
+//                     source_name: 'Location 1',
+//                     destination_name: 'Location 2',
+//                     cost: '5',
+//                     rating: 5,
+//                     start_time: '2023-01-01T08:00:00Z'
+//                 },
+//                 {
+//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
+//                     driver_name: '我瘋子',
+//                     driver_brand: 'Toyota',
+//                     driver_model: 'Camry',
+//                     driver_plate: 'ABC123',
+//                     source_name: '北車',
+//                     destination_name: '行天宮',
+//                     cost: '5',
+//                     rating: 4,
+//                     start_time: '2023-01-01T08:00:00Z'
+//                 },
+//                 {
+//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
+//                     driver_name: '爆肝人',
+//                     driver_brand: 'Toyota',
+//                     driver_model: 'Camry',
+//                     driver_plate: 'ABC123',
+//                     source_name: 'Location 1',
+//                     destination_name: 'Location 2',
+//                     cost: '5',
+//                     rating: 1,
+//                     start_time: '2023-01-01T08:00:00Z'
+//                 }
+//             ]
+//         };
+//     }
+// };
 </script>
 <template>
     <div>
@@ -149,6 +172,3 @@ export default {
     border: 2px solid #070707; /* 添加2px的邊框 */
 }
 </style>
-
-// { "driver_id": "fe22e8fa-04d2-49b5-8bac-1535153b687e", "driver_name": "John Doe", "driver_brand": "Toyota", "driver_model": "Camry", "driver_plate": "ABC123", "source_name": "Location 1", "destination_name": "Location 2", "cost":"5", "start_time":
-// "2023-01-01T08:00:00Z", }

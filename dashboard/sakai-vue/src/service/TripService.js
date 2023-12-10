@@ -1,10 +1,10 @@
 import request from './wrapper';
 
 export class TripService {
-    getHistory() {
+    getHistory({ trip_status, is_driver }) {
         return request({
             method: 'get',
-            url: '/trips/my',
+            url: `/trips/my?status=${trip_status}&is_driver=${is_driver}`,
             data: {}
         });
     }
