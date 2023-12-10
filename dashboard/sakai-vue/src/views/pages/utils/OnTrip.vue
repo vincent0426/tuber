@@ -9,6 +9,7 @@ const driverName = ref(null);
 const driver_image_url = ref(null);
 const driver_plate = ref(null);
 const start_time = ref(null);
+const mid = ref(null);
 var tripData;
 
 onMounted(() => {
@@ -19,6 +20,7 @@ onMounted(() => {
         driver_image_url.value = data.driver_image_url;
         driver_plate.value = data.driver_plate;
         start_time.value = data.start_time;
+        mid.value = data.mid;
         console.log(data);
     });
 });
@@ -89,6 +91,13 @@ onMounted(() => {
         directionsRenderer.setMap(map);
         tripService.getTrip(tripID).then((data) => {
             tripData = data;
+            let midStops = data.mid;
+            for(var i = 0;i < midStops.length;i++){
+                stops.push({
+                    location:midStops[i].Name,
+                    stopover: true,
+                });
+            }
             calculateAndDisplayRoute(directionsService, directionsRenderer);
             refreshCurrentPlace();
         });
