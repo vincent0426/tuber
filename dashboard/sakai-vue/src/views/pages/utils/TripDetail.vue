@@ -1,10 +1,9 @@
 <!-- The page for trip detail. Notice Customer and Driver may see different layout of this page. -->
 <script setup>
 import { ref, onMounted,onBeforeMount } from 'vue';
-import ProductService from '@/service/ProductService';
-import { FilterMatchMode, FilterOperator } from 'primevue/api';
-import CustomerService from '@/service/CustomerService';
+
 import { TripService } from '@/service/TripService';
+import Dropdown from 'primevue/dropdown';
 
 const tripService = new TripService();
 const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[4];
@@ -17,6 +16,9 @@ const driver_image_url = ref(null);
 const driver_plate = ref(null);
 const start_time = ref(null);
 const customer1 = ref(null);
+const mid_start = ref(null);
+const mid_end = ref(null);
+
 var tripData;
 
 onMounted(() => {
@@ -27,6 +29,20 @@ onMounted(() => {
         driver_image_url.value = data.driver_image_url;
         driver_plate.value = data.driver_plate;
         start_time.value = data.start_time;
+        mid_start.value = data.mid;
+        mid_start.value.push({
+            Lat: data.destination_latitude,
+            Lon: data.destination_longitude,
+            Name: data.destination_name,
+            PlaceID: data.destination_id
+        });
+        mid_start.value.push({
+            Lat: data.source_latitude,
+            Lon: data.source_longitude,
+            Name: data.source_name,
+            PlaceID: data.source_id
+        });
+        mid_end.value = mid_start.value;
         console.log(data);
     });
     tripService.getPassenger(tripID).then((data) => {
@@ -87,7 +103,7 @@ onMounted(() => {
           for (var i = 0; i < searchInputs.length; i++) {
             var autocomplete = new google.maps.places.Autocomplete(searchInputs[i], options);
             autocomplete.addListener('place_changed', function(){
-              console.log(this);
+              //console.log(this);
               var place = this.getPlace();
               createMarker(place);
               map.setCenter(place.geometry.location);
@@ -96,36 +112,32 @@ onMounted(() => {
             autocompletes.push(autocomplete);
           }
         });
-
         directionsRenderer.setMap(map);
-
-        const onChangeHandler = function () {
-          deleteMarkers();
-          AddStop();
-          calculateAndDisplayRoute(directionsService, directionsRenderer);
-        };
-        const AddStop = function () {
-          const start = document.getElementById("Start").value;
-          const end = document.getElementById("End").value;
-          stops.push({
-            location:start,
-            stopover: true,
-          });
-          stops.push({
-            location:end,
-            stopover: true,
-          });
-          
-        }
-        document.getElementById("checkPath").addEventListener("click", onChangeHandler);
         tripService.getTrip(tripID).then((data) => {
             tripData = data;
+            let midStops = data.mid;
+            for(var i = 0;i < midStops.length;i++){
+                stops.push({
+                    location:midStops[i].Name,
+                    stopover: true,
+                });
+            }
             calculateAndDisplayRoute(directionsService, directionsRenderer);
         });
         const onJoinTrip = function (){
-            tripService.joinTrip(tripID).then((data) => {
-                console.log(data);
-            });
+            let sourceID = StartStaion.value;
+            let destinationID = EndStaion.value;
+            console.log(tripID,sourceID,destinationID);
+            tripService.joinTrip(tripID,sourceID,destinationID)
+                .then(response => {
+                    // 處理成功回傳的資料
+                    alert("Success");
+                    console.log(response);
+                })
+                .catch(error => {
+                    // 處理錯誤
+                    alert(error);
+                });
         };
         document.getElementById("Save").addEventListener("click",onJoinTrip);
     }
@@ -146,12 +158,10 @@ onMounted(() => {
       });
       markers.push(marker);
     }
-    function deleteMarkers(){
-      for (let i = 0; i < markers.length; i++) {
-        markers[i].setMap(null);
-      }
-      markers = [];
-    }
+    const getStartStaionValue = () => {
+        console.log("Selected Start Station:", StartStaion.value);
+        
+    };
     // print route on map & mark recommand stop points
     function calculateAndDisplayRoute(directionsService, directionsRenderer) {
       console.log(stops);
@@ -247,17 +257,19 @@ onMounted(() => {
             </div> 
         <div class="col-12 card">
             <div class="grid grid-nogutter">
-                <div class="col-4 text-left">
+                
+                <div class="col-12">
                     <h5>Start</h5>
-                    <InputText class="search-location" placeholder="Search" id="Start" v-model="StartStaion"/>
+                    <Dropdown id="StartStop" v-model="StartStaion" :options="mid_start" optionValue="PlaceID" optionLabel="Name" placeholder="Select a Start" @change="getStartStaionValue" class="w-full md:w-14rem">
+                    </Dropdown>
                 </div>
-                <div class="col-4 text-middle">
+                <div class="col-12">
                     <h5>End</h5>
-                    <InputText class="search-location" placeholder="Search" id="End" v-model="EndStaion"/>
-                    <br><br>
+                    <Dropdown id="EndStop" v-model="EndStaion" :options="mid_end" optionValue="PlaceID" optionLabel="Name" placeholder="Select a End" class="w-full md:w-14rem">
+                    </Dropdown>
                 </div>
-                <div class="col-4 text-right">
-                    <Button label="CheckPath" class="mr-2 mb-2" id="checkPath"></Button>
+                <br><br>
+                <div class="col-4">
                     <Button label="Save" class="mr-2 mb-2" id="Save"></Button>
                 </div>
                 
