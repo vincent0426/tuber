@@ -79,8 +79,8 @@ const sortField = ref(null);
                         <div class="col-12">
                             <div class="flex flex-column md:flex-row align-items-center p-3 w-full">
                                 <div class="flex-1 text-center md:text-left">
-                                    <div class="font-bold text-2xl">From:{{ slotProps.data.SourceID }}</div>
-                                    <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationID }}</div>
+                                    <div class="font-bold text-2xl">From:{{ slotProps.data.SourceName }}</div>
+                                    <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
                                     <div class="mb-3">Driver Name:{{ slotProps.data.DriverName }}</div>
                                     <div class="mb-3">Start Time:{{ slotProps.data.StartTime }}</div>
                                     <!-- <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" class="mb-2"></Rating> -->
