@@ -77,7 +77,7 @@ const passengernumberValue = ref(null);
                     source = {
                         "lat": place.geometry.location.lat(),
                         "lon": place.geometry.location.lng(),
-                        "name": place.name,
+                        "name": document.getElementById("Start").value,
                         "place_id": place.place_id
                     };
                 });
@@ -91,7 +91,7 @@ const passengernumberValue = ref(null);
                     destination = {
                         "lat": place.geometry.location.lat(),
                         "lon": place.geometry.location.lng(),
-                        "name": place.name,
+                        "name": document.getElementById("End").value,
                         "place_id": place.place_id
                     };
                 });
@@ -105,9 +105,11 @@ const passengernumberValue = ref(null);
                     tempStop = {
                         "lat": place.geometry.location.lat(),
                         "lon": place.geometry.location.lng(),
-                        "name": place.name,
+                        "name": document.getElementById("Stop").value,
                         "place_id": place.place_id
                     };
+                    console.log(this);
+                    console.log(place);
                 });
             }
             
@@ -318,8 +320,6 @@ const passengernumberValue = ref(null);
                 <Button label="Save Stop" class="mr-2 mb-2" id="addStop"></Button>
                 <h5>Departure Time</h5>
                 <Calendar id="departuretime" :showIcon="true" :showButtonBar="true" v-model="datetime24h1" showTime hourFormat="24"></Calendar>
-                <h5>Release Trip Time</h5>
-                <Calendar id="releasetime" :showIcon="true" :showButtonBar="true" v-model="datetime24h2" showTime hourFormat="24"></Calendar>
                 <br>
                 <Button label="Save" class="mr-2 mb-2" id="Save"></Button>
             </div>
