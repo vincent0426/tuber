@@ -18,9 +18,21 @@ export default {
         this.fetchHistory();
     },
     methods: {
+        generateRandomCost() {
+            const comments = ['3', '5', '10', '12', '14', '15', '20', '24', '31', '55', '84', '85'];
+            return comments[Math.floor(Math.random() * comments.length)];
+        },
+        generateRandomData(response) {
+            // 为每个驾驶员生成随机评论和评分
+            response.items.forEach((item) => {
+                console.log(item);
+                item.Cost = this.generateRandomCost();
+            });
+        },
         async fetchHistory() {
             try {
                 const response = await tripService.getHistory({ trip_status: 'finished', is_driver: false });
+                this.generateRandomData(response);
                 console.log(response);
                 this.rideHistory = response.items;
             } catch (e) {
@@ -108,15 +120,15 @@ export default {
                 <template #content class="custom-content">
                     <div style="background: rgba(128, 128, 128, 0.05); border-radius: 3px">
                         <p class="m-0">
-                            {{ ride.start_time }}
+                            {{ ride.StartTime }}
                         </p>
-                        <p class="m-0">花費: {{ ride.cost }}</p>
+                        <p class="m-0">花費: {{ ride.Cost }}</p>
                     </div>
                 </template>
                 <template #footer>
                     <!-- <Rating v-model="value" readonly :cancel="false" /> -->
                     <div class="flex justify-content-center">
-                        <Rating :modelValue="ride.rating" :stars="5" :cancel="false" />
+                        <Rating :modelValue="ride.Rating" :stars="5" :cancel="false" />
                     </div>
                     <!-- https://primevue.org/rating/ -->
                 </template>
