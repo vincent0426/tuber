@@ -12,6 +12,7 @@ import (
 	"github.com/TSMC-Uber/server/business/web/v1/response"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Handlers manages the set of user endpoints.
@@ -116,7 +117,7 @@ func (h *Handlers) Query(ctx context.Context, c *gin.Context) error {
 func (h *Handlers) QueryByID(ctx context.Context, c *gin.Context) error {
 	id := c.Param("id")
 
-	qlocation, err := h.location.QueryByID(ctx, id)
+	qlocation, err := h.location.QueryByID(ctx, uuid.Must(uuid.Parse(id)))
 	if err != nil {
 		switch {
 		case errors.Is(err, location.ErrNotFound):

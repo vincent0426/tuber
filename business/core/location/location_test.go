@@ -136,9 +136,9 @@ func TestCountError(t *testing.T) {
 
 func TestQueryByID(t *testing.T) {
 	ctx := context.TODO()
-	locationID := uuid.New().String()
+	locationID := uuid.New()
 
-	expectedLocation := Location{ID: uuid.MustParse(locationID), Name: "Location", PlaceID: "PlaceID", Lat: 10.0, Lon: 20.0}
+	expectedLocation := Location{ID: locationID, Name: "Location", PlaceID: "PlaceID", Lat: 10.0, Lon: 20.0}
 
 	mockStorer := new(MockStorer)
 	mockStorer.On("QueryByID", ctx, locationID).Return(expectedLocation, nil)
@@ -153,7 +153,7 @@ func TestQueryByID(t *testing.T) {
 
 func TestQueryByIDError(t *testing.T) {
 	ctx := context.TODO()
-	locationID := uuid.New().String()
+	locationID := uuid.New()
 
 	mockStorer := new(MockStorer)
 	mockStorer.On("QueryByID", ctx, locationID).Return(Location{}, errors.New("query by id error"))

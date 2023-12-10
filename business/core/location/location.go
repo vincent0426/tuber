@@ -19,7 +19,7 @@ var (
 type Storer interface {
 	Create(ctx context.Context, location Location) error
 	Query(ctx context.Context, filter QueryFilter, orderBy order.By, pageNumber int, rowsPerPage int) ([]Location, error)
-	QueryByID(ctx context.Context, locationID string) (Location, error)
+	QueryByID(ctx context.Context, locationID uuid.UUID) (Location, error)
 	Count(ctx context.Context, filter QueryFilter) (int, error)
 }
 
@@ -69,7 +69,7 @@ func (c *Core) Count(ctx context.Context, filter QueryFilter) (int, error) {
 }
 
 // QueryByID gets the specified location from the database.
-func (c *Core) QueryByID(ctx context.Context, locationID string) (Location, error) {
+func (c *Core) QueryByID(ctx context.Context, locationID uuid.UUID) (Location, error) {
 	location, err := c.storer.QueryByID(ctx, locationID)
 	if err != nil {
 		return Location{}, fmt.Errorf("query: tripID[%s]: %w", locationID, err)

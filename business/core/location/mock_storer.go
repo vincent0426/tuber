@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/TSMC-Uber/server/business/data/order"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -21,7 +22,7 @@ func (m *MockStorer) Query(ctx context.Context, filter QueryFilter, orderBy orde
 	return args.Get(0).([]Location), args.Error(1)
 }
 
-func (m *MockStorer) QueryByID(ctx context.Context, locationID string) (Location, error) {
+func (m *MockStorer) QueryByID(ctx context.Context, locationID uuid.UUID) (Location, error) {
 	args := m.Called(ctx, locationID)
 	return args.Get(0).(Location), args.Error(1)
 }

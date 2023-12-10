@@ -12,6 +12,7 @@ import (
 	"github.com/TSMC-Uber/server/business/data/order"
 	"github.com/TSMC-Uber/server/business/sys/database"
 	"github.com/TSMC-Uber/server/foundation/logger"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -153,7 +154,7 @@ func (s *Store) Count(ctx context.Context, filter location.QueryFilter) (int, er
 }
 
 // QueryByID gets the specified trip from the database.
-func (s *Store) QueryByID(ctx context.Context, locationID string) (location.Location, error) {
+func (s *Store) QueryByID(ctx context.Context, locationID uuid.UUID) (location.Location, error) {
 	sql, args, err := sq.
 		Select("*").
 		From("locations").
