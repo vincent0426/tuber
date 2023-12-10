@@ -156,7 +156,13 @@ func (s *Store) Count(ctx context.Context, filter location.QueryFilter) (int, er
 // QueryByID gets the specified trip from the database.
 func (s *Store) QueryByID(ctx context.Context, locationID uuid.UUID) (location.Location, error) {
 	sql, args, err := sq.
-		Select("*").
+		Select(
+			"id",
+			"name",
+			"place_id",
+			"ST_Y(lat_lon::geometry) AS lat",
+			"ST_X(lat_lon::geometry) AS lon",
+		).
 		From("locations").
 		Where(sq.Eq{"id": locationID}).
 		PlaceholderFormat(sq.Dollar).
