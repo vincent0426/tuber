@@ -60,11 +60,19 @@ const sortKey = ref(null);
 const sortOrder = ref(null);
 const sortField = ref(null);
 
-// const test = (data) => {
-    
-//     console.log(locationService.getLocation(data));
-        
-// };
+function DateConvert(dateString) {
+    const date = new Date(dateString);
+    // 取得日期和時間的部分
+    const year = date.getFullYear(); // 年份
+    const month = `0${date.getMonth() + 1}`.slice(-2); // 月份（補0）
+    const day = `0${date.getDate()}`.slice(-2); // 日（補0）
+    const hours = `0${date.getHours()}`.slice(-2); // 小時（補0）
+    const minutes = `0${date.getMinutes()}`.slice(-2); // 分鐘（補0）
+    // 格式化成"YYYY-MM-DDTHH:MM:SSZ"的形式
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:00`;
+
+    return formattedDate;
+}
 
 </script>
 
@@ -82,7 +90,7 @@ const sortField = ref(null);
                                     <div class="font-bold text-2xl">From:{{ slotProps.data.SourceName }}</div>
                                     <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
                                     <div class="mb-3">Driver Name:{{ slotProps.data.DriverName }}</div>
-                                    <div class="mb-3">Start Time:{{ slotProps.data.StartTime }}</div>
+                                    <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
                                     <!-- <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" class="mb-2"></Rating> -->
                                 </div>
                                 <div class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-center md:align-items-end mt-5 md:mt-0">

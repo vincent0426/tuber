@@ -308,10 +308,11 @@ function DateConvert(dateString) {
     const year = date.getFullYear(); // 年份
     const month = `0${date.getMonth() + 1}`.slice(-2); // 月份（補0）
     const day = `0${date.getDate()}`.slice(-2); // 日（補0）
-    const hours = `0${date.getHours()}`.slice(-2); // 小時（補0）
+    const hours = `0${date.getHours()-8}`.slice(-2); // 小時（補0）
     const minutes = `0${date.getMinutes()}`.slice(-2); // 分鐘（補0）
     // 格式化成"YYYY-MM-DDTHH:MM:SSZ"的形式
     const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}:00Z`;
+    console.log(hours)
     return formattedDate;
 }
 function tripData() {
