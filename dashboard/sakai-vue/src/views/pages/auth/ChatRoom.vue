@@ -61,7 +61,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div>
-        <div>Trip ID: {{ tripId }}</div>
+        <!-- <div>Trip ID: {{ tripId }}</div> -->
         <h3 style="text-align: center">Chat Room</h3>
         <div class="message-container">
             <div v-for="(message, index) in messages" :key="index" class="message">
@@ -74,19 +74,43 @@ onBeforeUnmount(() => {
         </div>
         <div class="input-container">
             <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type your message..." />
-            <button @click="sendMessage">Send</button>
+            <!-- <button @click="sendMessage">Send</button> -->
+            <div class="send-button-container">
+                <button @click="sendMessage" class="pi pi-send" style="color: bisque"></button>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.message-container {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
+.send-button-container {
+    border-radius: 20%;
+    background-color: rgba(0, 0, 0, 0.7);
+    width: 60px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-
+.send-button-container button {
+    padding: 0;
+    margin: 0;
+    margin-right: 8px;
+    font-size: 15px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+.message-container {
+    overflow-y: auto;
+    border: 1px solid #cecbcb;
+    padding: 10px;
+    width: 380px; /* Set the maximum width of the container */
+    height: 660px;
+    margin: 0 auto; /* Center the container horizontally */
+    overflow-y: auto; /* Hide content if it exceeds the height of the container */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+}
 .message {
     display: flex;
     align-items: center;
@@ -105,7 +129,18 @@ onBeforeUnmount(() => {
 }
 
 .input-container {
-    margin-top: 10px;
+    position: fixed;
+    bottom: 35px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    background-color: white; /* 背景色 */
+    padding: 15px;
+    width: 360px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    border-radius: 5px;
 }
 
 input {

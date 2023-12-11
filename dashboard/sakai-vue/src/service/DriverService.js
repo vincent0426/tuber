@@ -1,6 +1,13 @@
 import request from './wrapper';
 
 export class DriverService {
+    getDriver(id) {
+        return request({
+            method: 'get',
+            url: `/drivers/${id}`,
+            data: {}
+        });
+    }
     getFavorite() {
         return request({
             method: 'get',

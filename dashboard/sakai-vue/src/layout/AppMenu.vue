@@ -18,7 +18,8 @@ const model_passenger = ref([
             { label: 'My trip', icon: 'pi pi-fw pi-car', to: '/passenger/mytrip' },
             { label: 'History trip', icon: 'pi pi-fw pi-book', to: '/passenger/history' },
             { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/setting' },
-            { label: 'Favorite Driver', icon: 'pi pi-fw pi-heart', to: '/passenger/favorite' }
+            { label: 'Favorite Driver', icon: 'pi pi-fw pi-heart', to: '/passenger/favorite' },
+            { label: 'Chat', icon: 'pi pi-fw pi-comment', to: '/chatList' }
         ]
     },
     {

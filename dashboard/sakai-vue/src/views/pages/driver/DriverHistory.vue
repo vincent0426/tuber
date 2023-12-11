@@ -2,6 +2,44 @@ import Rating from 'primevue/rating';
 <script setup></script>
 
 <script>
+import { TripService, LocationService } from '@/service';
+const tripService = new TripService();
+const locationService = new LocationService();
+export default {
+    data() {
+        return {
+            rideHistory: []
+        };
+    },
+    mounted() {
+        this.fetchHistory();
+    },
+    methods: {
+        generateRandomRevenue() {
+            const comments = ['31', '52', '10', '12', '14', '15', '20', '24', '31', '55', '84', '85'];
+            return comments[Math.floor(Math.random() * comments.length)];
+        },
+        generateRandomData(response) {
+            response.items.forEach((item) => {
+                item.received_revenue = this.generateRandomRevenue();
+                // item.source_name = this.getLocationName(item.MySourceID);
+                // item.destination_name = this.getLocationName(item.MyDestinationID);
+            });
+        },
+        async fetchHistory() {
+            try {
+                const response = await tripService.getHistory({ trip_status: 'finished', is_driver: false });
+                this.generateRandomData(response);
+                console.log(response);
+                this.rideHistory = response.items;
+            } catch (e) {
+                console.error('Error fetching History:', error);
+            }
+        }
+    }
+};
+</script>
+<!-- <script>
 export default {
     data() {
         return {
@@ -64,7 +102,7 @@ export default {
         };
     }
 };
-</script>
+</script> -->
 <template>
     <div>
         <h3 style="text-align: center">Driver History</h3>
@@ -84,7 +122,7 @@ export default {
                 </template>
                 <Divider />
                 <template #subtitle class="custom-content">
-                    {{ ride.source_name }} -> {{ ride.destination_name }}
+                    {{ ride.SourceName }} -> {{ ride.DestinationName }}
                     <div style="font-weight: bold; font-size: 20px; margin-bottom: -25px">Customers:</div>
                 </template>
                 <template #content class="custom-content">

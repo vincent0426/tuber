@@ -95,7 +95,7 @@ const router = createRouter({
                     component: () => import('@/views/pages/driver/ApplyList.vue')
                 },
                 {
-                    path: '/auth/chatList',
+                    path: '/chatList',
                     name: 'ChatList',
                     component: () => import('@/views/pages/auth/ChatList.vue')
                 },

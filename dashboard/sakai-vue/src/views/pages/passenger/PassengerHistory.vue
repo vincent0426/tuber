@@ -6,9 +6,10 @@ const value = ref(null);
 </script>
 
 <script>
-import { TripService, LocationService } from '@/service';
+import { TripService, LocationService, DriverService } from '@/service';
 const tripService = new TripService();
 const locationService = new LocationService();
+const driverService = new DriverService();
 export default {
     data() {
         return {
@@ -23,21 +24,24 @@ export default {
             const comments = ['3', '5', '10', '12', '14', '15', '20', '24', '31', '55', '84', '85'];
             return comments[Math.floor(Math.random() * comments.length)];
         },
-        generateRandomData(response) {
-            response.items.forEach((item) => {
-                item.Cost = this.generateRandomCost();
-                item.source_name = this.getLocationName(item.MySourceID);
-                item.destination_name = this.getLocationName(item.MyDestinationID);
-            });
+        async generateRandomData(response) {
+            // 使用 Promise.all 等待所有的非同步操作完成
+            await Promise.all(
+                response.items.map(async (item) => {
+                    item.Cost = this.generateRandomCost();
+                    item.driver_plate = await this.getDriverPlate(item.DriverID);
+                })
+            );
         },
-        async getLocationName(id) {
-            const resp = await locationService.getLocationName(id);
-            console.log('getLocationNameResponse:', resp);
+        async getDriverPlate(id) {
+            const resp = await driverService.getDriver(id);
+            console.log('getDriverPlateResponse:', resp.plate);
+            return resp.plate;
         },
         async fetchHistory() {
             try {
                 const response = await tripService.getHistory({ trip_status: 'finished', is_driver: false });
-                this.generateRandomData(response);
+                await this.generateRandomData(response);
                 console.log(response);
                 this.rideHistory = response.items;
             } catch (e) {
@@ -65,7 +69,7 @@ export default {
                     </div>
                 </template>
                 <Divider />
-                <template #subtitle class="custom-content">{{ ride.source_name }} -> {{ ride.destination_name }}</template>
+                <template #subtitle class="custom-content">{{ ride.SourceName }} -> {{ ride.DestinationName }}</template>
                 <template #content class="custom-content">
                     <div style="background: rgba(128, 128, 128, 0.05); border-radius: 3px">
                         <p class="m-0">Comment: {{ ride.Comment }}</p>
