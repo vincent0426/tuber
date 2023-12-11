@@ -88,11 +88,10 @@ function DateConvert(dateString) {
                     <template #list="slotProps">
                         <div class="col-12">
                             <div class="flex flex-column md:flex-row align-items-center p-3 w-full">
-                                <div class="flex-1 text-center md:text-left">
+                                <div class="flex-1 md:text-left">
                                     <div class="font-bold text-2xl">From:{{ slotProps.data.SourceName }}</div>
                                     <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
-                                    <div class="mb-3">Driver Name:{{ slotProps.data.DriverName }}</div>
-                                    <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
+                                    <div class="mb-3 text-center">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
                                 </div>
                                 <div class="text-center">
                                     <!-- <span class="text-2xl font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span> -->
