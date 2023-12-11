@@ -1,11 +1,13 @@
 <template>
     <div>
-        <div>Trip ID: {{ $route.params.tripId }}</div>
+        <div>Trip ID: {{ tripId }}</div>
         <h3 style="text-align: center">Chat Room</h3>
         <div class="message-container">
             <div v-for="(message, index) in messages" :key="index" class="message">
-                <strong>{{ message.sender }}</strong
-                >: {{ message.text }}
+                <img :src="message.ImageURL" class="message-avatar" />
+                <div class="message-content">
+                    <strong>{{ message.Username }}</strong>: {{ message.MessageText }}
+                </div>
             </div>
         </div>
         <div class="input-container">
@@ -14,63 +16,66 @@
         </div>
     </div>
 </template>
+
 <script setup>
 import { useStore } from 'vuex';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
 const store = useStore();
-
-// 使用 getter 取得 user
 const user = store.getters.user;
-console.log(user);
-</script>
-<script>
-export default {
-    name: 'TripDetails',
-    data() {
-        return {
-            tripId: null,
-            socket: null,
-            latestMessage: ''
-        };
-    },
-    created() {
-        // Set the trip ID from the route parameter
-        this.tripId = this.$route.params.tripId;
+const route = useRoute();
+const tripId = ref(route.params.tripId);
+const socket = ref(null);
+const messages = ref([]);
+const newMessage = ref('');
 
-        // Initialize the WebSocket connection
-        this.initializeWebSocket();
-    },
-    methods: {
-        initializeWebSocket() {
-            // Replace 'ws://example.com/path' with your WebSocket server URL
-            this.socket = new WebSocket(`ws://localhost:3000/v1/chat/ws?room=${this.tripId}`);
-
-            this.socket.addEventListener('open', (event) => {
-                console.log('WebSocket is open now.');
-                // You can send a message to the server if needed
-                // this.socket.send('Hello Server!');
-            });
-
-            this.socket.addEventListener('message', (event) => {
-                console.log('Message from server:', event.data);
-                this.latestMessage = event.data;
-            });
-
-            this.socket.addEventListener('error', (event) => {
-                console.error('WebSocket error observed:', event);
-            });
-
-            this.socket.addEventListener('close', (event) => {
-                console.log('WebSocket is closed now.');
-            });
-        }
-    },
-    beforeDestroy() {
-        // Close the WebSocket connection when the component is destroyed
-        if (this.socket) {
-            this.socket.close();
-        }
+const sendMessage = () => {
+    if (newMessage.value.trim() !== '') {
+        socket.value.send(JSON.stringify({ text: newMessage.value, sender: user.name }));
+        newMessage.value = '';
     }
 };
+
+const processMessage = (rawMessage) => {
+    const parsedMessage = JSON.parse(rawMessage);
+    const messageContent = JSON.parse(parsedMessage.Message);
+    messages.value.push({
+        UserID: parsedMessage.UserID,
+        Username: parsedMessage.Username,
+        ImageURL: parsedMessage.ImageURL,
+        MessageText: messageContent.text
+    });
+};
+
+const initializeWebSocket = () => {
+    socket.value = new WebSocket(`ws://localhost:3000/v1/chat/ws?room=${tripId.value}&user_id=${user.id}`);
+
+    socket.value.addEventListener('open', (event) => {
+        console.log('WebSocket is open now.');
+    });
+
+    socket.value.addEventListener('message', (event) => {
+        console.log('Message from server:', event.data);
+        processMessage(event.data);
+    });
+
+    socket.value.addEventListener('error', (event) => {
+        console.error('WebSocket error observed:', event);
+    });
+
+    socket.value.addEventListener('close', (event) => {
+        console.log('WebSocket is closed now.');
+    });
+};
+
+onMounted(initializeWebSocket);
+
+onBeforeUnmount(() => {
+    if (socket.value) {
+        socket.value.close();
+    }
+});
 </script>
 
 <style scoped>
@@ -82,7 +87,20 @@ export default {
 }
 
 .message {
-    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.message-content {
+    flex: 1;
 }
 
 .input-container {
@@ -92,9 +110,11 @@ export default {
 input {
     padding: 5px;
     margin-right: 5px;
+    width: 80%; /* Adjust as needed */
 }
 
 button {
     padding: 5px;
+    width: 15%; /* Adjust as needed */
 }
 </style>
