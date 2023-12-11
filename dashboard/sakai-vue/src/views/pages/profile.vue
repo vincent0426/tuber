@@ -1,7 +1,13 @@
+<script setup>
+import store from '@/store';
+import { ref } from 'vue';
+
+</script>
+
 <template>
 <div class="header">
     <span class="left-arrow" @click="goBack">←</span> <!-- Left arrow; replace with an icon if necessary -->
-    <p class="title">Edit Profile</p> <!-- Title -->
+    <p class="title">Profile</p> <!-- Title -->
 </div>
 
 <div class="center-container">
@@ -13,31 +19,26 @@
       </div>
     </div>
   </div>
-
+    {{ getUserName }}
     <div class="field">
-  <p>Name</p>
-  <input class="full-width-input"/>
-    </div>
-
-    <div class="field">
-  <p>Email</p>
-  <input class="full-width-input"/>
+        <p>Name</p>
+        <p class="content">{{ user_name }}</p>
     </div>
 
     <div class="field">
-  <p>Password</p>
-  <input class="full-width-input" type="password"/>
+        <p>Email</p>
+        <p class="content">{{ user_email }}</p>
     </div>
 
-    <div class="field">
-  <p>Data of Birth</p>
-  <input class="full-width-input"/>
+    <div class="field switch-field">
+        <label class="switch">
+        <input type="checkbox">
+        <span class="slider round"></span>
+        </label>
+        <span class="content">Recieving E-mail Alert</span>
     </div>
 
-    <div class="text-area">
-    <p>Personal profile</p>
-  <textarea class="full-width-input full-width-area"/>
-    </div>
+   
 </template>
 
 <script>
@@ -45,7 +46,10 @@
 
     data(){
         return{
-
+            user: ref(null),
+            user_id: ref(""),
+            user_name: ref(""),
+            user_email: ref(""),
         }
     },
     methods: {
@@ -57,6 +61,16 @@
             const file = event.target.files[0];
             this.photoUrl = URL.createObjectURL(file);
         },
+    },
+    computed:{
+        getUserName(){
+            this.user =  this.$store.getters.user
+            console.log(this.user)
+
+            this.user_id = this.user.id;
+            this.user_email = this.user.email;
+            this.user_name = this.user.name;
+        }
     }
   };
 </script>
@@ -71,6 +85,15 @@
 p{
     margin: 0;
     font-weight: bold;
+}
+p.content{
+    font-size: 20px;
+    font-weight:500;
+}
+span.content{
+    font-size: 22px;
+    text-align: center;
+    margin-left: 10px;
 }
 .left-arrow {
   /* Additional styling for arrows */
@@ -135,8 +158,73 @@ p{
 div.field{
     margin-top:10px;
     margin-bottom: 10px;
+    align-items: center;
+}
+div.switch-field{
+    display: flex;
 }
 div.text-area{
     margin-top: 55px;
 }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 </style>
