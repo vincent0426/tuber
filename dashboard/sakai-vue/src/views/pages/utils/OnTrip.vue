@@ -151,7 +151,7 @@ onMounted(() => {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                markerNow.setMap(null);
+                
                 markerNow = new google.maps.Marker({
                     map: map,
                     position: {lat: currentPosition.lat, lng: currentPosition.lng},
@@ -160,7 +160,7 @@ onMounted(() => {
                 map.setZoom(20);
                 locationService.driverSendLocation(tripID,currentPosition.lat,currentPosition.lng).then((data) => {
                     console.log(data);
-                });
+                }).error((e)=>{console.log(e)});
             });
             console.log(1);
         }
@@ -171,7 +171,7 @@ onMounted(() => {
                     lat: data.latitude,
                     lng: data.longitude
                 };
-                markerNow.setMap(null);
+                
                 markerNow = new google.maps.Marker({
                     map: map,
                     position: {lat: currentPosition.lat, lng: currentPosition.lng},
