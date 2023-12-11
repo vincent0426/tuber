@@ -49,10 +49,10 @@ export class TripService {
             url: '/trips/' + id + '/passengers'
         });
     }
-    getMyTrips(){
+    getMyTrips(is_driver){
         return request({
             method: 'get',
-            url: '/trips/my?status=not_start'
+            url: '/trips/my?status=not_start&is_driver=' + is_driver
         });
     }
 }

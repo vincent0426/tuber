@@ -1,37 +1,72 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import ProductService from '@/service/ProductService';
+import { TripService } from '@/service/TripService';
 
-const dataviewValue = ref(null);
-const layout = ref('list');
-const sortKey = ref(null);
-const sortOrder = ref(null);
-const sortField = ref(null);
-const sortOptions = ref([
-    { label: 'Price High to Low', value: '!price' },
-    { label: 'Price Low to High', value: 'price' }
-]);
 
-const productService = new ProductService();
+const tripService = new TripService();
+const dataviewValue = ref([]);
 
-onMounted(() => {
-    productService.getProductsSmall().then((data) => (dataviewValue.value = data));
+onMounted(async () => {
+  let currentPage = 1; // 設置當前頁數
+  const pageSize = 10; // 設置每頁顯示的行程數量
+
+  try {
+    while (true) {
+      if(currentPage == 1){
+        const response = await tripService.getMyTrips(true);
+        console.log(response);
+        const { items, total } = response; // 假設後端返回的數據中有 items 和 totalPages 屬性
+        dataviewValue.value = items;
+        // 如果當前頁已達到總頁數，則跳出循環
+        if (currentPage*pageSize >= total) {
+            console.log("break");
+            break;
+        }
+
+        currentPage++; // 頁數加一，繼續獲取下一頁的數據
+      }
+      else{
+        const response = await tripService.getThePageTrip(currentPage);
+        //console.log(response);
+        const { items, total } = response; // 假設後端返回的數據中有 items 和 totalPages 屬性
+        console.log("1");
+        console.log(dataviewValue.value);
+        console.log("1");
+        
+        console.log(items);
+        for(var i = 0;i < items.length;i++){
+            dataviewValue.value.push(items[i]);
+        }
+        // 如果當前頁已達到總頁數，則跳出循環
+        if (currentPage*pageSize >= total) {
+            console.log("break");
+            break;
+        }
+
+        currentPage++; // 頁數加一，繼續獲取下一頁的數據
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching trips:', error);
+  }
 });
 
-const onSortChange = (event) => {
-    const value = event.value.value;
-    const sortValue = event.value;
 
-    if (value.indexOf('!') === 0) {
-        sortOrder.value = -1;
-        sortField.value = value.substring(1, value.length);
-        sortKey.value = sortValue;
-    } else {
-        sortOrder.value = 1;
-        sortField.value = value;
-        sortKey.value = sortValue;
-    }
-};
+const layout = ref('list');
+
+function DateConvert(dateString) {
+    const date = new Date(dateString);
+    // 取得日期和時間的部分
+    const year = date.getFullYear(); // 年份
+    const month = `0${date.getMonth() + 1}`.slice(-2); // 月份（補0）
+    const day = `0${date.getDate()}`.slice(-2); // 日（補0）
+    const hours = `0${date.getHours()}`.slice(-2); // 小時（補0）
+    const minutes = `0${date.getMinutes()}`.slice(-2); // 分鐘（補0）
+    // 格式化成"YYYY-MM-DDTHH:MM:SSZ"的形式
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:00`;
+
+    return formattedDate;
+}
 </script>
 
 <template>
@@ -46,36 +81,25 @@ const onSortChange = (event) => {
     </div>
     <div class="grid">
         <div class="col-12">
+            <h3>My Trip</h3>
             <div class="card">
-                <h5>Your Rides</h5>
-                <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="6" :sortOrder="sortOrder" :sortField="sortField">
-                    <template #header>
-                        <div class="grid grid-nogutter">
-                            <div class="col-6 text-left">
-                                <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label" placeholder="Sort By Price" @change="onSortChange($event)" />
-                            </div>
-                            <!-- <div class="col-6 text-right">
-                                <DataViewLayoutOptions v-model="layout" />
-                            </div> -->
-                        </div>
-                    </template>
+                <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="10">
+                   
                     <template #list="slotProps">
                         <div class="col-12">
                             <div class="flex flex-column md:flex-row align-items-center p-3 w-full">
-                                <!-- <img :src="'demo/images/product/' + slotProps.data.image" :alt="slotProps.data.name" class="my-4 md:my-0 w-9 md:w-10rem shadow-2 mr-5" /> -->
                                 <div class="flex-1 text-center md:text-left">
-                                    <div class="font-bold text-2xl">{{ slotProps.data.name }}</div>
-                                    <div class="mb-3">{{ slotProps.data.description }}</div>
-                                    <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" class="mb-2"></Rating>
-                                    <div class="flex align-items-center">
-                                        <i class="pi pi-tag mr-2"></i>
-                                        <span class="font-semibold">{{ slotProps.data.category }}</span>
-                                    </div>
+                                    <div class="font-bold text-2xl">From:{{ slotProps.data.SourceName }}</div>
+                                    <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
+                                    <div class="mb-3">Driver Name:{{ slotProps.data.DriverName }}</div>
+                                    <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
                                 </div>
-                                <div class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-center md:align-items-end mt-5 md:mt-0">
-                                    <span class="text-l font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span>
-                                    <!-- <Button icon="pi pi-shopping-cart" label="Add to Cart" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button> -->
-                                    <span :class="'product-badge status-' + slotProps.data.inventoryStatus.toLowerCase()">{{ slotProps.data.inventoryStatus }}</span>
+                                <div class="text-center">
+                                    <!-- <span class="text-2xl font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span> -->
+                                    <!-- <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2" onclick="location.href='/#/TripDetail/'+ {{ slotProps.data.id }}"></Button> -->
+                                    <router-link :to="'/OnTrip/' + slotProps.data.TripID">
+                                        <Button label="Start Trip" class="mb-2"></Button>
+                                    </router-link>
                                 </div>
                             </div>
                         </div>
@@ -83,5 +107,7 @@ const onSortChange = (event) => {
                 </DataView>
             </div>
         </div>
+
+        
     </div>
 </template>

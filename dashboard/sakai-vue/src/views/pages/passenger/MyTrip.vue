@@ -1,9 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { TripService } from '@/service/TripService';
-import { LocationService } from '@/service/LocationService';
 const tripService = new TripService();
-const locationService = new LocationService();
 const dataviewValue = ref([]);
 
 onMounted(async () => {
@@ -13,7 +11,7 @@ onMounted(async () => {
   try {
     while (true) {
       if(currentPage == 1){
-        const response = await tripService.getMyTrips();
+        const response = await tripService.getMyTrips(false);
         console.log(response);
         const { items, total } = response; // 假設後端返回的數據中有 items 和 totalPages 屬性
         dataviewValue.value = items;
@@ -52,13 +50,7 @@ onMounted(async () => {
 });
 
 
-const datetime24h = ref(null);
-const StartStaion = ref(null);
-const EndStaion = ref(null);
 const layout = ref('list');
-const sortKey = ref(null);
-const sortOrder = ref(null);
-const sortField = ref(null);
 
 function DateConvert(dateString) {
     const date = new Date(dateString);
