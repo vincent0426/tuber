@@ -8,6 +8,7 @@ import (
 	"github.com/TSMC-Uber/server/business/core/ws"
 	"github.com/TSMC-Uber/server/business/core/ws/stores/wsdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
+	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"

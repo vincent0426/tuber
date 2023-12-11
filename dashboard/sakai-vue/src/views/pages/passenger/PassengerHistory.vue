@@ -6,8 +6,9 @@ const value = ref(null);
 </script>
 
 <script>
-import { TripService } from '@/service';
+import { TripService, LocationService } from '@/service';
 const tripService = new TripService();
+const locationService = new LocationService();
 export default {
     data() {
         return {
@@ -23,11 +24,15 @@ export default {
             return comments[Math.floor(Math.random() * comments.length)];
         },
         generateRandomData(response) {
-            // 为每个驾驶员生成随机评论和评分
             response.items.forEach((item) => {
-                console.log(item);
                 item.Cost = this.generateRandomCost();
+                item.source_name = this.getLocationName(item.MySourceID);
+                item.destination_name = this.getLocationName(item.MyDestinationID);
             });
+        },
+        async getLocationName(id) {
+            const resp = await locationService.getLocationName(id);
+            console.log('getLocationNameResponse:', resp);
         },
         async fetchHistory() {
             try {
@@ -41,62 +46,6 @@ export default {
         }
     }
 };
-// export default {
-//     data() {
-//         return {
-//             rideHistory: [
-//                 {
-//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-//                     driver_name: 'John Doe2',
-//                     driver_brand: 'Toyota',
-//                     driver_model: 'Camry',
-//                     driver_plate: 'ABC123',
-//                     source_name: '台北',
-//                     destination_name: '新竹',
-//                     cost: '5',
-//                     rating: 1,
-//                     start_time: '2023-01-01T08:00:00Z'
-//                 },
-//                 {
-//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-//                     driver_name: 'A',
-//                     driver_brand: 'Toyota',
-//                     driver_model: 'Camry',
-//                     driver_plate: 'ABC123',
-//                     source_name: 'Location 1',
-//                     destination_name: 'Location 2',
-//                     cost: '5',
-//                     rating: 5,
-//                     start_time: '2023-01-01T08:00:00Z'
-//                 },
-//                 {
-//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-//                     driver_name: '我瘋子',
-//                     driver_brand: 'Toyota',
-//                     driver_model: 'Camry',
-//                     driver_plate: 'ABC123',
-//                     source_name: '北車',
-//                     destination_name: '行天宮',
-//                     cost: '5',
-//                     rating: 4,
-//                     start_time: '2023-01-01T08:00:00Z'
-//                 },
-//                 {
-//                     driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e',
-//                     driver_name: '爆肝人',
-//                     driver_brand: 'Toyota',
-//                     driver_model: 'Camry',
-//                     driver_plate: 'ABC123',
-//                     source_name: 'Location 1',
-//                     destination_name: 'Location 2',
-//                     cost: '5',
-//                     rating: 1,
-//                     start_time: '2023-01-01T08:00:00Z'
-//                 }
-//             ]
-//         };
-//     }
-// };
 </script>
 <template>
     <div>
@@ -109,7 +58,7 @@ export default {
                             <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
                         </div>
                         <div class="driver-text">
-                            <p style="font-weight: bold; font-size: 16px">{{ ride.driver_name }}</p>
+                            <p style="font-weight: bold; font-size: 16px">{{ ride.DriverName }}</p>
                             <p style="font-size: 13px; font-style: italic">{{ ride.driver_plate }}</p>
                         </div>
                         <img alt="user header" src="../../../assets/images/modelS.jpg" style="width: 130px; height: 100px; object-fit: cover; object-position: center" />
@@ -119,10 +68,11 @@ export default {
                 <template #subtitle class="custom-content">{{ ride.source_name }} -> {{ ride.destination_name }}</template>
                 <template #content class="custom-content">
                     <div style="background: rgba(128, 128, 128, 0.05); border-radius: 3px">
+                        <p class="m-0">Comment: {{ ride.Comment }}</p>
                         <p class="m-0">
                             {{ ride.StartTime }}
                         </p>
-                        <p class="m-0">花費: {{ ride.Cost }}</p>
+                        <p class="m-0">Ride cost: {{ ride.Cost }}</p>
                     </div>
                 </template>
                 <template #footer>
@@ -184,3 +134,9 @@ export default {
     border: 2px solid #070707; /* 添加2px的邊框 */
 }
 </style>
+// export default { // data() { // return { // rideHistory: [ // { // driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e', // driver_name: 'John Doe2', // driver_brand: 'Toyota', // driver_model: 'Camry', // driver_plate: 'ABC123', // source_name:
+'台北', // destination_name: '新竹', // cost: '5', // rating: 1, // start_time: '2023-01-01T08:00:00Z' // }, // { // driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e', // driver_name: 'A', // driver_brand: 'Toyota', // driver_model: 'Camry', //
+driver_plate: 'ABC123', // source_name: 'Location 1', // destination_name: 'Location 2', // cost: '5', // rating: 5, // start_time: '2023-01-01T08:00:00Z' // }, // { // driver_id: 'fe22e8fa-04d2-49b5-8bac-1535153b687e', // driver_name: '我瘋子', //
+driver_brand: 'Toyota', // driver_model: 'Camry', // driver_plate: 'ABC123', // source_name: '北車', // destination_name: '行天宮', // cost: '5', // rating: 4, // start_time: '2023-01-01T08:00:00Z' // }, // { // driver_id:
+'fe22e8fa-04d2-49b5-8bac-1535153b687e', // driver_name: '爆肝人', // driver_brand: 'Toyota', // driver_model: 'Camry', // driver_plate: 'ABC123', // source_name: 'Location 1', // destination_name: 'Location 2', // cost: '5', // rating: 1, //
+start_time: '2023-01-01T08:00:00Z' // } // ] // }; // } // };

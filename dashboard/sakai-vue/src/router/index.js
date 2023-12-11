@@ -88,6 +88,17 @@ const router = createRouter({
                     path: '/driver/applylist',
                     name: 'ApplyList',
                     component: () => import('@/views/pages/driver/ApplyList.vue')
+                },
+                {
+                    path: '/auth/chatList',
+                    name: 'ChatList',
+                    component: () => import('@/views/pages/auth/ChatList.vue')
+                },
+                {
+                    path: '/chatroom/:tripId',
+                    name: 'ChatRoom',
+                    component: () => import('@/views/pages/auth/ChatRoom.vue'),
+                    props: true // 將路由參數作為組件的 props 傳遞
                 }
             ]
         },
@@ -107,11 +118,6 @@ const router = createRouter({
             component: () => import('@/views/pages/auth/Register.vue')
         },
         {
-            path: '/chat/:userId',
-            name: 'Chatroom',
-            component: () => import('@/views/pages/utils/Chat.vue')
-        },
-        {
             path: '/onTrip/:tripId',
             name: 'OnTrip',
             component: () => import('@/views/pages/utils/OnTrip.vue')
@@ -120,11 +126,6 @@ const router = createRouter({
             path: '/TripDetail/:tripId',
             name: 'TripDetail',
             component: () => import('@/views/pages/utils/TripDetail.vue')
-        },
-        {
-            path: '/auth/chatList',
-            name: 'ChatList',
-            component: () => import('@/views/pages/auth/ChatList.vue')
         }
     ]
 });
