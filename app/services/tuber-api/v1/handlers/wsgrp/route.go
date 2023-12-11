@@ -8,7 +8,6 @@ import (
 	"github.com/TSMC-Uber/server/business/core/ws"
 	"github.com/TSMC-Uber/server/business/core/ws/stores/wsdb"
 	"github.com/TSMC-Uber/server/business/web/v1/auth"
-	"github.com/TSMC-Uber/server/business/web/v1/mid"
 	"github.com/TSMC-Uber/server/foundation/logger"
 	"github.com/TSMC-Uber/server/foundation/web"
 	"github.com/jmoiron/sqlx"
@@ -34,8 +33,8 @@ func Routes(app *web.App, cfg Config) {
 	wsCore := ws.NewCore(wsdb.NewStore(cfg.Log, cfg.DB))
 	usrCore := user.NewCore(userdb.NewStore(cfg.Log, cfg.DB))
 
-	authen := mid.Authenticate(cfg.Auth)
+	// authen := mid.Authenticate(cfg.Auth)
 
 	hdl := New(wsCore, usrCore)
-	app.Handle(http.MethodGet, version, "/chat/ws", hdl.Connect, authen)
+	app.Handle(http.MethodGet, version, "/chat/ws", hdl.Connect)
 }

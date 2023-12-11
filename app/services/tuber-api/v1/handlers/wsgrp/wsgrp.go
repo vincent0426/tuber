@@ -8,7 +8,6 @@ import (
 	"github.com/TSMC-Uber/server/business/core/user"
 	"github.com/TSMC-Uber/server/business/core/ws"
 	"github.com/TSMC-Uber/server/business/sys/cachedb"
-	"github.com/TSMC-Uber/server/business/web/v1/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -35,11 +34,11 @@ func New(ws *ws.Core, user *user.Core) *Handlers {
 
 // Create adds a new trip to the system.
 func (h *Handlers) Connect(ctx context.Context, c *gin.Context) error {
-	userID := auth.GetUserID(c)
-	// temp fix for testing, will remove later when auth is implemented
-	// we need to implement a middleware to get user info from DB
-	if userID == uuid.Nil {
-		return fmt.Errorf("user not found")
+	// get user id from query param
+
+	userID, err := uuid.Parse(c.Request.URL.Query().Get("user_id"))
+	if err != nil {
+		return fmt.Errorf("parse user id: %w", err)
 	}
 
 	// get user from DB
