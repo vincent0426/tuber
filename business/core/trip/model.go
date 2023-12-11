@@ -116,6 +116,7 @@ type PassengerDetails struct {
 	PassengerID          uuid.UUID
 	PassengerName        string
 	PassengerImageURL    string
+	PassengerStatus      string
 	SourceName           string
 	SourcePlaceID        string
 	SourceLatitude       float64

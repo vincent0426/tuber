@@ -103,7 +103,7 @@ func (s *Store) Create(ctx context.Context, trip trip.Trip) error {
 	sql, args, err = sq.
 		Insert("trip_passenger").
 		Columns("trip_id", "passenger_id", "source_id", "destination_id", "status", "created_at", "roles").
-		Values(trip.ID, trip.DriverID, sourceID, destinationID, trip.Status, trip.CreatedAt, tripDriverRole).
+		Values(trip.ID, trip.DriverID, sourceID, destinationID, "pending", trip.CreatedAt, tripDriverRole).
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
@@ -413,7 +413,7 @@ func (s *Store) QueryByID(ctx context.Context, tripID uuid.UUID) (trip.TripView,
 func (s *Store) QueryPassengers(ctx context.Context, tripID uuid.UUID) (trip.TripDetails, error) {
 	sql, args, err := sq.Select(
 		"trip_id",
-		"passenger_id", "passenger_name", "passenger_image_url",
+		"passenger_id", "passenger_name", "passenger_image_url", "passenger_status",
 		"driver_id", "driver_name", "driver_image_url", "driver_brand", "driver_model", "driver_color", "driver_plate",
 		"source_name", "source_place_id", "ST_Y(source_lat_lon::geometry) AS source_latitude", "ST_X(source_lat_lon::geometry) AS source_longitude",
 		"destination_name", "destination_place_id", "ST_Y(destination_lat_lon::geometry) AS destination_latitude", "ST_X(destination_lat_lon::geometry) AS destination_longitude",
@@ -442,7 +442,7 @@ func (s *Store) QueryPassengers(ctx context.Context, tripID uuid.UUID) (trip.Tri
 		var passenger trip.PassengerDetails
 		if err := rows.Scan(
 			&ttrip.TripID,
-			&passenger.PassengerID, &passenger.PassengerName, &passenger.PassengerImageURL,
+			&passenger.PassengerID, &passenger.PassengerName, &passenger.PassengerImageURL, &passenger.PassengerStatus,
 			&ttrip.DriverID, &ttrip.DriverName, &ttrip.DriverImageURL, &ttrip.DriverBrand, &ttrip.DriverModel, &ttrip.DriverColor, &ttrip.DriverPlate,
 			&ttrip.SourceName, &ttrip.SourcePlaceID, &ttrip.SourceLatitude, &ttrip.SourceLongitude,
 			&ttrip.DestinationName, &ttrip.DestinationPlaceID, &ttrip.DestinationLatitude, &ttrip.DestinationLongitude,

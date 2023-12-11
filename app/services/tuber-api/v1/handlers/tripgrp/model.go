@@ -236,6 +236,7 @@ type AppPassengerDetails struct {
 	PassengerID          string  `json:"passenger_id"`
 	PassengerName        string  `json:"passenger_name"`
 	PassengerImageURL    string  `json:"passenger_image_url"`
+	PassengerStatus      string  `json:"passenger_status"`
 	SourceName           string  `json:"source_name"`
 	SourcePlaceID        string  `json:"source_place_id"`
 	SourceLatitude       float64 `json:"source_latitude"`
@@ -276,6 +277,7 @@ func toAppPassengerDetails(passengerDetails []trip.PassengerDetails) []AppPassen
 			PassengerID:          passengerDetail.PassengerID.String(),
 			PassengerName:        passengerDetail.PassengerName,
 			PassengerImageURL:    passengerDetail.PassengerImageURL,
+			PassengerStatus:      passengerDetail.PassengerStatus,
 			SourceName:           passengerDetail.SourceName,
 			SourcePlaceID:        passengerDetail.SourcePlaceID,
 			SourceLatitude:       passengerDetail.SourceLatitude,
