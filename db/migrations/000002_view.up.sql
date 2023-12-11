@@ -39,7 +39,9 @@ FROM trip
 -- trip_passenger_view
 CREATE VIEW trip_passenger_view AS
 SELECT trip_passenger.trip_id AS trip_id,
-  trip_passenger.passenger_id AS passenger_id,
+  single_trip_passenger.id AS passenger_id,
+  single_trip_passenger.name AS passenger_name,
+  single_trip_passenger.image_url AS passenger_image_url,
   users.id AS driver_id,
   users.name AS driver_name,
   users.image_url AS driver_image_url,
@@ -61,6 +63,7 @@ SELECT trip_passenger.trip_id AS trip_id,
   passenger_location_destination.lat_lon AS passenger_location_destination_lat_lon
 FROM trip_passenger
   JOIN trip ON trip_passenger.trip_id = trip.id
+  JOIN users AS single_trip_passenger ON single_trip_passenger.id = trip_passenger.passenger_id
   JOIN users ON users.id = trip.driver_id
   JOIN driver ON trip.driver_id = driver.user_id
   JOIN locations AS location_source ON trip.source_id = location_source.id

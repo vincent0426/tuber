@@ -234,6 +234,8 @@ func toAppTripView(tripView trip.TripView) AppTripView {
 
 type AppPassengerDetails struct {
 	PassengerID          string  `json:"passenger_id"`
+	PassengerName        string  `json:"passenger_name"`
+	PassengerImageURL    string  `json:"passenger_image_url"`
 	SourceName           string  `json:"source_name"`
 	SourcePlaceID        string  `json:"source_place_id"`
 	SourceLatitude       float64 `json:"source_latitude"`
@@ -272,6 +274,8 @@ func toAppPassengerDetails(passengerDetails []trip.PassengerDetails) []AppPassen
 	for _, passengerDetail := range passengerDetails {
 		appPassengerDetails = append(appPassengerDetails, AppPassengerDetails{
 			PassengerID:          passengerDetail.PassengerID.String(),
+			PassengerName:        passengerDetail.PassengerName,
+			PassengerImageURL:    passengerDetail.PassengerImageURL,
 			SourceName:           passengerDetail.SourceName,
 			SourcePlaceID:        passengerDetail.SourcePlaceID,
 			SourceLatitude:       passengerDetail.SourceLatitude,

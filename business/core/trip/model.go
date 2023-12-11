@@ -59,30 +59,30 @@ type NewTripPassenger struct {
 }
 
 type UserTrip struct {
-	TripID          uuid.UUID
-	PassengerID     uuid.UUID
-	MySourceID      uuid.UUID
-	MyDestinationID uuid.UUID
-	MyStatus        string
-	DriverID        uuid.UUID
-	DriverName      string
-	PassengerLimit  int
-	SourceID        uuid.UUID
-	SourceName      string
-	SourcePlaceID   string
-	SourceLatitude  float64
-	SourceLongitude float64
-	DestinationID   uuid.UUID
-	DestinationName string
+	TripID               uuid.UUID
+	PassengerID          uuid.UUID
+	MySourceID           uuid.UUID
+	MyDestinationID      uuid.UUID
+	MyStatus             string
+	DriverID             uuid.UUID
+	DriverName           string
+	PassengerLimit       int
+	SourceID             uuid.UUID
+	SourceName           string
+	SourcePlaceID        string
+	SourceLatitude       float64
+	SourceLongitude      float64
+	DestinationID        uuid.UUID
+	DestinationName      string
 	DestinationPlaceID   string
 	DestinationLatitude  float64
 	DestinationLongitude float64
-	TripStatus      string
-	StartTime       time.Time
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	Comment         string
-	Rating          int
+	TripStatus           string
+	StartTime            time.Time
+	CreatedAt            time.Time
+	UpdatedAt            time.Time
+	Comment              string
+	Rating               int
 }
 
 type TripView struct {
@@ -114,6 +114,8 @@ type TripView struct {
 
 type PassengerDetails struct {
 	PassengerID          uuid.UUID
+	PassengerName        string
+	PassengerImageURL    string
 	SourceName           string
 	SourcePlaceID        string
 	SourceLatitude       float64

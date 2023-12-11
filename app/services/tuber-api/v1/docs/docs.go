@@ -1142,6 +1142,12 @@ const docTemplate = `{
                 "passenger_id": {
                     "type": "string"
                 },
+                "passenger_image_url": {
+                    "type": "string"
+                },
+                "passenger_name": {
+                    "type": "string"
+                },
                 "source_latitude": {
                     "type": "number"
                 },
