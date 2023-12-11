@@ -9,17 +9,17 @@ import { ref } from 'vue';
     <span class="left-arrow" @click="goBack">←</span> <!-- Left arrow; replace with an icon if necessary -->
     <p class="title">Profile</p> <!-- Title -->
 </div>
+{{ getUserName }}
 
 <div class="center-container">
     <div class="photo-uploader">
       <div class="photo-container">
-        <img src="../../image/Ellipse2.png" alt="Profile" class="profile-photo">
+        <img :src="imgURL" alt="Profile" class="profile-photo">
         <img for="photo-input" class="camera-icon" src="../../image/camera.png"/>
         <input type="file" id="photo-input" @change="onFileChange" accept="image/*" hidden>
       </div>
     </div>
   </div>
-    {{ getUserName }}
     <div class="field">
         <p>Name</p>
         <p class="content">{{ user_name }}</p>
@@ -50,6 +50,7 @@ import { ref } from 'vue';
             user_id: ref(""),
             user_name: ref(""),
             user_email: ref(""),
+            imgURL: ref("../../image/Ellipse2.png"),
         }
     },
     methods: {
@@ -70,6 +71,7 @@ import { ref } from 'vue';
             this.user_id = this.user.id;
             this.user_email = this.user.email;
             this.user_name = this.user.name;
+            this.imgURL = this.user.imageURL;
         }
     }
   };
@@ -133,6 +135,7 @@ span.content{
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .camera-icon {
