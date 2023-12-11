@@ -1,22 +1,3 @@
-<template>
-    <div>
-        <div>Trip ID: {{ tripId }}</div>
-        <h3 style="text-align: center">Chat Room</h3>
-        <div class="message-container">
-            <div v-for="(message, index) in messages" :key="index" class="message">
-                <img :src="message.ImageURL" class="message-avatar" />
-                <div class="message-content">
-                    <strong>{{ message.Username }}</strong>: {{ message.MessageText }}
-                </div>
-            </div>
-        </div>
-        <div class="input-container">
-            <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type your message..." />
-            <button @click="sendMessage">Send</button>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { useStore } from 'vuex';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
@@ -52,7 +33,7 @@ const initializeWebSocket = () => {
     socket.value = new WebSocket(`ws://localhost:3000/v1/chat/ws?room=${tripId.value}&user_id=${user.id}`);
 
     socket.value.addEventListener('open', (event) => {
-        console.log('WebSocket is open now.');
+        console.log('WebSocket is open now.', event);
     });
 
     socket.value.addEventListener('message', (event) => {
@@ -65,7 +46,7 @@ const initializeWebSocket = () => {
     });
 
     socket.value.addEventListener('close', (event) => {
-        console.log('WebSocket is closed now.');
+        console.log('WebSocket is closed now.', event);
     });
 };
 
@@ -77,6 +58,26 @@ onBeforeUnmount(() => {
     }
 });
 </script>
+
+<template>
+    <div>
+        <div>Trip ID: {{ tripId }}</div>
+        <h3 style="text-align: center">Chat Room</h3>
+        <div class="message-container">
+            <div v-for="(message, index) in messages" :key="index" class="message">
+                <img :src="message.ImageURL" class="message-avatar" />
+                <div class="message-content">
+                    <strong>{{ message.Username }}</strong
+                    >: {{ message.MessageText }}
+                </div>
+            </div>
+        </div>
+        <div class="input-container">
+            <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Type your message..." />
+            <button @click="sendMessage">Send</button>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .message-container {
