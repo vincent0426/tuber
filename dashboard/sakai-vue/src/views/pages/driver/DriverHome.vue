@@ -35,12 +35,14 @@ const onSortChange = (event) => {
 </script>
 
 <template>
-    <div className="card">
+    <div className="card mt-4">
         <h3>Drive Home</h3>
-        <h3> with extra Revenue</h3>
-      <div class="col-12 md:col-6">
-          <Button label="Create a trip"> </Button>
-      </div>        
+        <h3>with extra Revenue</h3>
+        <div class="col-12 md:col-6">
+            <Button label="Create a trip">
+                <router-link to="/driver/create" class="text-white">Create a trip</router-link>
+            </Button>
+        </div>
     </div>
     <div class="grid">
         <div class="col-12">
@@ -81,5 +83,5 @@ const onSortChange = (event) => {
                 </DataView>
             </div>
         </div>
-      </div>
+    </div>
 </template>

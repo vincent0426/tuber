@@ -14,13 +14,13 @@ const menuitems = ref([
             },
             {
                 label: 'Edit profile',
-                icon: 'pi pi-fw pi-user-edit',
+                icon: 'pi pi-fw pi-user-edit'
                 // to: '',
             },
             {
                 label: 'Privacy',
                 icon: 'pi pi-fw pi-lock'
-            },
+            }
         ]
     },
     {
@@ -28,12 +28,12 @@ const menuitems = ref([
         items: [
             {
                 label: 'Help & Support',
-                icon: 'pi pi-fw pi-question',
+                icon: 'pi pi-fw pi-question'
             },
             {
                 label: 'Terms and Policies',
-                icon: 'pi pi-fw pi-exclamation-circle',
-            },
+                icon: 'pi pi-fw pi-exclamation-circle'
+            }
         ]
     },
     {
@@ -41,7 +41,7 @@ const menuitems = ref([
         items: [
             {
                 label: 'Report a problem',
-                icon: 'pi pi-fw pi-flag',
+                icon: 'pi pi-fw pi-flag'
             },
             {
                 label: 'Register new account',
@@ -51,7 +51,7 @@ const menuitems = ref([
             {
                 label: 'Log out',
                 icon: 'pi pi-fw pi-sign-out',
-                to: '/auth/login',
+                to: '/login'
             }
         ]
     }
@@ -68,11 +68,11 @@ const onContextRightClick = (event) => {
 
 <template>
     <!-- <div class="grid p-fluid"> -->
-        <div class="col-12 md:col-8 lg:col-6 xl:col-4" >
-            <div class="card" style="height: 100%; scale: 1.15;">
-                <h5>Settings</h5>
-                <Menu :model="menuitems" style="width: 100%; height: 100%;"></Menu>
-            </div>
+    <div class="col-12 md:col-8 lg:col-6 xl:col-4">
+        <div class="card" style="height: 100%; scale: 1.15">
+            <h5>Settings</h5>
+            <Menu :model="menuitems" style="width: 100%; height: 100%"></Menu>
         </div>
+    </div>
     <!-- </div> -->
 </template>

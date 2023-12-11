@@ -15,6 +15,13 @@ export class DriverService {
             data: {}
         });
     }
+    postBecomeDriver(formData) {
+        return request({
+            method: 'post',
+            url: '/drivers',
+            data: formData
+        });
+    }
     // getFavorite(id_token) {
     //     return request({
     //         method: 'post',

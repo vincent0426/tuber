@@ -26,8 +26,8 @@ const router = createRouter({
                 },
                 {
                     path: '/login',
-                    name: 'UIlogin',
-                    component: () => import('@/views/pages/login.vue')
+                    name: 'login',
+                    component: () => import('@/views/pages/auth/Login.vue')
                 },
                 {
                     path: '/profile',
@@ -58,6 +58,11 @@ const router = createRouter({
                     path: '/passenger/favorite',
                     name: 'Favorite',
                     component: () => import('@/views/pages/passenger/Favorite.vue')
+                },
+                {
+                    path: '/become-driver',
+                    name: 'BecomeDriver',
+                    component: () => import('@/views/pages/driver/BecomeDriver.vue')
                 },
                 {
                     path: '/driver/home',
@@ -102,11 +107,11 @@ const router = createRouter({
                 }
             ]
         },
-        {
-            path: '/auth/login',
-            name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
-        },
+        // {
+        //     path: '/auth/login',
+        //     name: 'login',
+        //     component: () => import('@/views/pages/auth/Login.vue')
+        // },
         {
             path: '/auth/access',
             name: 'accessDenied',
