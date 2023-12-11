@@ -1,8 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { TripService } from '@/service/TripService';
+import { LocationService } from '@/service/LocationService';
+
 const tripService = new TripService();
-const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[4];
+const locationService = new LocationService();
+const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[5];
 const source = ref(null);
 const destination = ref(null);
 const driverName = ref(null);
@@ -10,6 +13,11 @@ const driver_image_url = ref(null);
 const driver_plate = ref(null);
 const start_time = ref(null);
 const mid = ref(null);
+// 获取特定键的值
+const myData = localStorage.getItem('vuex-state');
+// 如果需要将存储的 JSON 字符串转换为对象
+const parsedData = JSON.parse(myData);
+const role = parsedData.role;
 var tripData;
 
 onMounted(() => {
@@ -57,8 +65,8 @@ onMounted(() => {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           };
-          map.setCenter(currentPosition);
-          map.setZoom(17.5);
+        //   map.setCenter(currentPosition);
+        //   map.setZoom(17.5);
           markerNow = new google.maps.Marker({
                 map: map,
                 position: {lat: currentPosition.lat, lng: currentPosition.lng},
@@ -137,23 +145,45 @@ onMounted(() => {
         .catch((e) => console.log("Directions request failed due to " + e));
     }
     function refreshCurrentPlace(){
-        navigator.geolocation.getCurrentPosition(function(position){
-            currentPosition = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude
-            };
-            markerNow.setMap(null);
-            markerNow = new google.maps.Marker({
-                map: map,
-                position: {lat: currentPosition.lat, lng: currentPosition.lng},
+        if(role == 'driver'){
+            navigator.geolocation.getCurrentPosition(function(position){
+                currentPosition = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                markerNow.setMap(null);
+                markerNow = new google.maps.Marker({
+                    map: map,
+                    position: {lat: currentPosition.lat, lng: currentPosition.lng},
+                });
+                map.setCenter(currentPosition);
+                map.setZoom(20);
+                locationService.driverSendLocation(tripID,currentPosition.lat,currentPosition.lng).then((data) => {
+                    console.log(data);
+                });
             });
-            map.setCenter(currentPosition);
-            map.setZoom(20);
-        });
-        console.log(1);
+            console.log(1);
+        }
+        else{
+            locationService.passengerGetLocation(tripID).then((data) => {
+                console.log(data);
+                currentPosition = {
+                    lat: data.latitude,
+                    lng: data.longitude
+                };
+                markerNow.setMap(null);
+                markerNow = new google.maps.Marker({
+                    map: map,
+                    position: {lat: currentPosition.lat, lng: currentPosition.lng},
+                });
+                map.setCenter(currentPosition);
+                map.setZoom(20);
+            });
+        }
+        
     }
     initMap();
-    setInterval(function() {refreshCurrentPlace()}, 15000);
+    //setInterval(function() {refreshCurrentPlace()}, 15000);
 
 </script>
 <template>

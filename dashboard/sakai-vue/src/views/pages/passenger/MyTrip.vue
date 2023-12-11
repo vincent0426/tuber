@@ -97,7 +97,7 @@ function DateConvert(dateString) {
                                     <!-- <span class="text-2xl font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span> -->
                                     <!-- <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2" onclick="location.href='/#/TripDetail/'+ {{ slotProps.data.id }}"></Button> -->
                                     <router-link :to="'/OnTrip/' + slotProps.data.TripID">
-                                        <Button label="Start Trip" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button>
+                                        <Button label="Start Trip" class="mb-2"></Button>
                                     </router-link>
                                 </div>
                             </div>

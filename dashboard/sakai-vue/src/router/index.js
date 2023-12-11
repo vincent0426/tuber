@@ -123,7 +123,7 @@ const router = createRouter({
             component: () => import('@/views/pages/auth/Register.vue')
         },
         {
-            path: '/onTrip/:tripId',
+            path: '/OnTrip/:tripId',
             name: 'OnTrip',
             component: () => import('@/views/pages/utils/OnTrip.vue')
         },
