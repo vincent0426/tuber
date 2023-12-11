@@ -68,23 +68,6 @@ const handleCredentialResponse = async (response) => {
                         </div>
                     </div>
                 </div>
-                <input type="tel" name="tel" placeholder=" Number" v-model="phone" />
-            </div>
-            <div class="options">
-                <input type="text" class="search-box" placeholder="Search Country Name" />
-                <ol></ol>
-            </div>
-        </div>
-
-        <button class="arrow-button black-button" @click="goNext"><span>Next</span> <span class="arrow">→</span></button>
-        <p class="p-message">By continuing you may receive an SMS for verification. Message and data rates may apply</p>
-
-        <div class="divider">
-            <span class="divider-text">or</span>
-        </div>
-        <div>
-            <div class="flex gap-5">
-                <div ref="googleLoginBtnRef"></div>
             </div>
         </div>
     </div>
