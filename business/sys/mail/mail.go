@@ -24,7 +24,7 @@ func sendEmail(msg amqp.Delivery) {
 	password := "muoq gjoo plxk ejhj" // email password
 	to := string(msg.Body)            // recipient email address
 	subject := "Hello"
-	body := "This is a test email from Go!"
+	body := "Your trip is going to start!"
 	// SMTP server configuration.
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"

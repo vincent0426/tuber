@@ -25,16 +25,16 @@ var routes = "all" // go build -ldflags "-X main.routes=crud"
 func main() {
 	switch routes {
 	case "all":
-		if err := cmd.Main(build, all.Routes()); err != nil {
+		if err := cmd.Main(routes, build, all.Routes()); err != nil {
 			os.Exit(1)
 		}
 
 	case "chat":
-		if err := cmd.Main(build, chat.Routes()); err != nil {
+		if err := cmd.Main(routes, build, chat.Routes()); err != nil {
 			os.Exit(1)
 		}
 	case "locationserver":
-		if err := cmd.Main(build, locationserver.Routes()); err != nil {
+		if err := cmd.Main(routes, build, locationserver.Routes()); err != nil {
 			os.Exit(1)
 		}
 		// case "reporting":

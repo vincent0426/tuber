@@ -31,7 +31,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func Main(build string, routeAdder v1.RouteAdder) error {
+func Main(routes, build string, routeAdder v1.RouteAdder) error {
 	var log *logger.Logger
 
 	events := logger.Events{
@@ -47,7 +47,7 @@ func Main(build string, routeAdder v1.RouteAdder) error {
 	log = logger.NewWithEvents(os.Stdout, logger.LevelInfo, "TUBER-API", traceIDFunc, events)
 
 	ctx := context.Background()
-	if err := run(ctx, log, build, routeAdder); err != nil {
+	if err := run(ctx, log, build, routes, routeAdder); err != nil {
 		log.Error(ctx, "startup", "status", "shutdown with error", "ERROR", err)
 		os.Exit(1)
 	}
@@ -55,7 +55,7 @@ func Main(build string, routeAdder v1.RouteAdder) error {
 	return nil
 }
 
-func run(ctx context.Context, log *logger.Logger, build string, routeAdder v1.RouteAdder) error {
+func run(ctx context.Context, log *logger.Logger, build string, routes string, routeAdder v1.RouteAdder) error {
 
 	// -------------------------------------------------------------------------
 	// GOMAXPROCS
@@ -93,7 +93,9 @@ func run(ctx context.Context, log *logger.Logger, build string, routeAdder v1.Ro
 		return fmt.Errorf("connecting to rabbitmq: %w", err)
 	}
 
-	go mail.StartSendEmailWorker()
+	if routes == "locationserver" {
+		go mail.StartSendEmailWorker()
+	}
 
 	defer func() {
 		log.Info(ctx, "shutdown", "status", "stopping rabbitmq support", "host", cfg.RabbitMQ.Host)
