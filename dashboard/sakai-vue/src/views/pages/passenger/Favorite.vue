@@ -111,13 +111,13 @@ export default {
             });
         },
         async fetchFavorite() {
-            try {
-                //加入假資料id
-                const response = await driverService.postFavorite('3b712f77-3d5e-4763-b58d-274dd291a5ef');
-                console.log(response);
-            } catch (e) {
-                console.error('Error posting fav driver:', error);
-            }
+            // try {
+            //     //加入假資料id
+            //     const response = await driverService.postFavorite('0f266daf-8585-48d4-b669-3105a7eecba3');
+            //     console.log(response);
+            // } catch (e) {
+            //     console.error('Error posting fav driver:', error);
+            // }
             try {
                 const response = await driverService.getFavorite();
                 console.log(response);

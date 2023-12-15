@@ -25,11 +25,19 @@ export default {
             return comments[Math.floor(Math.random() * comments.length)];
         },
         async generateRandomData(response) {
+            const favoriteDriversResponse = await driverService.getFavorite();
+            const favoriteDrivers = favoriteDriversResponse.items.map((driver) => driver.driver_id);
             // 使用 Promise.all 等待所有的非同步操作完成
             await Promise.all(
                 response.items.map(async (item) => {
                     item.Cost = this.generateRandomCost();
                     item.driver_plate = await this.getDriverPlate(item.DriverID);
+                    if (favoriteDrivers.includes(item.DriverID)) {
+                        //確認此人是否已經在最愛司機列表
+                        item.isFavorite = true;
+                    } else {
+                        item.isFavorite = false;
+                    }
                 })
             );
         },
@@ -42,10 +50,33 @@ export default {
             try {
                 const response = await tripService.getHistory({ trip_status: 'finished', is_driver: false });
                 await this.generateRandomData(response);
+                // await this.checkInFavorite(response);
                 console.log(response);
                 this.rideHistory = response.items;
             } catch (e) {
                 console.error('Error fetching History:', error);
+            }
+        },
+        formatTime(isoDateString) {
+            const date = new Date(isoDateString);
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+
+            return date.toLocaleTimeString([], options);
+        },
+        async addToFavorites(ride) {
+            try {
+                //加入driver
+                const response = await driverService.postFavorite(ride.DriverID);
+                console.log(response);
+                ride.isFavorite = true;
+            } catch (e) {
+                console.error('Error posting fav driver:', error);
             }
         }
     }
@@ -71,10 +102,10 @@ export default {
                 <Divider />
                 <template #subtitle class="custom-content">{{ ride.SourceName }} -> {{ ride.DestinationName }}</template>
                 <template #content class="custom-content">
-                    <div style="background: rgba(128, 128, 128, 0.05); border-radius: 3px">
+                    <div style="background: rgba(128, 128, 128, 0.05); border-radius: 3px; padding: 10px">
                         <p class="m-0">Comment: {{ ride.Comment }}</p>
                         <p class="m-0">
-                            {{ ride.StartTime }}
+                            {{ formatTime(ride.StartTime) }}
                         </p>
                         <p class="m-0">Ride cost: {{ ride.Cost }}</p>
                     </div>
@@ -83,6 +114,10 @@ export default {
                     <!-- <Rating v-model="value" readonly :cancel="false" /> -->
                     <div class="flex justify-content-center">
                         <Rating :modelValue="ride.Rating" :stars="5" :cancel="false" />
+                    </div>
+                    <div class="flex justify-content-center mt-2">
+                        <Button v-if="!ride.isFavorite" @click="addToFavorites(ride)">Add to Favorite</Button>
+                        <Button v-else disabled>Added to Favorite</Button>
                     </div>
                     <!-- https://primevue.org/rating/ -->
                 </template>
@@ -93,6 +128,7 @@ export default {
 <style scoped>
 .custom-content {
     background: rgba(128, 128, 128, 0.05);
+    padding: 10px;
 }
 .ride-container {
     max-width: 380px; /* Set the maximum width of the container */
