@@ -4,7 +4,6 @@ import { TripService, DriverService } from '@/service';
 const tripService = new TripService();
 const driverService = new DriverService();
 const chatList = ref([]);
-// const tripIdList = ref([]);
 
 onMounted(async () => {
     try {
@@ -13,93 +12,77 @@ onMounted(async () => {
         const isDriver = role === 'passenger' ? false : true;
         console.log('isDriver?', isDriver);
         const now_trip = await tripService.getHistory({ trip_status: 'in_trip', is_driver: isDriver });
+        console.log('now_trip:', now_trip);
         const not_start_trip = await tripService.getHistory({ trip_status: 'not_start', is_driver: isDriver });
+        console.log('not_started_trip:', not_start_trip);
         const finished_trip = await tripService.getHistory({ trip_status: 'finished', is_driver: isDriver });
-        const response = finished_trip;
-        const resultTrips = ref([]);
-        //console.log('my all trip history', response);
-        // tripIdList.value = now_trip.items.map((item) => item.TripID);
-        // console.log('my all tripID', tripIdList[0]);
-        generateRandomData(response);
-        chatList.value = response.items;
+        console.log('finished_trip:', finished_trip);
+        const allTripsWithColor = processTripList(now_trip, not_start_trip, finished_trip);
+        chatList.value = await iterateTripGetData(allTripsWithColor);
+        console.log('chatList\n', chatList.value);
     } catch (e) {
         console.error('Error fetching History:', e);
     }
 });
 
-// // 处理每个 tripIdList
-// const processTripList = (tripList, color) => {
-//     tripList.forEach((tripId) => {
-//         const driverName = getDriverName(tripId);
-//         const passengerNames = getPassengerNames(tripId);
-
-//         // 将结果添加到 resultTrips
-//         resultTrips.value.push({
-//             tripId,
-//             color,
-//             driverName,
-//             passengerNames
-//         });
-//     });
-// };
-
-// // 模拟异步获取 driver 名称的函数
-// const getDriverName = async (tripId) => {
-//     // 模拟异步操作，实际应用中需要替换为真实的异步操作
-//     return new Promise((resolve) => {
-//         setTimeout(() => {
-//             resolve(`Driver-${tripId}`);
-//         }, 500);
-//     });
-// };
-
-// // 模拟异步获取 passenger 名称的函数
-// const getPassengerNames = async (tripId) => {
-//     // 模拟异步操作，实际应用中需要替换为真实的异步操作
-//     return new Promise((resolve) => {
-//         setTimeout(() => {
-//             const count = Math.floor(Math.random() * 3) + 1; // 随机生成 1 到 3 个乘客
-//             const passengerNames = Array.from({ length: count }, (_, index) => `Passenger-${index + 1}`);
-//             resolve(passengerNames);
-//         }, 500);
-//     });
-// };
-
-// processTripList(redTripIdList.value, 'red');
-// processTripList(yellowTripIdList.value, 'yellow');
-// processTripList(blueTripIdList.value, 'blue');
-
-const generateRandomData = (response) => {
-    response.items.forEach((item) => {
-        item.trip_user_list = getTripPassengers(item.TripID);
-    });
+const processTripList = (now_trip, not_start_trip, finished_trip) => {
+    let now_trip_result = now_trip.items.map((item) => ({ tripId: item.TripID, color: '#666633' }));
+    let not_start_trip_result = not_start_trip.items.map((item) => ({ tripId: item.TripID, color: '#CCCCCC' }));
+    let finished_trip_result = finished_trip.items.map((item) => ({ tripId: item.TripID, color: '#333333' }));
+    return [...now_trip_result, ...not_start_trip_result, ...finished_trip_result];
 };
 
-const getTripPassengers = (tripId) => {
-    const resp = tripService.getPassenger(tripId);
-    console.log('trip_passengers:', resp);
+const iterateTripGetData = async (trips) => {
+    await Promise.all(
+        trips.map(async (item) => {
+            item.trip_user_list = await getTripPassengers(item.tripId);
+            item.trip_driver_name = item.trip_user_list.driver_details.driver_name;
+            const passengerNames = item.trip_user_list.passenger_details
+                .map((passenger) => passenger.passenger_name)
+                .filter((passengerName) => passengerName !== item.trip_driver_name)
+                .join(', ');
+            item.trip_passengers_name = passengerNames;
+        })
+    );
+    return trips;
+};
+
+const getTripPassengers = async (tripId) => {
+    try {
+        const resp = await tripService.getPassengers(tripId);
+        return resp;
+        // console.log('trip_passengers:', resp);
+    } catch (error) {
+        console.error('Error fetching trip passengers:', error);
+    }
+};
+const getBackgroundColor = (color) => {
+    return `linear-gradient(to bottom left, ${color}, #FFFFFF 30%, #FFFFFF)`;
 };
 </script>
 <template>
     <div>
         <h3 style="text-align: center">Chatroom List</h3>
         <div class="ride-container">
-            <div v-for="(ride, index) in chatList" :key="index" class="ride-card">
+            <div v-for="(ride, index) in chatList" :key="index" class="ride-card" :style="{ background: getBackgroundColor(ride.color) }">
                 <div class="custom-content">
                     <div class="left-part">
                         <div class="left-upper">
                             <div class="avatar-container">
                                 <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
                             </div>
-                            <div class="driver-name">Driver: {{ ride.DriverName }}</div>
+                            <div style="display:flex flex-direction:column">
+                                <div class="driver-name">Driver: {{ ride.trip_driver_name }}</div>
+                                <div class="locations">{{ ride.trip_user_list.source_name }} -> {{ ride.trip_user_list.destination_name }}</div>
+                            </div>
                         </div>
                         <div style="width: 270px; height: min-content; margin-right: 10px; margin-bottom: 10px">
-                            <div style="font-weight: 600; padding-top: 10px; font-style: italic">Passengers: {{ ride.trip_user_list }}</div>
+                            <div style="font-weight: 600; padding-top: 10px; font-style: italic">Passengers: {{ ride.trip_passengers_name }}</div>
                         </div>
                     </div>
 
                     <div class="right-part">
-                        <router-link :to="{ name: 'ChatRoom', params: { tripId: ride.TripID } }">
+                        <router-link :to="{ name: 'ChatRoom', params: { tripId: ride.tripId } }">
                             <div style="align-items: center; border-radius: 50%; background-color: rgba(0, 0, 0, 0.7); width: 40px; height: 40px; display: flex; justify-content: center">
                                 <i class="pi pi-comments" style="color: bisque"></i>
                             </div>
@@ -112,6 +95,12 @@ const getTripPassengers = (tripId) => {
 </template>
 
 <style scoped>
+.locations {
+    font-weight: 200;
+    font-size: small;
+    margin-left: 20px;
+    font-style: italic;
+}
 .custom-content {
     background: rgba(128, 128, 128, 0.05);
     display: flex;
@@ -162,8 +151,11 @@ const getTripPassengers = (tripId) => {
     font-size: larger;
     align-items: center;
     justify-content: center;
-    align-content: center;
+    align-content: flex-start;
     flex-wrap: wrap;
+    margin-top: 10px;
+    padding-left: -30px;
+    align-self: flex-start;
 }
 
 .avatar {
