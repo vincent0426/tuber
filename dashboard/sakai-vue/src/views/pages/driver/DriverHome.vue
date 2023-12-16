@@ -91,11 +91,9 @@ function DateConvert(dateString) {
                                 <div class="flex-1 md:text-left">
                                     <div class="font-bold text-2xl">From:{{ slotProps.data.SourceName }}</div>
                                     <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
-                                    <div class="mb-3 text-center">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
+                                    <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
                                 </div>
                                 <div class="text-center">
-                                    <!-- <span class="text-2xl font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span> -->
-                                    <!-- <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2" onclick="location.href='/#/TripDetail/'+ {{ slotProps.data.id }}"></Button> -->
                                     <router-link :to="'/OnTrip/' + slotProps.data.TripID">
                                         <Button label="Start Trip" class="mb-2"></Button>
                                     </router-link>
