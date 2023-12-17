@@ -6,7 +6,7 @@ import { TripService } from '@/service/TripService';
 import Dropdown from 'primevue/dropdown';
 
 const tripService = new TripService();
-const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[4];
+const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[5];
 const StartStaion = ref(null);
 const EndStaion = ref(null);
 const source = ref(null);
@@ -45,7 +45,7 @@ onMounted(() => {
         mid_end.value = mid_start.value;
         console.log(data);
     });
-    tripService.getPassenger(tripID).then((data) => {
+    tripService.getPassengers(tripID).then((data) => {
         customer1.value = data.passenger_details;
     });
 });

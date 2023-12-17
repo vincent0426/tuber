@@ -1,10 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue';
 import { TripService } from '@/service/TripService';
-import { LocationService } from '@/service/LocationService';
+
+import { useStore } from 'vuex';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+const store = useStore();
+const user = store.getters.user;
+const route = useRoute();
+const socket = ref(null);
+const messages = ref([]);
+const newMessage = ref('');
 
 const tripService = new TripService();
-const locationService = new LocationService();
+
 const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[5];
 const source = ref(null);
 const destination = ref(null);
@@ -13,14 +22,68 @@ const driver_image_url = ref(null);
 const driver_plate = ref(null);
 const start_time = ref(null);
 const mid = ref(null);
-// 获取特定键的值
+
 const myData = localStorage.getItem('vuex-state');
-// 如果需要将存储的 JSON 字符串转换为对象
 const parsedData = JSON.parse(myData);
 const role = parsedData.role;
 var tripData;
+var location;
+
+const sendMessage = (currentPosition) => {
+    socket.value.send(JSON.stringify({ "latitute": currentPosition.lat, "longitude": currentPosition.lng }));
+    console.log(currentPosition);
+};
+
+const processMessage = (rawMessage) => {
+    const parsedMessage = JSON.parse(rawMessage);
+    
+    currentPosition = {
+        lat: parsedMessage.latitute,
+        lng: parsedMessage.longitude
+    };
+    if(markerNow !== ''){
+        markerNow.setMap(null);
+    }
+    markerNow = new google.maps.Marker({
+        map: map,
+        position: {lat: currentPosition.lat, lng: currentPosition.lng},
+    });
+    map.setCenter(currentPosition);
+    map.setZoom(20);
+};
+function initializeWebSocket(){
+    if(role == 'driver'){
+        socket.value = new WebSocket(`ws://localhost:3003/v1/ws/driver?trip_id=${tripID}`);
+        console.log("driver");
+    }
+    else{
+        socket.value = new WebSocket(`ws://localhost:3003/v1/ws/passenger?trip_id=${tripID}`);
+        console.log("pass");
+    }
+    
+
+    socket.value.addEventListener('open', (event) => {
+        console.log('WebSocket is open now.', event);
+    });
+
+    socket.value.addEventListener('message', (event) => {
+        console.log('Message from server:', event.data);
+        if(role == 'passenger'){
+            processMessage(event.data);
+        }
+    });
+
+    socket.value.addEventListener('error', (event) => {
+        console.error('WebSocket error observed:', event);
+    });
+
+    socket.value.addEventListener('close', (event) => {
+        console.log('WebSocket is closed now.', event);
+    });
+}
 
 onMounted(() => {
+    initializeWebSocket();
     tripService.getTrip(tripID).then((data) => {
         source.value = data.source_name;
         destination.value = data.destination_name;
@@ -32,7 +95,11 @@ onMounted(() => {
         console.log(data);
     });
 });
-
+onBeforeUnmount(() => {
+    if (socket.value) {
+        socket.value.close();
+    }
+});
 
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
       key: "AIzaSyCWk9OsA3BidynIgg5_ybz2dWVIBkuWpxE",
@@ -48,6 +115,7 @@ onMounted(() => {
     let stops = [];
     let markers = [];
     let markerNow;
+
     async function initMap() {
         // Request libraries when needed, not in the script tag.
         const { Map } = await google.maps.importLibrary("maps");
@@ -110,7 +178,7 @@ onMounted(() => {
             refreshCurrentPlace();
         });
     }
-    // }
+   
     function createMarker(place) {
       if (!place.geometry || !place.geometry.location) return;
 
@@ -151,39 +219,23 @@ onMounted(() => {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                
+                if(markerNow !== ''){
+                    markerNow.setMap(null);
+                    console.log("reset");
+                }
+                console.log("MakerNow:",markerNow)
                 markerNow = new google.maps.Marker({
                     map: map,
                     position: {lat: currentPosition.lat, lng: currentPosition.lng},
                 });
                 map.setCenter(currentPosition);
                 map.setZoom(20);
-                locationService.driverSendLocation(tripID,currentPosition.lat,currentPosition.lng).then((data) => {
-                    console.log(data);
-                }).error((e)=>{console.log(e)});
-            });
-            console.log(1);
-        }
-        else{
-            locationService.passengerGetLocation(tripID).then((data) => {
-                console.log(data);
-                currentPosition = {
-                    lat: data.latitude,
-                    lng: data.longitude
-                };
-                
-                markerNow = new google.maps.Marker({
-                    map: map,
-                    position: {lat: currentPosition.lat, lng: currentPosition.lng},
-                });
-                map.setCenter(currentPosition);
-                map.setZoom(20);
+                sendMessage(currentPosition);
             });
         }
-        
     }
     initMap();
-    //setInterval(function() {refreshCurrentPlace()}, 15000);
+    setInterval(function() {refreshCurrentPlace()}, 15000);
 
 </script>
 <template>
