@@ -14,8 +14,8 @@ const menuitems = ref([
             },
             {
                 label: 'Edit profile',
-                icon: 'pi pi-fw pi-user-edit'
-                // to: '',
+                icon: 'pi pi-fw pi-user-edit',
+                to: '/profile',
             },
             {
                 label: 'Privacy',

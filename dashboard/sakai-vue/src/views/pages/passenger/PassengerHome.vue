@@ -18,6 +18,7 @@ onMounted(() => {
     productService.getProductsSmall().then((data) => (dataviewValue.value = data));
 });
 
+
 const onSortChange = (event) => {
     const value = event.value.value;
     const sortValue = event.value;
@@ -40,7 +41,10 @@ const onSortChange = (event) => {
         <h3> with others</h3>
       <div class="col-12 md:col-6">
         <div class="p-inputgroup">
-            <Button label="Search"> </Button>
+            <!-- This is for Search Page. -->
+            <router-link to="/passenger/search">
+                <Button label="Search"> </Button>
+            </router-link>
             <InputText placeholder="Where to?" />
         </div>
       </div>        
@@ -48,22 +52,24 @@ const onSortChange = (event) => {
     <div class="grid">
         <div class="col-12">
             <div class="card">
-                <h5>Your Rides</h5>
-                <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="6" :sortOrder="sortOrder" :sortField="sortField">
-                    <template #header>
+                <router-link to="/passenger/mytrip">
+                    <h5>Your Rides</h5>
+                </router-link>
+                 <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="6" :sortOrder="sortOrder" :sortField="sortField">
+                 <!--   <template #header>
                         <div class="grid grid-nogutter">
                             <div class="col-6 text-left">
                                 <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label" placeholder="Sort By Price" @change="onSortChange($event)" />
                             </div>
-                            <!-- <div class="col-6 text-right">
+                            <div class="col-6 text-right">
                                 <DataViewLayoutOptions v-model="layout" />
-                            </div> -->
+                            </div> 
                         </div>
                     </template>
                     <template #list="slotProps">
                         <div class="col-12">
                             <div class="flex flex-column md:flex-row align-items-center p-3 w-full">
-                                <!-- <img :src="'demo/images/product/' + slotProps.data.image" :alt="slotProps.data.name" class="my-4 md:my-0 w-9 md:w-10rem shadow-2 mr-5" /> -->
+                                img :src="'demo/images/product/' + slotProps.data.image" :alt="slotProps.data.name" class="my-4 md:my-0 w-9 md:w-10rem shadow-2 mr-5" />
                                 <div class="flex-1 text-center md:text-left">
                                     <div class="font-bold text-2xl">{{ slotProps.data.name }}</div>
                                     <div class="mb-3">{{ slotProps.data.description }}</div>
@@ -75,13 +81,13 @@ const onSortChange = (event) => {
                                 </div>
                                 <div class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-center md:align-items-end mt-5 md:mt-0">
                                     <span class="text-l font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span>
-                                    <!-- <Button icon="pi pi-shopping-cart" label="Add to Cart" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button> -->
+                                     <Button icon="pi pi-shopping-cart" label="Add to Cart" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button>
                                     <span :class="'product-badge status-' + slotProps.data.inventoryStatus.toLowerCase()">{{ slotProps.data.inventoryStatus }}</span>
                                 </div>
                             </div>
                         </div>
-                    </template>
-                </DataView>
+                    </template> -->
+                </DataView> 
             </div>
         </div>
       </div>
