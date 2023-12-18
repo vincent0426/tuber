@@ -6,7 +6,7 @@ import { TripService } from '@/service/TripService';
 import Dropdown from 'primevue/dropdown';
 
 const tripService = new TripService();
-const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[5];
+const tripID = window.location.href.split('/TripDetail/').filter(segment => segment.trim() !== '')[1];
 const StartStaion = ref(null);
 const EndStaion = ref(null);
 const source = ref(null);

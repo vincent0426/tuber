@@ -14,7 +14,7 @@ const newMessage = ref('');
 
 const tripService = new TripService();
 
-const tripID = window.location.href.split('/').filter(segment => segment.trim() !== '')[5];
+const tripID = window.location.href.split('/OnTrip/').filter(segment => segment.trim() !== '')[1];
 const source = ref(null);
 const destination = ref(null);
 const driverName = ref(null);
