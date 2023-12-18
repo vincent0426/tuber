@@ -166,6 +166,8 @@ async function initMap() {
         });
         document.getElementById('Stop').value = '';
         mid.push(tempStop);
+        console.log(mid);
+        
         tempStop = {};
     };
     const SaveTrip = function () {
@@ -178,7 +180,7 @@ async function initMap() {
             .then((response) => {
                 // 處理成功回傳的資料
                 console.log(response);
-                window.location.href = '/driver/trip';
+                //window.location.href = '/driver/trip';
             })
             .catch((error) => {
                 // 處理錯誤
