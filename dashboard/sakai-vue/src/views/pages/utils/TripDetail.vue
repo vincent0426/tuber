@@ -18,11 +18,13 @@ const start_time = ref(null);
 const customer1 = ref(null);
 const mid_start = ref(null);
 const mid_end = ref(null);
+const passenger_limit = ref(null);
 
 var tripData;
 
 onMounted(() => {
     tripService.getTrip(tripID).then((data) => {
+        //console.log(data);
         source.value = data.source_name;
         destination.value = data.destination_name;
         driverName.value = data.driver_name;
@@ -43,13 +45,26 @@ onMounted(() => {
             ID: data.source_id
         });
         mid_end.value = mid_start.value;
-        console.log(data);
+        console.log(mid_end);
     });
     tripService.getPassengers(tripID).then((data) => {
         customer1.value = data.passenger_details;
+        //console.log(data);
     });
 });
-
+function DateConvert(dateString) {
+    const date = new Date(dateString);
+    // 取得日期和時間的部分
+    const year = date.getFullYear(); // 年份
+    const month = `0${date.getMonth() + 1}`.slice(-2); // 月份（補0）
+    const day = `0${date.getDate()}`.slice(-2); // 日（補0）
+    const hours = `0${date.getHours()}`.slice(-2); // 小時（補0）
+    const minutes = `0${date.getMinutes()}`.slice(-2); // 分鐘（補0）
+    // 格式化成"YYYY-MM-DDTHH:MM:SSZ"的形式
+    const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:00 `;
+    //console.log(formattedDate)
+    return formattedDate;
+}
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
       key: "AIzaSyCWk9OsA3BidynIgg5_ybz2dWVIBkuWpxE",
       v: "weekly",
@@ -136,7 +151,8 @@ onMounted(() => {
                 })
                 .catch(error => {
                     // 處理錯誤
-                    alert(error);
+                    console.log(error);
+                    alert(error.error);
                 });
         };
         document.getElementById("Save").addEventListener("click",onJoinTrip);
@@ -214,7 +230,8 @@ onMounted(() => {
                 <div class="col-16 text-left">
                     <div class="font-bold text-2xl">From:{{ source }}</div>
                     <div class="font-bold text-2xl">To:{{ destination }}</div>
-                    <div class="font-bold text-2xl">Start Time:{{ start_time }}</div>
+                    <div class="font-bold text-2xl">Start Time:{{ DateConvert(start_time) }}</div>
+                    
                 </div>
             </div>
         </div>
@@ -239,7 +256,7 @@ onMounted(() => {
                     <template #loading> Loading customers data. Please wait. </template>
                     <Column field="passenger_id" header="ID" style="min-width: 12rem">
                         <template #body="{ data }">
-                            {{ data.passenger_id }}
+                            {{ data.passenger_name }}
                         </template>
                     </Column>
                     <Column field="source_name" header="Source" style="min-width: 12rem">

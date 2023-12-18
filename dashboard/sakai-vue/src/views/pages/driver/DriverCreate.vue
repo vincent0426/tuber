@@ -180,6 +180,7 @@ async function initMap() {
             .then((response) => {
                 // 處理成功回傳的資料
                 console.log(response);
+                alert("Success");
                 //window.location.href = '/driver/trip';
             })
             .catch((error) => {
