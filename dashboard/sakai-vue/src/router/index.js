@@ -25,11 +25,6 @@ const router = createRouter({
                     component: () => import('@/views/pages/logo.vue')
                 },
                 {
-                    path: '/login',
-                    name: 'login',
-                    component: () => import('@/views/pages/auth/Login.vue')
-                },
-                {
                     path: '/profile',
                     name: 'profile',
                     component: () => import('@/views/pages/profile.vue')
@@ -106,6 +101,11 @@ const router = createRouter({
                     props: true // 將路由參數作為組件的 props 傳遞
                 }
             ]
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: () => import('@/views/pages/auth/Login.vue')
         },
         // {
         //     path: '/auth/login',

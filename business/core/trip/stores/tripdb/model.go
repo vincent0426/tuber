@@ -36,30 +36,31 @@ func toDBTrip(trip trip.Trip) dbTrip {
 
 // ------------------------------------------------------------
 type dbUserTrip struct {
-	TripID          uuid.UUID      `db:"trip_id"`
-	PassengerID     uuid.UUID      `db:"passenger_id"`
-	MySourceID      uuid.UUID      `db:"my_source_id"`
-	MyDestinationID uuid.UUID      `db:"my_destination_id"`
-	MyStatus        string         `db:"my_status"`
-	DriverID        uuid.UUID      `db:"driver_id"`
-	DriverName      string         `db:"driver_name"`
-	PassengerLimit  int            `db:"passenger_limit"`
-	SourceID        uuid.UUID      `db:"source_id"`
-	SourceName      string         `db:"source_name"`
-	SourcePlaceID   string         `db:"source_place_id"`
-	SourceLatitude  float64        `db:"source_latitude"`
-	SourceLongitude float64        `db:"source_longitude"`
-	DestinationID   uuid.UUID      `db:"destination_id"`
-	DestinationName string         `db:"destination_name"`
-	DestinationPlaceID   string    `db:"destination_place_id"`
-	DestinationLatitude  float64   `db:"destination_latitude"`
-	DestinationLongitude float64   `db:"destination_longitude"`
-	TripStatus      string         `db:"trip_status"`
-	StartTime       time.Time      `db:"start_time"`
-	CreatedAt       time.Time      `db:"trip_created_at"`
-	UpdatedAt       time.Time      `db:"trip_updated_at"`
-	Comment         sql.NullString `db:"trip_comment"`
-	Rating          sql.NullInt64  `db:"trip_rating"`
+	TripID               uuid.UUID      `db:"trip_id"`
+	PassengerID          uuid.UUID      `db:"passenger_id"`
+	MySourceID           uuid.UUID      `db:"my_source_id"`
+	MyDestinationID      uuid.UUID      `db:"my_destination_id"`
+	MyStatus             string         `db:"my_status"`
+	DriverID             uuid.UUID      `db:"driver_id"`
+	DriverName           string         `db:"driver_name"`
+	DriverImageURL       string         `db:"driver_image_url"`
+	PassengerLimit       int            `db:"passenger_limit"`
+	SourceID             uuid.UUID      `db:"source_id"`
+	SourceName           string         `db:"source_name"`
+	SourcePlaceID        string         `db:"source_place_id"`
+	SourceLatitude       float64        `db:"source_latitude"`
+	SourceLongitude      float64        `db:"source_longitude"`
+	DestinationID        uuid.UUID      `db:"destination_id"`
+	DestinationName      string         `db:"destination_name"`
+	DestinationPlaceID   string         `db:"destination_place_id"`
+	DestinationLatitude  float64        `db:"destination_latitude"`
+	DestinationLongitude float64        `db:"destination_longitude"`
+	TripStatus           string         `db:"trip_status"`
+	StartTime            time.Time      `db:"start_time"`
+	CreatedAt            time.Time      `db:"trip_created_at"`
+	UpdatedAt            time.Time      `db:"trip_updated_at"`
+	Comment              sql.NullString `db:"trip_comment"`
+	Rating               sql.NullInt64  `db:"trip_rating"`
 }
 
 func toCoreUserTrip(dbUserTrip dbUserTrip) trip.UserTrip {
@@ -74,30 +75,31 @@ func toCoreUserTrip(dbUserTrip dbUserTrip) trip.UserTrip {
 	}
 
 	trip := trip.UserTrip{
-		TripID:          dbUserTrip.TripID,
-		PassengerID:     dbUserTrip.PassengerID,
-		MySourceID:      dbUserTrip.MySourceID,
-		MyDestinationID: dbUserTrip.MyDestinationID,
-		MyStatus:        dbUserTrip.MyStatus,
-		DriverID:        dbUserTrip.DriverID,
-		DriverName:      dbUserTrip.DriverName,
-		PassengerLimit:  dbUserTrip.PassengerLimit,
-		SourceID:        dbUserTrip.SourceID,
-		SourceName:      dbUserTrip.SourceName,
-		SourcePlaceID:   dbUserTrip.SourcePlaceID,
-		SourceLatitude:  dbUserTrip.SourceLatitude,
-		SourceLongitude: dbUserTrip.SourceLongitude,
-		DestinationID:   dbUserTrip.DestinationID,
-		DestinationName: dbUserTrip.DestinationName,
+		TripID:               dbUserTrip.TripID,
+		PassengerID:          dbUserTrip.PassengerID,
+		MySourceID:           dbUserTrip.MySourceID,
+		MyDestinationID:      dbUserTrip.MyDestinationID,
+		MyStatus:             dbUserTrip.MyStatus,
+		DriverID:             dbUserTrip.DriverID,
+		DriverName:           dbUserTrip.DriverName,
+		DriverImageURL:       dbUserTrip.DriverImageURL,
+		PassengerLimit:       dbUserTrip.PassengerLimit,
+		SourceID:             dbUserTrip.SourceID,
+		SourceName:           dbUserTrip.SourceName,
+		SourcePlaceID:        dbUserTrip.SourcePlaceID,
+		SourceLatitude:       dbUserTrip.SourceLatitude,
+		SourceLongitude:      dbUserTrip.SourceLongitude,
+		DestinationID:        dbUserTrip.DestinationID,
+		DestinationName:      dbUserTrip.DestinationName,
 		DestinationPlaceID:   dbUserTrip.DestinationPlaceID,
 		DestinationLatitude:  dbUserTrip.DestinationLatitude,
 		DestinationLongitude: dbUserTrip.DestinationLongitude,
-		TripStatus:      dbUserTrip.TripStatus,
-		StartTime:       dbUserTrip.StartTime.In(time.Local),
-		CreatedAt:       dbUserTrip.CreatedAt.In(time.Local),
-		UpdatedAt:       dbUserTrip.UpdatedAt.In(time.Local),
-		Comment:         comment,
-		Rating:          rating,
+		TripStatus:           dbUserTrip.TripStatus,
+		StartTime:            dbUserTrip.StartTime.In(time.Local),
+		CreatedAt:            dbUserTrip.CreatedAt.In(time.Local),
+		UpdatedAt:            dbUserTrip.UpdatedAt.In(time.Local),
+		Comment:              comment,
+		Rating:               rating,
 	}
 
 	return trip
