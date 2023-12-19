@@ -285,6 +285,26 @@ func (h *Handlers) Join(ctx context.Context, c *gin.Context) error {
 	return web.Respond(ctx, c.Writer, toAppTripPassenger(tripPassenger), http.StatusCreated)
 }
 
+func (h *Handlers) UpdatePassengerStatus(ctx context.Context, c *gin.Context) error {
+	tripID := uuid.Must(uuid.Parse(c.Param("id")))
+	passengerID := uuid.Must(uuid.Parse(c.Param("passenger_id")))
+
+	var app struct {
+		Status string `json:"status"`
+	}
+	// Validate the request.
+	if err := web.Decode(c, &app); err != nil {
+		return response.NewError(err, http.StatusBadRequest)
+	}
+
+	tripPassenger, err := h.trip.UpdatePassengerStatus(ctx, tripID, passengerID, app.Status)
+	if err != nil {
+		return fmt.Errorf("accept: tripPassenger[%+v]: %w", tripPassenger, err)
+	}
+
+	return web.Respond(ctx, c.Writer, toAppTripPassenger(tripPassenger), http.StatusOK)
+}
+
 // @Summary get all passengers of a trip
 // @Schemes
 // @Description QueryPassengers will query passengers of a trip

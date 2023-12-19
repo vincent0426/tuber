@@ -45,7 +45,7 @@ type Storer interface {
 	Join(ctx context.Context, tripPassenger TripPassenger) error
 
 	QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetails, error)
-
+	UpdatePassengerStatus(ctx context.Context, tripPassenger TripPassenger) error
 	CreateRating(ctx context.Context, rating Rating) error
 }
 
@@ -239,6 +239,20 @@ func (c *Core) Join(ctx context.Context, tripID uuid.UUID, ntp NewTripPassenger)
 	}
 
 	if err := c.storer.Join(ctx, tripPassenger); err != nil {
+		return TripPassenger{}, fmt.Errorf("create: %w", err)
+	}
+
+	return tripPassenger, nil
+}
+
+func (c *Core) UpdatePassengerStatus(ctx context.Context, tripID uuid.UUID, passengerID uuid.UUID, status string) (TripPassenger, error) {
+	tripPassenger := TripPassenger{
+		TripID:      tripID,
+		PassengerID: passengerID,
+		Status:      status,
+	}
+
+	if err := c.storer.UpdatePassengerStatus(ctx, tripPassenger); err != nil {
 		return TripPassenger{}, fmt.Errorf("create: %w", err)
 	}
 

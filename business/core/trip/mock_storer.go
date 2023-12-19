@@ -48,6 +48,11 @@ func (m *MockStorer) Join(ctx context.Context, tripPassenger TripPassenger) erro
 	return args.Error(0)
 }
 
+func (m *MockStorer) UpdatePassengerStatus(ctx context.Context, tripPassenger TripPassenger) error {
+	args := m.Called(ctx, tripPassenger)
+	return args.Error(0)
+}
+
 func (m *MockStorer) QueryPassengers(ctx context.Context, tripID uuid.UUID) (TripDetails, error) {
 	fmt.Println("MockStorer.QueryPassengers", tripID)
 	args := m.Called(ctx, tripID)

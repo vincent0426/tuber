@@ -317,6 +317,28 @@ func (s *Store) Join(ctx context.Context, tripPassenger trip.TripPassenger) erro
 	return nil
 }
 
+func (s *Store) UpdatePassengerStatus(ctx context.Context, tripPassenger trip.TripPassenger) error {
+	dbTripPassenger := toDBTripPassenger(tripPassenger)
+	sql, args, err := sq.
+		Update("trip_passenger").
+		Set("status", dbTripPassenger.Status).
+		Where(sq.Eq{"trip_id": dbTripPassenger.TripID}).
+		Where(sq.Eq{"passenger_id": dbTripPassenger.PassengerID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("tosql: %w", err)
+	}
+
+	// execute the sql
+	if err := database.ExecContext(ctx, s.log, s.db, sql, args); err != nil {
+		return fmt.Errorf("execcontext: %w", err)
+	}
+
+	return nil
+}
+
 // // Count returns the total number of trips in the DB.
 func (s *Store) Count(ctx context.Context, filter trip.QueryFilter) (int, error) {
 	builder := sq.Select("COUNT(*) AS count").From("trip")

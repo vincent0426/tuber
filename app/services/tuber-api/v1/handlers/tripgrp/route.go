@@ -47,6 +47,6 @@ func Routes(app *web.App, cfg Config) {
 	app.Handle(http.MethodPost, version, "/trips/:id/join", hdl.Join, authen)
 
 	app.Handle(http.MethodGet, version, "/trips/:id/passengers", hdl.QueryPassengers, authen)
-
+	app.Handle(http.MethodPut, version, "/trips/:id/passengers/:passenger_id", hdl.UpdatePassengerStatus, authen)
 	app.Handle(http.MethodPost, version, "/trips/:id/rating", hdl.CreateRating, authen)
 }
