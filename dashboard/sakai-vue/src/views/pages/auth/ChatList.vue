@@ -76,7 +76,7 @@ const getBackgroundColor = (color) => {
                                 <div class="locations">{{ ride.trip_user_list.source_name }} -> {{ ride.trip_user_list.destination_name }}</div>
                             </div>
                         </div>
-                        <div style="width: 270px; height: min-content; margin-right: 10px; margin-bottom: 10px">
+                        <div style="display: flex; justify-content: flex-start; width: 270px; height: min-content; margin-right: 10px; margin-bottom: 10px">
                             <div style="font-weight: 600; padding-top: 10px; font-style: italic">Passengers: {{ ride.trip_passengers_name }}</div>
                         </div>
                     </div>

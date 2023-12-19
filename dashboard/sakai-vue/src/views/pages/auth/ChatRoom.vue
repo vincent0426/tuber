@@ -30,6 +30,7 @@ const processMessage = (rawMessage) => {
 };
 
 const initializeWebSocket = () => {
+    console.log(user.id);
     socket.value = new WebSocket(`ws://localhost:3000/v1/chat/ws?room=${tripId.value}&user_id=${user.id}`);
 
     socket.value.addEventListener('open', (event) => {
@@ -64,11 +65,45 @@ onBeforeUnmount(() => {
         <!-- <div>Trip ID: {{ tripId }}</div> -->
         <h3 style="text-align: center">Chat Room</h3>
         <div class="message-container">
-            <div v-for="(message, index) in messages" :key="index" class="message">
-                <img :src="message.ImageURL" class="message-avatar" />
-                <div class="message-content">
-                    <strong>{{ message.Username }}</strong
-                    >: {{ message.MessageText }}
+            <div
+                v-for="(message, index) in messages"
+                :key="index"
+                :style="{
+                    display: 'flex',
+                    'margin-bottom': '20px',
+                    // 'flex-direction': message.UserID === user.id ? 'row' : 'row-reverse',
+                    width: '380px',
+                    'justify-content': message.UserID === user.id ? 'flex-end' : 'flex-start',
+                    'margin-bottom': '20px',
+                    // 'margin-right': message.UserID === user.id ? '2px' : '0',
+                    'max-width': '100%'
+                }"
+            >
+                <div v-if="message.UserID !== user.id" style="background-color: white; display: flex; flex-direction: column; margin-right: 12px">
+                    <img :src="message.ImageURL" class="message-avatar" />
+                    <div style="font-weight: 900; margin: 0 auto">{{ message.Username }}</div>
+                    <!-- <img v-if="message.UserID !== user.id" :src="message.ImageURL" class="message-avatar" /> -->
+                </div>
+
+                <div
+                    :style="{
+                        color: '#FFFFFF',
+                        'border-radius': message.UserID === user.id ? '30px 30px 0px 30px' : '30px 30px 30px 0px',
+                        background: message.UserID === user.id ? 'linear-gradient(to right, rgba(0, 123, 255, 0.8), rgba(0, 183, 255, 0.7))' : '#D3D3D3',
+                        display: 'flex',
+                        'align-items': 'center',
+                        padding: '10px 20px',
+                        'word-wrap': 'break-word'
+                    }"
+                >
+                    <div class="text">
+                        {{ message.MessageText }}
+                    </div>
+                </div>
+                <div v-if="message.UserID === user.id" style="background-color: white; display: flex; flex-direction: column; margin-left: 12px">
+                    <img :src="message.ImageURL" class="message-avatar" />
+                    <div style="font-weight: 900; margin: 0 auto">{{ message.Username }}</div>
+                    <!-- <img v-if="message.UserID !== user.id" :src="message.ImageURL" class="message-avatar" /> -->
                 </div>
             </div>
         </div>
@@ -83,6 +118,11 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.text {
+    justify-content: flex-end;
+    word-wrap: break-word; /* 在单词内换行 */
+    max-width: 260px;
+}
 .send-button-container {
     border-radius: 20%;
     background-color: rgba(0, 0, 0, 0.7);
@@ -102,7 +142,6 @@ onBeforeUnmount(() => {
     cursor: pointer;
 }
 .message-container {
-    overflow-y: auto;
     border: 1px solid #cecbcb;
     padding: 10px;
     width: 380px; /* Set the maximum width of the container */
@@ -110,24 +149,30 @@ onBeforeUnmount(() => {
     margin: 0 auto; /* Center the container horizontally */
     overflow-y: auto; /* Hide content if it exceeds the height of the container */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-}
-.message {
     display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+    /* justify-content: flex-start; */
+    flex-direction: column;
 }
-
 .message-avatar {
     width: 40px;
     height: 40px;
     border-radius: 20px;
-    margin-right: 10px;
+    margin: 0 auto;
 }
 
-.message-content {
-    flex: 1;
+.message-right {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+    display: flex;
+    margin-bottom: 20px;
+    flex-direction: row;
+    width: 380px;
 }
 
+.message-left {
+    flex-direction: row;
+    justify-content: flex-end;
+}
 .input-container {
     position: fixed;
     bottom: 35px;

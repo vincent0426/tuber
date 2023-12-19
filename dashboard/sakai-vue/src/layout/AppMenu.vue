@@ -59,7 +59,8 @@ const model_driver = ref([
             { label: 'Home', icon: 'pi pi-fw pi-home', to: '/driver/home' },
             { label: 'Create A Trip', icon: 'pi pi-fw pi-plus', to: '/driver/create' },
             { label: 'History', icon: 'pi pi-fw pi-book', to: '/driver/history' },
-            { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/setting' }
+            { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/setting' },
+            { label: 'Chat', icon: 'pi pi-fw pi-comment', to: '/chatList' }
         ]
     },
     {
