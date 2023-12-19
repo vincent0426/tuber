@@ -251,6 +251,7 @@ func (s *Store) QueryMyTrip(ctx context.Context, userID uuid.UUID, filter trip.Q
 		"trip.id AS trip_id",
 		"trip.driver_id",
 		"driver.name AS driver_name",
+		"driver.image_url AS driver_image_url",
 		"trip.passenger_limit",
 		"trip.source_id",
 		"trip.destination_id",
