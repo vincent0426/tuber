@@ -343,7 +343,7 @@ initMap();
                     <label for="licenseplatenumber">License Plate Number</label>
                 </span> -->
                 <h5>Passenger Number</h5>
-                <InputText id="passengernumber" placeholder="e.g. 4" v-model="passengernumberValue" />
+                <InputText id="passengernumber" placeholder="e.g. 4(包含司機自己)" v-model="passengernumberValue" />
                 <h5>From</h5>
                 <InputText class="search-location" placeholder="Search" id="Start" type="text" />
                 <h5>To</h5>

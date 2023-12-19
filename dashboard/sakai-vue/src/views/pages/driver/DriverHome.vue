@@ -93,7 +93,12 @@ function DateConvert(dateString) {
                                     <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
                                     <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
                                 </div>
-                                <div class="text-center">
+                                <div class="text-center p-2">
+                                    <router-link :to="'/TripDetail/' + slotProps.data.TripID">
+                                        <Button label="Trip Detail" class="mb-2"></Button>
+                                    </router-link>
+                                </div>
+                                <div class="text-right">
                                     <router-link :to="'/OnTrip/' + slotProps.data.TripID">
                                         <Button label="Start Trip" class="mb-2"></Button>
                                     </router-link>

@@ -161,9 +161,26 @@ function DateConvert(dateString) {
                     });
             }
         };
+        
         document.getElementById("Save").addEventListener("click",onJoinTrip);
+        
     }
-
+    const AddPassenger = (passengerID)=>{
+        if(isDriver){
+            tripService.acceptPassenger(tripID,passengerID)
+                .then(response => {
+                    // 處理成功回傳的資料
+                    alert("Success");
+                    console.log(response);
+                    location.reload();
+                })
+                .catch(error => {
+                        // 處理錯誤
+                    console.log(error);
+                    alert(error.error);
+                });
+        }
+    }
     // Set markers at the location of each place result
     function createMarker(place) {
       if (!place.geometry || !place.geometry.location) return;
@@ -287,7 +304,7 @@ function DateConvert(dateString) {
                     </Column>
                     <Column field="Add" header="Add" style="min-width: 6rem" v-if="isDriver">
                         <template #body="{ data }">
-                            <Button label="+" class="mr-2 mb-2"></Button>
+                            <Button label="+" class="mr-2 mb-2" id="addPassenger" @click="AddPassenger(data.passenger_id)"></Button>
                         </template>
                     </Column>
                     

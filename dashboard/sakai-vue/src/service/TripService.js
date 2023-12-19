@@ -65,4 +65,13 @@ export class TripService {
             }
         });
     }
+    acceptPassenger(id,passengerID){
+        return request({
+            method: 'put',
+            url: '/trips/' + id + '/passengers/' + passengerID,
+            data: {
+                status: "accepted"
+            }
+        });
+    }
 }
