@@ -48,11 +48,26 @@ onMounted(() => {
             ID: data.source_id
         });
         mid_end.value = mid_start.value;
-        console.log(mid_end);
+        console.log(data);
     });
     tripService.getPassengers(tripID).then((data) => {
-        customer1.value = data.passenger_details;
-        //console.log(data);
+        if(!isDriver){
+            let arr = data.passenger_details;
+            let arrlen = arr.length;
+            for(var i = 0;i < arr.length;i++){
+                if(arr[i].passenger_status == 'pending'){
+                    delete arr[i];
+                    arrlen -= 1;
+                }
+            }
+            console.log(arr);
+            arr.length = arrlen;
+            customer1.value = arr;
+        }
+        else{
+            customer1.value = data.passenger_details;
+        }
+        
     });
 });
 function DateConvert(dateString) {
@@ -144,7 +159,6 @@ function DateConvert(dateString) {
         });
         const onJoinTrip = function (){
             if(!isDriver){
-                
                 let sourceID = StartStaion.value;
                 let destinationID = EndStaion.value;
                 console.log(tripID,sourceID,destinationID);
@@ -325,7 +339,7 @@ function DateConvert(dateString) {
                 </div>
                 <br><br>
                 <div class="col-4">
-                    <Button label="Save" class="mr-2 mb-2" id="Save"></Button>
+                    <Button label="Save" class="md:w-auto align-items-center" id="Save"></Button>
                 </div>
                 
             </div>
