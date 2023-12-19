@@ -30,7 +30,7 @@ const parsedData = JSON.parse(myData);
 const role = parsedData.role;
 var tripData;
 var location;
-
+var isOnTrip;
 const sendMessage = (currentPosition) => {
     socket.value.send(JSON.stringify({ "latitute": currentPosition.lat, "longitude": currentPosition.lng }));
     console.log(currentPosition);
@@ -133,6 +133,7 @@ onBeforeUnmount(() => {
     let markerNow;
 
     async function initMap() {
+        isOnTrip = true;
         // Request libraries when needed, not in the script tag.
         const { Map } = await google.maps.importLibrary("maps");
         const { Geometry } = await google.maps.importLibrary("geometry");
@@ -193,6 +194,7 @@ onBeforeUnmount(() => {
             calculateAndDisplayRoute(directionsService, directionsRenderer);
             refreshCurrentPlace();
         });
+        document.getElementById('endTrip').addEventListener('click', EndTrip);
     }
    
     function createMarker(place) {
@@ -229,7 +231,8 @@ onBeforeUnmount(() => {
         .catch((e) => console.log("Directions request failed due to " + e));
     }
     function refreshCurrentPlace(){
-        if(role == 'driver'){
+        console.log(isOnTrip);
+        if(role == 'driver' && isOnTrip){
             navigator.geolocation.getCurrentPosition(function(position){
                 currentPosition = {
                     lat: position.coords.latitude,
@@ -250,9 +253,10 @@ onBeforeUnmount(() => {
             });
         }
     }
-    function EndTrip(){
-        tripService.endTrip(tripID,passengerLimit).then((data) => {
+    const EndTrip = function(){
+        tripService.endTrip(tripID,Number(passengerLimit)).then((data) => {
             console.log(data);
+            isOnTrip = false;
             alert("End");
         });
     }
