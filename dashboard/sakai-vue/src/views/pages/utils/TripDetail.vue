@@ -19,7 +19,10 @@ const customer1 = ref(null);
 const mid_start = ref(null);
 const mid_end = ref(null);
 const passenger_limit = ref(null);
-
+const myData = localStorage.getItem('vuex-state');
+const parsedData = JSON.parse(myData);
+const role = parsedData.role;
+const isDriver = (role == 'driver');
 var tripData;
 
 onMounted(() => {
@@ -140,20 +143,23 @@ function DateConvert(dateString) {
             calculateAndDisplayRoute(directionsService, directionsRenderer);
         });
         const onJoinTrip = function (){
-            let sourceID = StartStaion.value;
-            let destinationID = EndStaion.value;
-            console.log(tripID,sourceID,destinationID);
-            tripService.joinTrip(tripID,sourceID,destinationID)
-                .then(response => {
-                    // 處理成功回傳的資料
-                    alert("Success");
-                    console.log(response);
-                })
-                .catch(error => {
-                    // 處理錯誤
-                    console.log(error);
-                    alert(error.error);
-                });
+            if(!isDriver){
+                
+                let sourceID = StartStaion.value;
+                let destinationID = EndStaion.value;
+                console.log(tripID,sourceID,destinationID);
+                tripService.joinTrip(tripID,sourceID,destinationID)
+                    .then(response => {
+                        // 處理成功回傳的資料
+                        alert("Success");
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        // 處理錯誤
+                        console.log(error);
+                        alert(error.error);
+                    });
+            }
         };
         document.getElementById("Save").addEventListener("click",onJoinTrip);
     }
@@ -205,6 +211,9 @@ function DateConvert(dateString) {
     <div class="grid">
         <div class="col-12">
             <h3>Trip Info</h3>
+            <router-link :to="'/'+ role +'/home'">
+                    <Button label="Home" class="mb-2"></Button>
+            </router-link>
             <div class="card">
                 <div class="grid grid-nogutter">
                     <div class="col-4 text-left">
@@ -254,19 +263,31 @@ function DateConvert(dateString) {
                     
                     <template #empty> No customers found. </template>
                     <template #loading> Loading customers data. Please wait. </template>
-                    <Column field="passenger_id" header="ID" style="min-width: 12rem">
+                    <Column field="passenger_id" header="ID" style="min-width: 6rem">
                         <template #body="{ data }">
                             {{ data.passenger_name }}
                         </template>
                     </Column>
-                    <Column field="source_name" header="Source" style="min-width: 12rem">
+                    <Column field="source_name" header="Source" style="min-width: 6rem">
                         <template #body="{ data }">
                             {{ data.source_name }}
                         </template>
                     </Column>
-                    <Column field="destination_name" header="Destination" style="min-width: 12rem">
+                    <Column field="destination_name" header="Destination" style="min-width: 6rem">
                         <template #body="{ data }">
                             {{ data.destination_name }}
+                        </template>
+                    </Column>
+                    <Column field="status" header="Status" style="min-width: 6rem" v-if="isDriver">
+                        <template #body="{ data }">
+                            {{ data.passenger_status }}
+                            
+                        </template>
+                        
+                    </Column>
+                    <Column field="Add" header="Add" style="min-width: 6rem" v-if="isDriver">
+                        <template #body="{ data }">
+                            <Button label="+" class="mr-2 mb-2"></Button>
                         </template>
                     </Column>
                     

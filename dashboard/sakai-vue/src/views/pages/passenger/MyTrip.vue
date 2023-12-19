@@ -85,9 +85,7 @@ function DateConvert(dateString) {
                                     <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
                                     <!-- <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" class="mb-2"></Rating> -->
                                 </div>
-                                <div class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-center md:align-items-end mt-5 md:mt-0">
-                                    <!-- <span class="text-2xl font-semibold mb-2 align-self-center md:align-self-end">${{ slotProps.data.price }}</span> -->
-                                    <!-- <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2" onclick="location.href='/#/TripDetail/'+ {{ slotProps.data.id }}"></Button> -->
+                                <div class="flex flex-row md:w-auto align-items-center">
                                     <router-link :to="'/OnTrip/' + slotProps.data.TripID">
                                         <Button label="Start Trip" class="mb-2"></Button>
                                     </router-link>

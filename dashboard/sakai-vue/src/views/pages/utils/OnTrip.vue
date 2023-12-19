@@ -21,7 +21,9 @@ const driverName = ref(null);
 const driver_image_url = ref(null);
 const driver_plate = ref(null);
 const start_time = ref(null);
+const passengerLimit = ref(null);
 const mid = ref(null);
+const customer1 =ref(null);
 
 const myData = localStorage.getItem('vuex-state');
 const parsedData = JSON.parse(myData);
@@ -92,7 +94,21 @@ onMounted(() => {
         driver_plate.value = data.driver_plate;
         start_time.value = data.start_time;
         mid.value = data.mid;
+        passengerLimit.value = data.passenger_limit;
         console.log(data);
+    });
+    tripService.getPassengers(tripID).then((data) => {
+        let arr = data.passenger_details;
+        let arrlen = arr.length;
+        for(var i = 0;i < arr.length;i++){
+            if(arr[i].passenger_status == 'pending'){
+                delete arr[i];
+                arrlen -= 1;
+            }
+        }
+        console.log(arr);
+        arr.length = arrlen;
+        customer1.value = arr;
     });
 });
 onBeforeUnmount(() => {
@@ -234,14 +250,23 @@ onBeforeUnmount(() => {
             });
         }
     }
+    function EndTrip(){
+        tripService.endTrip(tripID,passengerLimit).then((data) => {
+            console.log(data);
+            alert("End");
+        });
+    }
     initMap();
     setInterval(function() {refreshCurrentPlace()}, 15000);
 
 </script>
 <template>
     <div class="grid">
-        <div class="col-12">
+        <div class="col-12 card">
                 <h4>Trip</h4>
+                <router-link :to="'/'+ role +'/home'">
+                    <Button label="Home" class="mb-2"></Button>
+                </router-link>
                 <div class="flex justify-content-left">
                     <div id="map" style="width: 100%; height: 70vh"></div>
                 </div>
@@ -252,7 +277,59 @@ onBeforeUnmount(() => {
                     <div class="font-bold text-2xl">To:{{ destination }}</div>
                     <br>
                     <div class="font-bold text-2xl">Start Time:{{ start_time }}</div>
+                    <br>
+                    <Button class="font-bold text-cenetr" id="endTrip" label="End" v-if="role=='driver'"/>
+                    
                 </div>
         </div>
+        <div class="card col-12">
+                <h5>Other Passengers</h5>
+                <DataTable
+                    :value="customer1"
+                    :paginator="true"
+                    class="p-datatable-gridlines"
+                    :rows="10"
+                    dataKey="id"
+                    :rowHover="true"
+                    v-model:filters="filters1"
+                    filterDisplay="menu"
+                    :loading="loading1"
+                    :filters="filters1"
+                    responsiveLayout="scroll"
+                    :globalFilterFields="['passenger_id', 'status']"
+                >
+                    
+                    <template #empty> No customers found. </template>
+                    <template #loading> Loading customers data. Please wait. </template>
+                    <Column field="passenger_id" header="ID" style="min-width: 6rem">
+                        <template #body="{ data }">
+                            {{ data.passenger_name }}
+                        </template>
+                    </Column>
+                    <Column field="source_name" header="Source" style="min-width: 6rem">
+                        <template #body="{ data }">
+                            {{ data.source_name }}
+                        </template>
+                    </Column>
+                    <Column field="destination_name" header="Destination" style="min-width: 6rem">
+                        <template #body="{ data }">
+                            {{ data.destination_name }}
+                        </template>
+                    </Column>
+                    <Column field="status" header="Status" style="min-width: 6rem" v-if="isDriver">
+                        <template #body="{ data }">
+                            {{ data.passenger_status }}
+                            
+                        </template>
+                        
+                    </Column>
+                    <Column field="Add" header="Add" style="min-width: 6rem" v-if="isDriver">
+                        <template #body="{ data }">
+                            <Button label="+" class="mr-2 mb-2"></Button>
+                        </template>
+                    </Column>
+                    
+                </DataTable>
+            </div> 
     </div>
 </template>

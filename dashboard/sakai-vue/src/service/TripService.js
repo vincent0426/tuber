@@ -55,4 +55,14 @@ export class TripService {
             url: '/trips/my?status=not_start&is_driver=' + is_driver
         });
     }
+    endTrip(id,passengerLimit){
+        return request({
+            method: 'put',
+            url: '/trips/' + id,
+            data: {
+                status: "finished",
+                passenger_limit: passengerLimit
+            }
+        });
+    }
 }

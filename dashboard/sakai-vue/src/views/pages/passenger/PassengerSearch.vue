@@ -92,7 +92,7 @@ console.log(dataviewValue);
                                     <div class="font-bold text-2xl">To:{{ slotProps.data.destination_name }}</div>
                                     <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.start_time) }}</div>
                                 </div>
-                                <div class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-center md:align-items-end mt-5 md:mt-0">
+                                <div class="flex flex-row md:w-auto align-items-center">
                                     <router-link :to="'/TripDetail/' + slotProps.data.id">
                                         <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button>
                                     </router-link>
