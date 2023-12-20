@@ -96,7 +96,5 @@ function DateConvert(dateString) {
                 </DataView>
             </div>
         </div>
-
-        
     </div>
 </template>

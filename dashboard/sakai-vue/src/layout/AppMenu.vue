@@ -15,7 +15,6 @@ const model_passenger = ref([
             // { label: 'set profile', icon: 'pi pi-fw pi-home', to: '/profile' },
             { label: 'Home', icon: 'pi pi-fw pi-home', to: '/passenger/home' },
             { label: 'Search', icon: 'pi pi-fw pi-search', to: '/passenger/search' },
-            { label: 'My trip', icon: 'pi pi-fw pi-car', to: '/passenger/mytrip' },
             { label: 'History trip', icon: 'pi pi-fw pi-book', to: '/passenger/history' },
             { label: 'Setting', icon: 'pi pi-fw pi-cog', to: '/setting' },
             { label: 'Favorite Driver', icon: 'pi pi-fw pi-heart', to: '/passenger/favorite' },
@@ -77,11 +76,6 @@ const model_driver = ref([
                         icon: 'pi pi-fw pi-sign-out',
                         to: '/login'
                     },
-                    // {
-                    //     label: 'Access Denied',
-                    //     icon: 'pi pi-fw pi-lock',
-                    //     to: '/auth/access'
-                    // },
                     {
                         label: 'Switch to Passenger',
                         icon: 'pi pi-fw pi-arrows-h',

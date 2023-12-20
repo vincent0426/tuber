@@ -80,11 +80,6 @@ const router = createRouter({
                     component: () => import('@/views/pages/utils/Setting.vue')
                 },
                 {
-                    path: '/driver/profile',
-                    name: 'DriverProfile',
-                    component: () => import('@/views/pages/driver/DriverProfile.vue')
-                },
-                {
                     path: '/driver/applylist',
                     name: 'ApplyList',
                     component: () => import('@/views/pages/driver/ApplyList.vue')

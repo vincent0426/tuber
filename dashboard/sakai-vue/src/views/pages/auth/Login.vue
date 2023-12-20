@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, ref } from 'vue';
-import AppConfig from '@/layout/AppConfig.vue';
 import store from '@/store';
 import router from '@/router';
 

@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 import InputSwitch from 'primevue/inputswitch';
+import store from '../store/index.js';
 
 const { layoutConfig, onMenuToggle } = useLayout();
 
@@ -69,7 +70,7 @@ const isOutsideClicked = (event) => {
 
 <template>
     <div class="layout-topbar">
-        <router-link to="/" class="layout-topbar-logo">
+        <router-link :to="'/' + store.getters.role + '/home'" class="layout-topbar-logo">
             <span>TUber</span>
         </router-link>
 
@@ -84,7 +85,9 @@ const isOutsideClicked = (event) => {
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
             <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
                 <i class="pi pi-user"></i>
-                <span>Profile</span>
+                <router-link to='/profile' class="layout-topbar-logo">
+                    <span>Profile</span>
+                </router-link>
             </button>
         </div>
     </div>
