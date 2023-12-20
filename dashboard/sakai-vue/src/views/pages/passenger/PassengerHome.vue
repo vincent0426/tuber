@@ -114,21 +114,28 @@ const onSortChange = (event) => {
                 <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="10">
                    
                     <template #list="slotProps">
-                        <div class="col-12">
-                            <div class="flex flex-column md:flex-row align-items-center p-3 w-full">
-                                <div class="flex-1 text-center md:text-left">
-                                    <div class="font-bold text-2xl">From:{{ slotProps.data.SourceName }}</div>
-                                    <div class="font-bold text-2xl">To:{{ slotProps.data.DestinationName }}</div>
-                                    <div class="mb-3">Driver Name:{{ slotProps.data.DriverName }}</div>
-                                    <div class="mb-3">Start Time:{{ DateConvert(slotProps.data.StartTime) }}</div>
-                                    <!-- <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" class="mb-2"></Rating> -->
+                        <div class="card">
+                            <!-- <div class="border-round border-1 surface-border p-4"> -->
+                                <div class="flex mb-3">
+                                <img :src="slotProps.data.driver_image_url" :alt="slotProps.data.driver_name" class="w-3 shadow-2 my-3 mx-0" style="margin: auto;"/>
+                                <div style="margin: auto;">
+                                    <div class="mb-1">Driver:  {{ slotProps.data.driver_name }}</div>
+                                    <div class="mb-2">Time:<br>{{ DateConvert(slotProps.data.start_time) }}</div>
                                 </div>
-                                <div class="flex flex-row md:w-auto align-items-center">
-                                    <router-link :to="'/OnTrip/' + slotProps.data.TripID">
-                                        <Button label="Start Trip" class="mb-2"></Button>
+                                </div>
+                                <div class="flex-1 text-left md:text-left" width="100%" height="150%">
+                                    <Tag class="mr-2" value="From" :rounded="true"></Tag>
+                                    <div class="font-bold text-xl">{{ slotProps.data.source_name }}</div>
+                                    <Tag class="mr-2" value="To" :rounded="true"></Tag>
+                                    <div class="font-bold text-xl">{{ slotProps.data.destination_name }}</div>
+                                   
+                                </div>
+                                <div class="flex justify-content-between mt-3">
+                                    <router-link :to="'/TripDetail/' + slotProps.data.id">
+                                        <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button>
                                     </router-link>
                                 </div>
-                            </div>
+                            <!-- </div> -->
                         </div>
                     </template>
                 </DataView>

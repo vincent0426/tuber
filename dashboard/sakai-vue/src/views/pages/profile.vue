@@ -128,7 +128,7 @@ span.content{
 }
 
 .profile-photo {
-  position: absolute;
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: cover;

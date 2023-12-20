@@ -245,8 +245,10 @@ function DateConvert(dateString) {
                 <div class="grid grid-nogutter">
                         <img :src="driver_image_url" :alt="driverName" class="w-3 shadow-2 my-3 mx-0" style="scale: 120%;margin-right: 50px;" />
                     <div class="col-18 text-middle" style="margin: auto;">
-                        <div class="font-bold text-xl">Driver: {{ driverName }}</div>
-                        <div class="font-bold text-xl">License plate number: <br>{{ driver_plate }}</div>
+                        <Tag class="mr-2" value="Driver" ></Tag>
+                        <div class="font-bold text-xl">{{ driverName }}</div>
+                        <Tag class="mr-2" value="License plate number" ></Tag>
+                        <div class="font-bold text-xl">{{ driver_plate }}</div>
                     </div>
                 
                 </div>
@@ -258,13 +260,16 @@ function DateConvert(dateString) {
         <div class="col-12">
             <div class="card">
                 <h3>Trip Info</h3>
-                <div class="flex justify-content-left">
+                <div class="flex justify-content-left" style="margin: auto; margin-bottom: 10px;">
                     <div id="map" style="width: 100%; height: 50vh"></div>
                 </div>
-                <div class="col-16 text-left">
-                    <div class="font-bold text-xl">From: <br>{{ source }}</div>
-                    <div class="font-bold text-xl">To: <br>{{ destination }}</div>
-                    <div class="font-bold text-xl">Start Time: <br>{{ DateConvert(start_time) }}</div>
+                <div class="col-16 text-left" style="margin: auto;">
+                    <Tag class="mr-2" value="From" ></Tag>
+                    <div class="font-bold text-xl">{{ source }}</div>
+                    <Tag class="mr-2" value="To" ></Tag>
+                    <div class="font-bold text-xl">{{ destination }}</div>
+                    <Tag class="mr-2" value="Time" ></Tag>
+                    <div class="font-bold text-xl">{{ DateConvert(start_time) }}</div>
                     
                 </div>
             </div>
@@ -319,15 +324,13 @@ function DateConvert(dateString) {
                 </DataTable>
             </div> 
         <div class="col-12 card">
-            <div class="grid grid-nogutter">
+            <div class="grid grid-nogutter" style="margin: 10px;">
                 
-                <div class="col-12">
-                    <h5>Start</h5>
+                <div class="col-12" style="margin: auto;">
+                    <Tag class="mr-2" value="Start" ></Tag>
                     <Dropdown id="StartStop" v-model="StartStaion" :options="mid_start" optionValue="ID" optionLabel="Name" placeholder="Select a Start" @change="getStartStaionValue" class="w-full md:w-14rem">
                     </Dropdown>
-                </div>
-                <div class="col-12">
-                    <h5>End</h5>
+                    <Tag class="mr-2" value="End" ></Tag>
                     <Dropdown id="EndStop" v-model="EndStaion" :options="mid_end" optionValue="ID" optionLabel="Name" placeholder="Select a End" class="w-full md:w-14rem">
                     </Dropdown>
                 </div>
