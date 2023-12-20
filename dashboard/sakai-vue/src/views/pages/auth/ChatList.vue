@@ -71,13 +71,13 @@ const getBackgroundColor = (color) => {
                             <div class="avatar-container">
                                 <img alt="driver avatar" :src="ride.trip_user_list.driver_details.driver_image_url" class="avatar" />
                             </div>
-                            <div style="display:flex flex-direction:column">
+                            <div style="color:black; display:flex flex-direction:column">
                                 <div class="driver-name">Driver: {{ ride.trip_driver_name }}</div>
                                 <div class="locations">{{ ride.trip_user_list.source_name }} -> {{ ride.trip_user_list.destination_name }}</div>
                             </div>
                         </div>
                         <div style="display: flex; justify-content: flex-start; width: 270px; height: min-content; margin-right: 10px; margin-bottom: 10px">
-                            <div style="font-weight: 600; padding-top: 10px; font-style: italic">Passengers: {{ ride.trip_passengers_name }}</div>
+                            <div style="font-weight: 600; padding-top: 10px; font-style: italic; color: black">Passengers: {{ ride.trip_passengers_name }}</div>
                         </div>
                     </div>
 
@@ -100,6 +100,7 @@ const getBackgroundColor = (color) => {
     font-size: small;
     margin-left: 20px;
     font-style: italic;
+    margin-right: 41px;
 }
 .custom-content {
     background: rgba(128, 128, 128, 0.05);
@@ -107,6 +108,7 @@ const getBackgroundColor = (color) => {
     flex-direction: row;
     height: 100%;
     width: 100%;
+    position: relative;
 }
 .ride-container {
     width: 380px; /* Set the maximum width of the container */
@@ -119,11 +121,12 @@ const getBackgroundColor = (color) => {
 }
 
 .ride-card {
-    border: 0, 0, 0, 1px solid #ccc;
+    border: 0, 0, 0, 1px solid #797676;
     padding: 10px;
     margin-bottom: 10px;
     flex: 1 0 25em;
     width: 100%;
+    background-color: gray;
 }
 
 .driver-info {
@@ -146,7 +149,8 @@ const getBackgroundColor = (color) => {
     margin-right: 10px;
 }
 .driver-name {
-    text-align: center; /* 将这个样式应用到 driver-name */
+    text-align: left;
+
     font-weight: 600;
     font-size: larger;
     /* align-items: center; */
@@ -154,7 +158,7 @@ const getBackgroundColor = (color) => {
     align-content: flex-start;
     flex-wrap: wrap;
     margin-top: 10px;
-    padding-left: -30px;
+    padding-left: 10px;
     align-self: flex-start;
 }
 
@@ -170,15 +174,13 @@ const getBackgroundColor = (color) => {
     flex-direction: column;
 }
 .right-part {
+    position: absolute;
     width: 40px;
     height: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
-    /* justify-content: center; */
-    align-content: center;
-    /* flex-wrap: wrap; */
-    right: 0px;
+    right: 0;
 }
 .left-upper {
     display: flex;

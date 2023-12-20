@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
                     'max-width': '100%'
                 }"
             >
-                <div v-if="message.UserID !== user.id" style="background-color: white; display: flex; flex-direction: column; margin-right: 12px">
+                <div v-if="message.UserID !== user.id" style="display: flex; flex-direction: column; margin-right: 12px">
                     <img :src="message.ImageURL" class="message-avatar" />
                     <div style="font-weight: 900; margin: 0 auto">{{ message.Username }}</div>
                     <!-- <img v-if="message.UserID !== user.id" :src="message.ImageURL" class="message-avatar" /> -->
@@ -100,7 +100,7 @@ onBeforeUnmount(() => {
                         {{ message.MessageText }}
                     </div>
                 </div>
-                <div v-if="message.UserID === user.id" style="background-color: white; display: flex; flex-direction: column; margin-left: 12px">
+                <div v-if="message.UserID === user.id" style="display: flex; flex-direction: column; margin-left: 12px">
                     <img :src="message.ImageURL" class="message-avatar" />
                     <div style="font-weight: 900; margin: 0 auto">{{ message.Username }}</div>
                     <!-- <img v-if="message.UserID !== user.id" :src="message.ImageURL" class="message-avatar" /> -->
@@ -121,7 +121,7 @@ onBeforeUnmount(() => {
 .text {
     justify-content: flex-end;
     word-wrap: break-word; /* 在单词内换行 */
-    max-width: 260px;
+    max-width: 250px;
 }
 .send-button-container {
     border-radius: 20%;
@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
 .message-container {
     border: 1px solid #cecbcb;
     padding: 10px;
-    width: 380px; /* Set the maximum width of the container */
+    width: 360px; /* Set the maximum width of the container */
     height: 660px;
     margin: 0 auto; /* Center the container horizontally */
     overflow-y: auto; /* Hide content if it exceeds the height of the container */
@@ -181,10 +181,10 @@ onBeforeUnmount(() => {
     margin: 0 auto;
     display: flex;
     flex-direction: row;
-    background-color: white; /* 背景色 */
+    background-color: rgba(1, 14, 14, 0.9); /* 背景色 */
     padding: 15px;
     width: 360px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    box-shadow: 0px 0px 10px rgba(41, 14, 14, 0.1); /* 添加阴影效果 */
     border-radius: 5px;
 }
 
