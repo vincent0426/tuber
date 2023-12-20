@@ -62,8 +62,8 @@
 }
 
 .avatar {
-    width: 100%;
-    height: 100%;
+    width: 50px;
+    height: 50px;
     object-fit: cover; /* 保持頭像比例 */
     border-radius: 50%; /* 圓形頭像 */
     border: 2px solid #070707; /* 添加2px的邊框 */
@@ -111,13 +111,6 @@ export default {
             });
         },
         async fetchFavorite() {
-            // try {
-            //     //加入假資料id
-            //     const response = await driverService.postFavorite('0f266daf-8585-48d4-b669-3105a7eecba3');
-            //     console.log(response);
-            // } catch (e) {
-            //     console.error('Error posting fav driver:', error);
-            // }
             try {
                 const response = await driverService.getFavorite();
                 console.log(response);
@@ -141,7 +134,7 @@ export default {
             <div v-for="(ride, index) in FavoriteDriver" :key="index" class="ride-card">
                 <div class="driver-info">
                     <div class="avatar-container">
-                        <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
+                        <img alt="driver avatar" :src="ride.driver_image_url" class="avatar" />
                     </div>
                     <div class="driver-text">
                         <div class="name-rating">

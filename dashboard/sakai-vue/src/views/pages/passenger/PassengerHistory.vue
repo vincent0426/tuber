@@ -24,6 +24,10 @@ export default {
             const comments = ['3', '5', '10', '12', '14', '15', '20', '24', '31', '55', '84', '85'];
             return comments[Math.floor(Math.random() * comments.length)];
         },
+        generateRandomRating() {
+            const ratings = [1, 2.4, 3, 4.8, 5.0];
+            return ratings[Math.floor(Math.random() * ratings.length)];
+        },
         async generateRandomData(response) {
             const favoriteDriversResponse = await driverService.getFavorite();
             const favoriteDrivers = favoriteDriversResponse.items.map((driver) => driver.driver_id);
@@ -31,6 +35,7 @@ export default {
             await Promise.all(
                 response.items.map(async (item) => {
                     item.Cost = this.generateRandomCost();
+                    item.Rating = this.generateRandomRating();
                     item.driver_plate = await this.getDriverPlate(item.DriverID);
                     if (favoriteDrivers.includes(item.DriverID)) {
                         //確認此人是否已經在最愛司機列表
@@ -49,6 +54,7 @@ export default {
         async fetchHistory() {
             try {
                 const response = await tripService.getHistory({ trip_status: 'finished', is_driver: false });
+                console.log(response);
                 await this.generateRandomData(response);
                 // await this.checkInFavorite(response);
                 console.log(response);
@@ -90,7 +96,7 @@ export default {
                 <template #header>
                     <div class="driver-info">
                         <div class="avatar-container">
-                            <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
+                            <img alt="driver avatar" :src="ride.DriverImageURL" class="avatar" />
                         </div>
                         <div class="driver-text">
                             <p style="font-weight: bold; font-size: 16px">{{ ride.DriverName }}</p>
@@ -167,8 +173,8 @@ export default {
 }
 
 .avatar {
-    width: 100%;
-    height: 100%;
+    width: 60px;
+    height: 60px;
     object-fit: cover; /* 保持頭像比例 */
     border-radius: 50%; /* 圓形頭像 */
     border: 2px solid #070707; /* 添加2px的邊框 */

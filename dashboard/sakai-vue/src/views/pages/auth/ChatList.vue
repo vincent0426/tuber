@@ -61,7 +61,7 @@ const getBackgroundColor = (color) => {
 };
 </script>
 <template>
-    <div>
+    <div style="padding-top: 6px">
         <h3 style="text-align: center">Chatroom List</h3>
         <div class="ride-container">
             <div v-for="(ride, index) in chatList" :key="index" class="ride-card" :style="{ background: getBackgroundColor(ride.color) }">
@@ -69,7 +69,7 @@ const getBackgroundColor = (color) => {
                     <div class="left-part">
                         <div class="left-upper">
                             <div class="avatar-container">
-                                <img alt="driver avatar" src="../../../assets/images/Patrick.svg" class="avatar" />
+                                <img alt="driver avatar" :src="ride.trip_user_list.driver_details.driver_image_url" class="avatar" />
                             </div>
                             <div style="display:flex flex-direction:column">
                                 <div class="driver-name">Driver: {{ ride.trip_driver_name }}</div>
@@ -149,8 +149,8 @@ const getBackgroundColor = (color) => {
     text-align: center; /* 将这个样式应用到 driver-name */
     font-weight: 600;
     font-size: larger;
-    align-items: center;
-    justify-content: center;
+    /* align-items: center; */
+    justify-content: flex-start;
     align-content: flex-start;
     flex-wrap: wrap;
     margin-top: 10px;
@@ -159,8 +159,8 @@ const getBackgroundColor = (color) => {
 }
 
 .avatar {
-    width: 100%;
-    height: 100%;
+    width: 50px;
+    height: 50px;
     object-fit: cover; /* 保持頭像比例 */
     border-radius: 50%; /* 圓形頭像 */
     border: 2px solid #070707; /* 添加2px的邊框 */
