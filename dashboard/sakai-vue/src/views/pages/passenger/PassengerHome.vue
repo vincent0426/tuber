@@ -22,9 +22,10 @@ onMounted(async () => {
     while (true) {
       if(currentPage == 1){
         const response = await tripService.getMyTrips(false);
-        console.log(response);
+        //console.log(response);
         const { items, total } = response; // 假設後端返回的數據中有 items 和 totalPages 屬性
         dataviewValue.value = items;
+        console.log(dataviewValue);
         // 如果當前頁已達到總頁數，則跳出循環
         if (currentPage*pageSize >= total) {
             console.log("break");
@@ -117,21 +118,20 @@ const onSortChange = (event) => {
                         <div class="card">
                             <!-- <div class="border-round border-1 surface-border p-4"> -->
                                 <div class="flex mb-3">
-                                <img :src="slotProps.data.driver_image_url" :alt="slotProps.data.driver_name" class="w-3 shadow-2 my-3 mx-0" style="margin: auto;"/>
                                 <div style="margin: auto;">
-                                    <div class="mb-1">Driver:  {{ slotProps.data.driver_name }}</div>
-                                    <div class="mb-2">Time:<br>{{ DateConvert(slotProps.data.start_time) }}</div>
+                                    <div class="mb-1">Driver:  {{ slotProps.data.DriverName }}</div>
+                                    <div class="mb-2">Time:<br>{{ DateConvert(slotProps.data.StartTime) }}</div>
                                 </div>
                                 </div>
                                 <div class="flex-1 text-left md:text-left" width="100%" height="150%">
                                     <Tag class="mr-2" value="From" :rounded="true"></Tag>
-                                    <div class="font-bold text-xl">{{ slotProps.data.source_name }}</div>
+                                    <div class="font-bold text-xl">{{ slotProps.data.SourceName }}</div>
                                     <Tag class="mr-2" value="To" :rounded="true"></Tag>
-                                    <div class="font-bold text-xl">{{ slotProps.data.destination_name }}</div>
+                                    <div class="font-bold text-xl">{{ slotProps.data.DestinationName }}</div>
                                    
                                 </div>
                                 <div class="flex justify-content-between mt-3">
-                                    <router-link :to="'/TripDetail/' + slotProps.data.id">
+                                    <router-link :to="'/TripDetail/' + slotProps.data.TripID">
                                         <Button label="Apply" :disabled="slotProps.data.inventoryStatus === 'OUTOFSTOCK'" class="mb-2"></Button>
                                     </router-link>
                                 </div>
