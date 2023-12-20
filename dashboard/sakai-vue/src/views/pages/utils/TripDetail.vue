@@ -241,18 +241,12 @@ function DateConvert(dateString) {
 <template>
     <div class="grid">
         <div class="col-12">
-            <h3>Trip Info</h3>
-            <router-link :to="'/'+ role +'/home'">
-                    <Button label="Home" class="mb-2"></Button>
-            </router-link>
             <div class="card">
                 <div class="grid grid-nogutter">
-                    <div class="col-4 text-left">
-                        <img :src="driver_image_url" :alt="driverName" class="w-3 shadow-2 my-3 mx-0" />
-                    </div>
-                    <div class="col-18 text-middle">
-                        <div class="font-bold text-2xl">Driver:{{ driverName }}</div>
-                        <div class="font-bold text-2xl">License plate number:{{ driver_plate }}</div>
+                        <img :src="driver_image_url" :alt="driverName" class="w-3 shadow-2 my-3 mx-0" style="scale: 120%;margin-right: 50px;" />
+                    <div class="col-18 text-middle" style="margin: auto;">
+                        <div class="font-bold text-xl">Driver: {{ driverName }}</div>
+                        <div class="font-bold text-xl">License plate number: <br>{{ driver_plate }}</div>
                     </div>
                 
                 </div>
@@ -263,14 +257,14 @@ function DateConvert(dateString) {
         </div>
         <div class="col-12">
             <div class="card">
-                <h4>Trip</h4>
+                <h3>Trip Info</h3>
                 <div class="flex justify-content-left">
                     <div id="map" style="width: 100%; height: 50vh"></div>
                 </div>
                 <div class="col-16 text-left">
-                    <div class="font-bold text-2xl">From:{{ source }}</div>
-                    <div class="font-bold text-2xl">To:{{ destination }}</div>
-                    <div class="font-bold text-2xl">Start Time:{{ DateConvert(start_time) }}</div>
+                    <div class="font-bold text-xl">From: <br>{{ source }}</div>
+                    <div class="font-bold text-xl">To: <br>{{ destination }}</div>
+                    <div class="font-bold text-xl">Start Time: <br>{{ DateConvert(start_time) }}</div>
                     
                 </div>
             </div>

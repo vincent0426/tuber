@@ -99,6 +99,11 @@ const router = createRouter({
                     name: 'ChatRoom',
                     component: () => import('@/views/pages/auth/ChatRoom.vue'),
                     props: true // 將路由參數作為組件的 props 傳遞
+                },
+                {
+                    path: '/TripDetail/:tripId',
+                    name: 'TripDetail',
+                    component: () => import('@/views/pages/utils/TripDetail.vue')
                 }
             ]
         },
@@ -127,11 +132,6 @@ const router = createRouter({
             name: 'OnTrip',
             component: () => import('@/views/pages/utils/OnTrip.vue')
         },
-        {
-            path: '/TripDetail/:tripId',
-            name: 'TripDetail',
-            component: () => import('@/views/pages/utils/TripDetail.vue')
-        }
     ]
 });
 
