@@ -81,9 +81,9 @@ console.log(dataviewValue);
         <div class="col-12">
             <h3>Search Trip</h3>
             <div class="card">
-                <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="10" :sortField="sortField" :sortOrder="sortOrder">
+                <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="10" :sortField="sortField" :sortOrder="sortOrder" >
                     <template #list="slotProps">
-                        <div class="card">
+                        <div class="card" v-if="slotProps.data.status=='not_start'">
                             <!-- <div class="border-round border-1 surface-border p-4"> -->
                                 <div class="flex mb-3">
                                 <img :src="slotProps.data.driver_image_url" :alt="slotProps.data.driver_name" class="w-3 shadow-2 my-3 mx-0" style="margin: auto;"/>
